@@ -6,7 +6,7 @@ import (
 )
 
 func Client() {
-	//1、客户端主动连接服务器 http://127.0.0.1:8808/xudan.jpeg
+	//1、客户端主动连接服务器 http://127.0.0.1:8808/ysjyxx0000011.xml
 	conn, err := net.Dial("tcp", "127.0.0.1:8808")
 	if err != nil {
 		fmt.Println("Dial err:", err)

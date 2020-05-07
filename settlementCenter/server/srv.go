@@ -16,7 +16,7 @@ func Server() {
 	}
 	defer listener.Close()
 	//阻塞等待客户端（浏览器）连接
-	conn, err :=  listener.Accept()
+	conn, err := listener.Accept()
 	if err != nil {
 		fmt.Println("Accept err:", err)
 		return
@@ -27,12 +27,12 @@ func Server() {
 	//读取客户端发来的数据
 	//数据缓冲区
 	buf := make([]byte, 4096)
-	n, err := conn.Read(buf)   //n 接收数据的长度
+	n, err := conn.Read(buf) //n 接收数据的长度
 	if err != nil {
 		fmt.Println("Read err:", err)
 		return
 	}
-	result := buf[:n]        //切片截取
+	result := buf[:n] //切片截取
 	fmt.Printf("#\n%s#", string(result))
 }
 
@@ -40,16 +40,15 @@ func Server() {
 func handler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("hello http"))
 }
-func Server2()  {
+func Server2() {
 	// 注册处理函数
 	http.HandleFunc("/hello", handler)
 	// 绑定服务器监听地址
 	http.ListenAndServe("127.0.0.1:8000", nil)
 }
 
-
 //打开文件  http://127.0.0.1:8808/00000000000000079766.xml
-func openSendFile(fileName string, w http.ResponseWriter)  {
+func openSendFile(fileName string, w http.ResponseWriter) {
 	filePath := "./jnp" + fileName
 	// 只读打开文件：
 	f, err := os.Open(filePath)
@@ -70,21 +69,18 @@ func openSendFile(fileName string, w http.ResponseWriter)  {
 		w.Write(buf[:n])
 	}
 }
+
 //处理函数
-func serverHandle(w http.ResponseWriter, r *http.Request)  {
+func serverHandle(w http.ResponseWriter, r *http.Request) {
 	fileName := r.URL.String()
-	fmt.Println("urlfileName=",fileName)
+	fmt.Println("urlfileName=", fileName)
 
 	// 封装函数，去到服务器指定目录中找寻文件，存在打开写会给浏览器， 不存在报错
 	openSendFile(fileName, w)
 }
 
-//取出图片
+//取出文件
 func Server3() {
 	http.HandleFunc("/", serverHandle)
 	http.ListenAndServe("127.0.0.1:8808", nil)
 }
-
-
-
-

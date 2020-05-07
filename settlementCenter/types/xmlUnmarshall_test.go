@@ -6,10 +6,10 @@ import (
 	"testing"
 )
 
-func Test_XMLUnMarshall(t *testing.T){
-	m:=Message{}
+func Test_XMLUnMarshall(t *testing.T) {
+	m := Message{}
 
-	data:=`<Message>
+	data := `<Message>
     <Header>
         <Version>00010000</Version>
         <MessageClass>5</MessageClass>
@@ -96,10 +96,9 @@ func Test_XMLUnMarshall(t *testing.T){
 		return
 	}
 
-
 	fmt.Printf("XMLName: %#v\n", m.XMLName)
 	fmt.Printf("Header: %q\n", m.Header)
-	fmt.Printf("m.Header.MessageClass: %q\n",m.Header.MessageClass )
+	fmt.Printf("m.Header.MessageClass: %q\n", m.Header.MessageClass)
 	fmt.Printf("m.Header.MessageId: %v\n", m.Header.MessageId)
 	fmt.Printf(" m.Header.SenderId: %v\n", m.Header.SenderId)
 	fmt.Printf("Transaction: %v\n", m.Transaction)

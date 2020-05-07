@@ -1,4 +1,4 @@
-package cmd
+package client
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ func sendFile(path string, connect net.Conn) {
 		fmt.Println("Open", err)
 		return
 	}
-	defer  file.Close()
+	defer file.Close()
 	buff := make([]byte, 1024*4)
 	for {
 		size, rerr := file.Read(buff)

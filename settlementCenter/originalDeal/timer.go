@@ -9,33 +9,28 @@ import (
 )
 
 func Timer1() {
-/*	crontab := cron.New()
-	task := func() {
-		fmt.Println("hello world",)
-	}
-	// 添加定时任务, * * * * * 是 crontab,表示每分钟执行一次
-	crontab.AddFunc("* * * * *", task)
-	// 启动定时器
-	crontab.Start()
-	// 定时任务是另起协程执行的,这里使用 select 简答阻塞.实际开发中需要
-	// 根据实际情况进行控制
-	select {}*/
+	/*	crontab := cron.New()
+		task := func() {
+			fmt.Println("hello world",)
+		}
+		// 添加定时任务, * * * * * 是 crontab,表示每分钟执行一次
+		crontab.AddFunc("* * * * *", task)
+		// 启动定时器
+		crontab.Start()
+		// 定时任务是另起协程执行的,这里使用 select 简答阻塞.实际开发中需要
+		// 根据实际情况进行控制
+		select {}  */
 
-	tiker := time.NewTicker(time.Second*6)
+	tiker := time.NewTicker(time.Second * 6)
 	for i := 0; i < 3; i++ {
 
 		fmt.Println(<-tiker.C)
 	}
 }
 
-func Timer()  {
-
+func Timer() {
 
 }
-
-
-
-
 
 // Crontab crontab manager
 type Crontab struct {
@@ -133,4 +128,3 @@ func (c *Crontab) IsExists(jid string) bool {
 	_, exist := c.ids[jid]
 	return exist
 }
-
