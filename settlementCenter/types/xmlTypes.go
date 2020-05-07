@@ -8,28 +8,29 @@ import (
 //一个交易包
 type Message struct {
 	XMLName xml.Name `xml:"Message"`
-	Header
-	Body
+	Header  `xml:"Message>Header"`
+	Body    `xml:"Message>Body"`
 }
 
 type Header struct {
-	Version      string //统一 00010000 Hex(8)
-	MessageClass int
-	MessageType  int
-	SenderId     string // Hex(16位，不足补零)
-	ReceiverId   string //Hex(16位，不足补零)
-	MessageId    int64  //消息序号，从1开始，逐1递增 ，8字节
+	Version      string `xml:"Message>Header>Version"`      //统一 00010000 Hex(8) Header
+	MessageClass int32  `xml:"Message>Header>MessageClass"` //消息传输的机制
+	MessageType  int32  `xml:"Message>Header>MessageType"`  //消息的应用类型
+	SenderId     string `xml:"Message>Header>SenderId"`     // Hex(16位，不足补零)发送方Id
+	ReceiverId   string `xml:"Message>Header>ReceiverId"`   //Hex(16位，不足补零)接收方Id
+	MessageId    int64  `xml:"Message>Header>MessageId"`    //消息序号，从1开始，逐1递增 ，8字节
 }
 
 type Body struct {
-	ContentType       int `xml:",attr"` //始终为1
-	ClearTargetDate   time.Time             //日期 如：2017-06-05
-	ServiceProviderId string                //通行宝中心系统Id，表示消息包中的交易是由收费方产生的
-	IssuerId          string                //发行服务机构Id， 表示产生交易记录的发行服务机构。
-	MessageId         int64                 //交易消息包Id。
-	Count             int                   //本消息包含的记录数量
-	Amount            int                   //交易总金额(分)
-	Transaction       []Transaction         //交易原始数据
+	ContentType       int           `xml:"ContentType,attr"`               //始终为1
+	ClearTargetDate   time.Time     `xml:"Message>Body>ClearTargetDate"`   //日期 如：2017-06-05
+	ServiceProviderId string        `xml:"Message>Body>ServiceProviderId"` //通行宝中心系统Id，表示消息包中的交易是由收费方产生的
+	IssuerId          string        `xml:"Message>Body>IssuerId"`          //发行服务机构Id， 表示产生交易记录的发行服务机构。
+	MessageId         int64         `xml:"Message>Body>MessageId"`         //交易消息包Id。
+	Count             int           `xml:"Message>Body>Count"`             //本消息包含的记录数量
+	Amount            int           `xml:"Message>Body>Amount"`            //交易总金额(分)
+	Transaction       []Transaction //交易原始数据   `xml:"Message>Body>Transaction"`
+	Description       string        `xml:",innerxml"`
 }
 type Transaction struct {
 	TransId        int       // 包内顺序Id，从1开始递增 ，包内唯一的交易记录

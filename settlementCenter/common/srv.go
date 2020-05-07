@@ -44,7 +44,7 @@ func handlerConnect(conn net.Conn)  {
 	}
 }
 
-func main() {
+func main12() {
 	// 创建监听 socket
 	listener, err := net.Listen("tcp", "127.0.0.1:8003")
 	if err != nil {
