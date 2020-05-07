@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/etc" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/etc/settlementCenter" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/github.com/BurntSushi/toml" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/github.com/github.com/go-sql-driver/mysql" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/github.com/github.com/go-xorm/xorm" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/github.com/go-sql-driver/mysql" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/github.com/go-xorm/xorm" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/github.com/xorm.io/builder" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/github.com/xorm.io/core" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/settlementCenter" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/settlementCenter/cmd" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/settlementCenter/storage" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/settlementCenter1/storage" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/github.com/go-sql-driver/mysql" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/github.com/go-xorm/xorm" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/xorm.io/builder" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/xorm.io/core" vcs="Git" />
+  </component>
+</project>
