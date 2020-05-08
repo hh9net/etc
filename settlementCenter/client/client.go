@@ -1,7 +1,6 @@
 package client
 
 import (
-	"bytes"
 	"compress/flate"
 	"fmt"
 	"io"
@@ -67,17 +66,17 @@ func ReadAndCompress(filename string) {
 		return
 	}
 	// 一个缓冲区压缩的内容
-	buf := bytes.NewBuffer(nil)
-
+	//buf := bytes.NewBuffer(nil)
+	fn := []byte(filename)
+	fname := string(fn[:len(fn)-3])
 	//创建文件
-	fw, f_werr := os.Create(filename)
+	fw, f_werr := os.Create(fname + "lz77")
 	if f_werr != nil {
 		log.Fatal("Read:", f_werr)
 	}
 	defer fw.Close()
-	fw.Write()
 	// 创建一个flate.Writer，压缩级别最好
-	flateWrite, err := flate.NewWriter(buf, flate.BestCompression)
+	flateWrite, err := flate.NewWriter(fw, flate.BestCompression)
 	if err != nil {
 		log.Fatalln(err)
 	}
