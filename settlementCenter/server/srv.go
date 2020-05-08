@@ -7,6 +7,8 @@ import (
 	"os"
 )
 
+//模拟联网中心
+
 func Server() {
 	//创建用与监听客户端连接请求的socket
 	listener, err := net.Listen("tcp", "127.0.0.1:8808")
