@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net"
 	"os"
+	"settlementCenter/client"
 )
 
 func ReadFile(fileName string, connect net.Conn) {
@@ -105,20 +106,25 @@ func HandleTable() {
 	}
 
 	//打包
+	client.Compress()
 
 }
 
-//发送数据包
+//线程2 发送数据包
 func HandleSendXml() {
-
 	//从文件夹sendxml中扫描打包文件（判断这个文件夹下面有没有文件）
+	//tiker := time.NewTicker(time.Second * 2)
+	//for  {
+	//	fmt.Println(<-tiker.C)
+	//}
 	//if true
 	//read 后  这里应该是要调 数据服务的一个接口
+	client.Sendxml()
 	//调接口成功后 mv文件夹到另一个文件中
 	//
 }
 
-//接收数据包
+//线程3  接收数据包
 func HandleChannelMessage() {
 
 	//监听channel数据，将接收到的数据存储到指定文件夹
@@ -126,7 +132,7 @@ func HandleChannelMessage() {
 	Receive()
 }
 
-//处理数据包
+//线程4 处理数据包
 func AnalyzeDataPakage() {
 
 	//定期检查上面的文件夹    解压后

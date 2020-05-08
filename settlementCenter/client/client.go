@@ -10,7 +10,7 @@ import (
 	"os"
 )
 
-func NewClient() net.Conn {
+func NewConn() net.Conn {
 	//1、客户端主动连接服务器 http://127.0.0.1:8808/ysjyxx0000011.xml
 	conn, err := net.Dial("tcp", "127.0.0.1:8808")
 	if err != nil {
@@ -22,9 +22,8 @@ func NewClient() net.Conn {
 	return conn
 }
 
-func Client() {
-	conn := NewClient()
-
+func Sendxml() {
+	conn := NewConn()
 	//2、模拟浏览器，组织一个最简单的请求报文。包含请求行，请求头，空行即可。
 	//requestHttpHeader := "GET /ysjyxx0000011.xml HTTP/1.1\r\nHost:127.0.0.1:8808\r\n\r\n"
 	requestHttpHeader := "GET /ysjyxx0000011.xml HTTP/1.1\r\nHost:127.0.0.1:8808\r\n\r\n"

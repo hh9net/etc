@@ -35,6 +35,20 @@ dev：与联网中心直接结算
 【对压缩包解压并分析（  争议包等问题处理没有具体处理方案）】
 
 
+原始交易
+	originalDeal
+		原始交易记录分组打包为交易包
+
+记账处理
+	keepAccounts
+
+争议交易处理
+	disputeProcessing
+
+清分统计
+distributionStatistics
+
+
 
 
 

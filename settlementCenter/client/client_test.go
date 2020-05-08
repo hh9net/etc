@@ -3,7 +3,8 @@ package client
 import "testing"
 
 func TestClient(t *testing.T) {
-	Client()
+	Sendxml()
+	Send()
 }
 
 func TestCompress(t *testing.T) {
