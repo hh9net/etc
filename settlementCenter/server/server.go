@@ -8,6 +8,7 @@ import (
 	"net"
 	"os"
 	"settlementCenter/client"
+	"time"
 )
 
 func ReadFile(fileName string, connect net.Conn) {
@@ -131,8 +132,14 @@ func HandleChannelMessage() {
 	Receive()
 }
 
-//线程4 处理数据包
+//线程4 处理数据包  定期扫描 接收联网的接收数据的文件夹 receive，如果有文件就解压， 解压后分析包。
 func AnalyzeDataPakage() {
 
-	//定期检查上面的文件夹    解压后
+	//定期检查文件夹receive    解压后
+	tiker := time.NewTicker(time.Second * 5)
+	for {
+		<-tiker.C
+		//扫描receive 文件夹
+
+	}
 }
