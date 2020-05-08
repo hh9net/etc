@@ -69,7 +69,8 @@ func ReadAndCompress(filename string) {
 	fn := []byte(filename)
 	fname := string(fn[:len(fn)-3])
 	//创建文件
-	fw, f_werr := os.Create(fname + "lz77")
+	//fw, f_werr := os.Create("../sendzipxml/"+fname + "lz77")
+	fw, f_werr := os.Create("../sendzipxml/" + fname + "xml")
 	if f_werr != nil {
 		log.Fatal("Read:", f_werr)
 	}
