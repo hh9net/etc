@@ -67,7 +67,6 @@ func Receive() {
 
 //处理任务
 func HandleTask(conn net.Conn) {
-
 	//起goroutine handle函数
 	//handle函数为总的逻辑处理入口
 	//在这个handle函数中起四个goroutine
