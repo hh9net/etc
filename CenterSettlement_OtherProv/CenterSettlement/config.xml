@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Config>
+	<WorkerThread>
+		<Collect>1</Collect>
+		<TacCheck>1</TacCheck>
+		<StatDayCheck>1</StatDayCheck>
+		<Settle>1</Settle>
+		<SendFile>0</SendFile>
+        <RecvFile>0</RecvFile>
+        <AnalyzeFile>0</AnalyzeFile>
+        <ServerIp>192.168.4.250</ServerIp>
+	</WorkerThread>
+	<TxbDb>
+		<DbService>192.168.4.250:1521/TXB</DbService>
+		<DbUser>admin</DbUser>
+		<DbPwd>123</DbPwd>
+	</TxbDb>
+	<Data>
+		<DataPath>D:\recvfile</DataPath>
+	</Data>
+</Config>
