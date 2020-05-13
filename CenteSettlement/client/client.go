@@ -4,14 +4,13 @@ import (
 	"compress/flate"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net"
 	"os"
 )
 
 func NewConn() net.Conn {
-	//1、客户端主动连接服务器 http://127.0.0.1:8808
+	//连接联网中心
 	conn, err := net.Dial("tcp", "127.0.0.1:8808")
 	if err != nil {
 		log.Fatal("Dial 联网中心 err:", err)
@@ -86,18 +85,4 @@ func ReadAndCompress(filename string) {
 	flateWrite.Flush()
 	//flateWrite.
 	fmt.Println(fbuf)
-}
-
-//XML文件 按照 LZ77 方式打包
-func Compress() {
-	myfolder := `../generatexml`
-	files, _ := ioutil.ReadDir(myfolder)
-	for _, file := range files {
-		if file.IsDir() {
-			continue
-		} else {
-			fmt.Println(file.Name())
-			ReadAndCompress(file.Name())
-		}
-	}
 }
