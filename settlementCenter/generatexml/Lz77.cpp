@@ -7,6 +7,10 @@
 #include <arpa/inet.h>
 #include <string.h>
 
+extern "C" {
+    #include "load_so.h"
+}
+
 /*******************************************************
 ** 取log2(n)的upper_bound*/
 int CCompressLZ77::UpperLog2(int n)

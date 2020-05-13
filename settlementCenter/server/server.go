@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 	"settlementCenter/client"
+	"settlementCenter/generatexml"
 	"time"
 )
 
@@ -94,9 +95,10 @@ func HandleTable() {
 	//准备数据（在数据层）
 	//Xml数据生成Xml文件、压缩，存文件
 	fname := Generatexml()
-
+	Generatexml()
 	//压缩
-	Lz77Compress(fname)
+	//Lz77Compress(fname)
+	generatexml.Lz77zip(fname)
 
 	//Md5计算
 
