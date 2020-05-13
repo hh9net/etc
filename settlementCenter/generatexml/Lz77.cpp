@@ -6,6 +6,7 @@
 #include "stdio.h"
 #include <arpa/inet.h>
 #include <string.h>
+#include <errno.h>
 
 extern "C" {
     #include "load_so.h"
@@ -509,6 +510,7 @@ int CCompressLZ77::CompressFile(char *inputfile, char *outputfile )
 	in = fopen(inputfile,"rb");
 	if (in == NULL)
 	{
+	printf("inputfile=%s ,%s\n",inputfile,strerror(errno));
 		puts("Can't open source file");
 		return -1;
 	}

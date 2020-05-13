@@ -39,8 +39,8 @@ func Generatexml() string {
 		var Tran types.Transaction
 		Tran.TransId = i + 1                         //包内序号
 		Tran.Time = v.FDtJiaoysj                     //交易时间
-		Tran.Fee = v.FNbJine                         //交易金额
-		Tran.CustomizedData = "===customizedData===" //【清分目标日？？？】
+		Tran.Fee = v.FNbJine                         //交易金额 yuan
+		Tran.CustomizedData = "===customizedData===" //【清分目标日 ？？？】 当前日期
 		//Tran.Service.ServiceType = v.FDtJiaoylx                    //交易类型
 		Tran.Service.Description = v.FVcZhangdms //账单描述  南京南站南广场P3|11小时32分40秒
 		//Tran.Service.Detail=//交易详细信息 1|04|3201|3201000006|1105|20191204 211733|03|3201|320
@@ -96,7 +96,7 @@ func Generatexml() string {
 	}
 	log.Println(outputxml)
 
-	//创建文件
+	//创建文件 cz
 	fw, f_werr := os.Create("../generatexml/" + "CZ_3201_" + Filename + ".xml")
 	if f_werr != nil {
 		log.Fatal("Read:", f_werr)

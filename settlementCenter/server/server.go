@@ -94,11 +94,12 @@ func HandleTable() {
 	//查询原始交易数据（在数据层）
 	//准备数据（在数据层）
 	//Xml数据生成Xml文件、压缩，存文件
-	fname := Generatexml()
-	Generatexml()
+	//fname := Generatexml()
+	//Generatexml()
 	//压缩
 	//Lz77Compress(fname)
-	generatexml.Lz77zip(fname)
+	f := "../CZ_3201_00000000000000999999.xml"
+	generatexml.Lz77zip(f)
 
 	//Md5计算
 
@@ -115,6 +116,7 @@ func HandleSendXml() {
 	//从文件夹sendxml中扫描打包文件（判断这个文件夹下面有没有文件）
 	tiker := time.NewTicker(time.Second * 2)
 	for {
+
 		fmt.Println(<-tiker.C)
 	}
 	//if true
@@ -158,4 +160,5 @@ func AnalyzeDataPakage() {
 	//		争议数据包
 	//		清分数据包
 	//		退费数据包
+
 }
