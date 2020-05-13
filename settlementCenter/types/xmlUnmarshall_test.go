@@ -3,6 +3,9 @@ package types
 import (
 	"encoding/xml"
 	"fmt"
+	"io/ioutil"
+	"log"
+	"os"
 	"testing"
 )
 
@@ -101,5 +104,51 @@ func Test_XMLUnMarshall(t *testing.T) {
 	fmt.Printf("m.Header.MessageClass: %q\n", m.Header.MessageClass)
 	fmt.Printf("m.Header.MessageId: %v\n", m.Header.MessageId)
 	fmt.Printf(" m.Header.SenderId: %v\n", m.Header.SenderId)
-	fmt.Printf("Transaction: %v\n", m.Transaction)
+	fmt.Printf("Transaction: %v\n", m.Body.Transaction)
+}
+
+func Test_XMLMarshal(t *testing.T) {
+	//把原始交易数据转化成xml文件
+	jiaoyi := &Message{
+		Header: Header{Version: "000100", MessageClass: 1, MessageType: 5, SenderId: "12345", ReceiverId: "42131", MessageId: 0000000001},
+		Body:   Body{}}
+	jiaoyi.Body.Transaction = []Transaction{{TransId: 123}, {TransId: 456}}
+
+	//使用MarshalIndent函数，生成的XML格式有缩进
+	outputxml, err := xml.MarshalIndent(jiaoyi, "  ", "    ")
+	//使用Marshal函数，生成的XML格式无缩进
+	//outputxml,err:=xml.Marshal(v)
+	if err != nil {
+		fmt.Printf("error: %v\n", err)
+	}
+	//os.Stdout.Write(outputxml)
+
+	//存为xml文件
+	//
+	//num := strconv.Itoa(9999999)
+	//NeedAdd := 20 - len(num)
+	//var newByte string
+	//if NeedAdd > 0 {
+	//	newByte = strings.Repeat("0",NeedAdd)
+	//	newByte = newByte + num
+	//}
+	//fname:=newByte
+	num := 888888
+	fname := fmt.Sprintf("%020d", num)
+	//创建文件"
+	fw, f_werr := os.Create("../sendzipxml/" + fname + ".xml")
+	if f_werr != nil {
+		log.Fatal("Read:", f_werr)
+	}
+	//加入XML头
+	headerBytes := []byte(xml.Header)
+	//拼接XML头和实际XML内容
+	xmlOutPutData := append(headerBytes, outputxml...)
+	//写入文件
+	ioutil.WriteFile("test.xml", xmlOutPutData, os.ModeAppend)
+	defer fw.Close()
+	_, ferr := fw.Write((xmlOutPutData))
+	if ferr != nil {
+		fmt.Printf("error: %v\n", err)
+	}
 }

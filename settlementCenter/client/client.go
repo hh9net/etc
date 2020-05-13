@@ -11,7 +11,7 @@ import (
 )
 
 func NewConn() net.Conn {
-	//1、客户端主动连接服务器 http://127.0.0.1:8808/ysjyxx0000011.xml
+	//1、客户端主动连接服务器 http://127.0.0.1:8808
 	conn, err := net.Dial("tcp", "127.0.0.1:8808")
 	if err != nil {
 		log.Fatal("Dial 联网中心 err:", err)
@@ -44,13 +44,13 @@ func Sendxml() {
 }
 
 func ReadAndCompress(filename string) {
-	filepath := "../sendxml/" + filename
+	filepath := "../generatexml/" + filename
 
 	fbuf := make([]byte, 1024*4)
 
 	file, fErr := os.OpenFile(filepath, os.O_RDWR, 0777)
 	if fErr != nil {
-		log.Fatal("Open sendxml err:", fErr)
+		log.Fatal("Open generatexml err:", fErr)
 		return
 	}
 	defer file.Close()
@@ -90,7 +90,7 @@ func ReadAndCompress(filename string) {
 
 //XML文件 按照 LZ77 方式打包
 func Compress() {
-	myfolder := `../sendxml`
+	myfolder := `../generatexml`
 	files, _ := ioutil.ReadDir(myfolder)
 	for _, file := range files {
 		if file.IsDir() {

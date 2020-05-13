@@ -1,0 +1,153 @@
+
+原先逻辑：
+etc结算：把原始交易数据汇总 -> 写入原始数据汇总表 ； 海玲通过原始数据汇总表打包数据 ， 然后与联网中心进行结算 ；
+数据库： oracle 数据库； 用golang 操作 oracle数据库；
+
+
+dev：与联网中心直接结算
+
+现有逻辑：
+数据库：mysql数据库；用golang xorm操作mysql数据库；
+
+//线程1：【 之前用的是oracle ，现在需要讨论一下mysql的建表和字段（已OK）】
+原逻辑：
+	从车道消费数据表中一次查找100条未打包的数据，(5分钟或100条)，未打包数据的数据有标记；
+    按照联网交互的格式要求生成XML。  并按照 LZ77 方式打包；存入指定的文件夹中；并更新数据库打包标记；注意使用事务更新包号，打包时间。
+【 1、数据记录比较少，5分钟查询一次未打包交易记录。2、数据记录比较多，取前100条未打包交易记录  并更新数据库打包标记；注意使用事务更新包号，打包时间。】
+【 按照卡网络号发送数据包 CZ_3201_00000000000000079752.xml.lz77 】
+
+CustomizedData按照如下格式：
+TAC校验码（hex8）、交易金额（hex8）、交易类型（hex2）、终端机编号（hex12）、
+交易的终端流水号（hex8）、交易时间（hex14）、TAC保留串（hex4）、交易后余额（hex8）、交易前余额（hex8）、卡计数器（hex4）
+
+
+
+//线程2：
+从文件夹sendxml中 定期 扫描打包文件，
+若有则读取，按照联网规范 发送至 联网中心的数据服务端口中；
+发送成功后（收到联网中心的ok 应答） 将文件转移至另外文件夹sendsucceed；
+【定时器：定期扫描文件夹，把扫描到的文件，读取并发送，发送成功后，把数据包转移到另文件夹，如果发送失败则重发】
+【我方发送数据包，对面接收数据包 】
+【对方发送应答包，我方将已发送的文件转移至另外文件夹sendsucceed；】
+
+tcp通讯报文格式
+格式如下：
+
+ 消息报文顺序号 （SSSSSSS） 20字节 + 压缩后的XML消息长度(CCCCCC) 6字节 +  32字节MD5 (16进制显示字符串) + 二进制压缩后的XML消息包( AAAAAAAAAAAAAAA…)
+其中：MESSAGEID长度20字节Char型，不足左补0，取值与XML消息包消息头中的MessageId 栏位相同。
+压缩后的xml消息长度类型为6字节Char型压缩后的消息包长度，不足左补0。
+MD5为32个16进制显示字符，不足左补0。
+压缩后的xml报文最大长度999999字节。
+
+//tcp通讯报文格式
+type SendStru struct {
+	Massageid  [20]byte //消息报文序号  20字节Char型，不足左补0
+	Xml_length [6]byte  //压缩后XML消息包长度
+	Md5_str    [32]byte //32字节MD5校验串   MD5值由<Message>
+	Xml_msg    []byte	   //二进制压缩后的XML 消息包 .xml.lz77
+}
+
+报文接收处理
+对于大报文（长度超过16K），接收方获得报文长度后，需进行多次Read，直至接收到所有报文数据后，应答接收OK报文。
+如中间报文接收超时，应答接收失败报文，关闭Socket退出接收处理。
+ MD5计算方法
+MD5值由<Message> …</Message> XML报文压缩前明文的二进制流进行计算获得。
+ 压缩算法：
+XML消息包的压缩算法采用标准的LZ77压缩算法。
+
+通讯应答接收完成报文格式
+ MessageId    +   tcp接收结果
+20字节char型 +   1字节char型
+该应答用于通讯接收完成的即时应答，不校验消息内部信息格式，判断消息接收长度符合，即返回此应答给发送方。
+发送方依此应答作为报文发送结束标志，不作为消息内容正确的判断依据，消息内容的正确性判断，由接收方业务处理后通过通用确认消息格式异步返回。
+
+Tcp接收结果
+Result	取值
+1	成功接收
+0	接收超时长度不符
+
+//通讯报文应答格式
+type ReplyStru struct {
+	Massageid [20]byte //消息报文序号【20字节】
+	result    byte     //【1字节】	1 成功接收 0 接收超时、长度不符
+}
+
+XML消息包数据存储形式
+所有传输的数据及回应消息均采用XML，其基本结构如下：
+
+所有消息，包括用于确认信息的消息均使用以上基本结构。
+消息包含消息头Header和消息体Body。
+所有消息的消息头结构相同，仅使用的具体数值根据其不同应用有所区别。不同应用的消息体内部结构不同。
+
+
+
+
+//线程3：
+服务端监听联网中心的端口，接收联网发送过来的数据包，并存储在指定文件夹receive；
+【 服务端监听端口，接受数据包，把数据写成文件，放入指定文件夹  】
+
+//线程4：
+定期扫描 接收联网的接收数据的文件夹 receive，如果有文件就解压， 解压后分析包。
+更新应答包状态、争议包状态、记账包状态、清分包状态、退费包状态；
+【对压缩包解压并分析（  争议包等问题处理没有具体处理方案）】
+
+
+原始交易
+	originalDeal
+		原始交易记录分组打包为交易包
+
+记账处理
+	keepAccounts
+
+争议交易处理
+	disputeProcessing
+
+清分统计
+distributionStatistics
+
+结算数据表字段
+	FVcJiaoyjlid
+	FVcTingccbh
+	FVcChedid
+	FVcGongsjtid
+	FNbTingcclx
+	FNbJiaoyzt
+	FNbYuansjybxh
+	FNbJiaoybnxh
+	FNbJizjg
+	FNbZhengylx
+	FNbJizbxh
+	FNbZhengyclbxh
+	FNbQingfbxh
+	FVcXiaofjlbh
+	FVcJiamkh
+	FVcKajmjyxh
+	FVcObuid
+	FVcObufxf
+	FVcObucp
+	FVcObucpys
+	FVcKah
+	FVcKawlh
+	FVcKajyxh
+	FVcKafxf
+	FNbKalx
+	FNbJiaoyqye
+	FNbJiaoyhye
+	FNbJine
+	FVcTacm
+	FDtJiaoysj
+	FDtJiaoylx
+	FVcChex
+	FVcObuzt
+	FVcSuanfbs
+	FDtYonghrksj
+	FNbYonghtcsc
+	FVcZhangdms
+	FVcMiybbh
+	FVcObuyyxlh
+	FVcChedjyxh
+
+
+
+
+
