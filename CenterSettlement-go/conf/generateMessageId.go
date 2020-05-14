@@ -28,7 +28,7 @@ func GenerateMessageId() int64 {
 	log.Println(" file new messageid: ", s)
 
 	cfg.Section("").Key("messageid").SetValue(s) //  修改后值然后进行保存
-	Saveerr := cfg.SaveTo("MessageId.conf")
+	Saveerr := cfg.SaveTo("app.conf")
 	if Saveerr != nil {
 		log.Fatal("Fail to SaveTo file:", Saveerr)
 	}
