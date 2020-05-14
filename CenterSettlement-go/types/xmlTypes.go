@@ -80,6 +80,7 @@ type Validation struct {
 	TerminalTransNo string   //8位16进制数，PSAM卡脱机交易序号，在MAC1计算过程中得到  Hex(8)
 }
 
+//
 type OBU struct {
 	XMLName  xml.Name `xml:"OBU"`
 	NetNo    string   //4501  OBU网络号
