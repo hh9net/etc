@@ -1,11 +1,11 @@
 package storage
 
 import (
+	"CenterSettlement-go/types"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-xorm/xorm"
 	"log"
-	"settlementCenter/types"
 )
 
 //连接数据库
