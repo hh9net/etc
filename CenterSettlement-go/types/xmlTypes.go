@@ -35,15 +35,21 @@ type Body struct {
 
 }
 type Transaction struct {
-	XMLName        xml.Name   `xml:"Transaction"`
-	TransId        int        // `xml:"Transaction>TransId"`        // 包内顺序Id，从1开始递增 ，包内唯一的交易记录
-	Time           time.Time  //`xml:"Transaction>Time"`           //交易的发生时间，需要加TAC计算
-	Fee            int        // `xml:"Transaction>Fee"`            //交易的发生金额(分)
-	Service        Service    //`xml:"Transaction>Service"`        //服务信息
-	ICCard         ICCard     //`xml:"Transaction>ICCard"`         //IC卡信息
-	Validation     Validation //`xml:"Transaction>Validation"`     //与校验相关的信息
-	OBU            OBU        // `xml:"Transaction>OBU"`            //参加交易的电子标签信息
-	CustomizedData string     // `xml:"Transaction>CustomizedData"` //特定发行方与通行宝收费方之间 约定格式的交易信息【  】
+	XMLName             xml.Name   `xml:"Transaction"`
+	TransId             int        // 包内顺序Id，从1开始递增 ，包内唯一的交易记录
+	Time                time.Time  //交易的发生时间，需要加TAC计算
+	Fee                 int        //交易的发生金额(分)
+	Service             Service    //服务信息
+	ICCard              ICCard     //IC卡信息
+	Validation          Validation //与校验相关的信息
+	OBU                 OBU        //参加交易的电子标签信息
+	CustomizedData      string     //特定发行方与通行宝收费方之间 约定格式的交易信息【  】
+	Id                  string     //停车场消费交易编号(停车场编号+交易发生的时间+流水号 )
+	Name                string     `xml:"name"`                //停车场名称(不超过150个字符)
+	ParkTime            int        `xml:"parkTime"`            //停放时长(单位：分)
+	VehicleType         int        `xml:"vehicleType"`         //收费车型
+	AlgorithmIdentifier int        `xml:"algorithmIdentifier"` //算法标识 1-3DEX  2-SM4
+
 }
 
 //服务信息
@@ -74,6 +80,7 @@ type Validation struct {
 	TerminalTransNo string   //8位16进制数，PSAM卡脱机交易序号，在MAC1计算过程中得到  Hex(8)
 }
 
+//
 type OBU struct {
 	XMLName  xml.Name `xml:"OBU"`
 	NetNo    string   //4501  OBU网络号
