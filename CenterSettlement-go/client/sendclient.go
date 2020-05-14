@@ -36,7 +36,7 @@ func sendFile(path string, connect net.Conn) {
 
 //发送
 func Send() {
-	path := "../sendfilexml"
+	path := "../sendfilexml/"
 	info, serr := os.Stat(path)
 	if serr != nil {
 		fmt.Println("Stat error", serr)
@@ -51,6 +51,7 @@ func Send() {
 	defer conn.Close()
 
 	_, w_err := conn.Write([]byte(info.Name()))
+
 	if w_err != nil {
 		fmt.Println("Write error", w_err)
 		return
@@ -58,10 +59,12 @@ func Send() {
 
 	buff := make([]byte, 4096)
 	size, r_err := conn.Read(buff)
+
 	if r_err != nil {
 		fmt.Println("Read error", r_err)
 		return
 	}
+
 	if "ok" == string(buff[:size]) {
 		//如果收到ok应答，发送文件
 		sendFile(path, conn)

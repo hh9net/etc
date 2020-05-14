@@ -1,6 +1,8 @@
 package server
 
 import (
+	storage "CenterSettlement-go/storages"
+	"CenterSettlement-go/types"
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/xml"
@@ -8,8 +10,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	storage "settlementCenter/storages"
-	"settlementCenter/types"
 	"time"
 )
 

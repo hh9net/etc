@@ -2,40 +2,42 @@ package client
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 )
 
+//如果发送成功，把文件移动到指定的文件夹
 func MoveFile() {
 	//打开文件，返回文件指针
-	file, err := os.Open("./1.txt")
+	file, err := os.Open("../genetatexml/CZ_3201_00000000000000999999.xml")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
-	fmt.Println(file)
-	_ = file.Close()
+	log.Println(file)
+	defer file.Close()
 
 	//以读写方式打开文件，如果不存在，则创建
 	file2, err := os.OpenFile("./2.txt", os.O_RDWR|os.O_CREATE, 0766)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
-	fmt.Println(file2)
-	_ = file2.Close()
+	log.Println(file2)
+	defer file2.Close()
 
 	//创建文件
 	//Create函数也是调用的OpenFile
 	file3, err := os.Create("./3.txt")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
-	fmt.Println(file3)
-	file3.Close()
+	log.Println(file3)
+	defer file3.Close()
 
 	//读取文件内容
 	file4, err := os.Open("./1.txt")
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 	//创建byte的slice用于接收文件读取数据
 	buf := make([]byte, 1024)

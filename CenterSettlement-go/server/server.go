@@ -1,12 +1,12 @@
 package server
 
 import (
+	"CenterSettlement-go/client"
+	"CenterSettlement-go/generatexml"
 	"fmt"
 	"io"
 	"net"
 	"os"
-	"settlementCenter/client"
-	"settlementCenter/generatexml"
 	"time"
 )
 
