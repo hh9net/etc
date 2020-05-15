@@ -9,7 +9,10 @@ import (
 	"log"
 )
 
-//数据层负责查询数据、准备数据、
+//数据层负责 查询数据、插入数据、准备数据、返回数据、错误处理
+//在收到联网中心的数据后，解析插入数据
+//在发送给联网中心前查询数据
+//注意事务处理
 
 //通过交易状态为0，卡网络号为江苏本省， 卡类型为储值卡、   查询交易结算数据
 func QueryJiessj() *[]types.BJsJiessj {
@@ -19,13 +22,13 @@ func QueryJiessj() *[]types.BJsJiessj {
 	}
 	//查询多条数据
 	tests := make([]types.BJsJiessj, 0)
-	qerr := xorm.Where("F_NB_JIAOYZT=?", 0).And("F_VC_KAWLH=?", types.JS_NETWORK).Limit(100, 0).Find(&tests)
+	qerr := xorm.Where("F_NB_JIAOYZT=?", 0).And("F_VC_KAWLH=?", types.JS_NETWORK).And("F_VC_KALX=?", types.PRECARD).Limit(100, 0).Find(&tests)
 	if qerr != nil {
 		panic(qerr)
 	}
 	log.Printf("总共查询出 %d 条数据\n", len(tests))
 	for _, v := range tests {
-		log.Printf("交易状态: %d, 交易记录id: %s, 卡网络号: %s\n", v.FNbJiaoyzt, v.FVcJiaoyjlid, v.FVcKawlh)
+		log.Printf("打包状态: %d, 交易记录id: %s, 卡网络号: %s\n", v.FNbDabzt, v.FVcJiaoyjlid, v.FVcKawlh)
 	}
 	return &tests
 }

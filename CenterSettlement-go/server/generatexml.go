@@ -14,16 +14,15 @@ import (
 )
 
 var (
-	Messageid      int64
-	Filename       string
-	count          int
-	amount         int
-	customizedData string
-	serviceType    string
+	Messageid int64
+	Filename  string
+	count     int
+	amount    int
 )
 
 //线程1
 func Generatexml() string {
+	//从数据层获取准备的数据
 
 	Trans := make([]types.Transaction, 0)
 	//获取本省数据
@@ -86,13 +85,12 @@ func Generatexml() string {
 	for _, T := range Trans {
 		jiaoyisj.Body.Transaction = append(jiaoyisj.Body.Transaction, T)
 	}
-	log.Println(jiaoyisj)
 	//使用MarshalIndent函数，生成的XML格式有缩进
 	outputxml, err := xml.MarshalIndent(jiaoyisj, "  ", "  ")
 	//使用Marshal函数，生成的XML格式无缩进
 	//outputxml,err:=xml.Marshal(v)
 	if err != nil {
-		fmt.Printf("error: %v\n", err)
+		log.Printf("error: %v\n", err)
 	}
 	log.Println(outputxml)
 
@@ -111,7 +109,7 @@ func Generatexml() string {
 	defer fw.Close()
 	_, ferr := fw.Write((xmlOutPutData))
 	if ferr != nil {
-		fmt.Printf("Write xml file error: %v\n", err)
+		log.Printf("Write xml file error: %v\n", err)
 	}
 	//更新消息包信息
 

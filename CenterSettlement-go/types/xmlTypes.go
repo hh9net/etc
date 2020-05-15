@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-//一个交易包
+//一个原始交易数据包
 type Message struct {
 	XMLName xml.Name `xml:"Message"`
 	Header  Header   `xml:"Header"`
@@ -25,20 +25,20 @@ type Header struct {
 type Body struct {
 	XMLName           xml.Name      `xml:"Body"`
 	ContentType       int           `xml:",attr"` //始终为1
-	ClearTargetDate   time.Time     //日期 如：2017-06-05 清分目标日期
+	ClearTargetDate   time.Time     //日期 如：2017-06-05 清分目标日期：取当前日期
 	ServiceProviderId string        //通行宝中心系统Id，表示消息包中的交易是由收费方产生的
 	IssuerId          string        //发行服务机构Id， 表示产生交易记录的发行服务机构。
-	MessageId         int64         //交易消息包Id。
+	MessageId         int64         //交易消息包Id。配置文件中获得
 	Count             int           //本消息包含的记录数量
-	Amount            int           //交易总金额(分)
-	Transaction       []Transaction //交易原始数据   `xml:"Message>Body>Transaction"`
+	Amount            int           //交易总金额(元) 数据库为分【注意转换的小数问题】
+	Transaction       []Transaction //交易原始数据
 
 }
 type Transaction struct {
 	XMLName             xml.Name   `xml:"Transaction"`
 	TransId             int        // 包内顺序Id，从1开始递增 ，包内唯一的交易记录
-	Time                time.Time  //交易的发生时间，需要加TAC计算
-	Fee                 int        //交易的发生金额(分)
+	Time                time.Time  //交易的发生时间，需要加TAC计算 2020-05-13 14:34:34
+	Fee                 int        //交易的发生金额(元)
 	Service             Service    //服务信息
 	ICCard              ICCard     //IC卡信息
 	Validation          Validation //与校验相关的信息
@@ -55,16 +55,16 @@ type Transaction struct {
 //服务信息
 type Service struct {
 	XMLName     xml.Name `xml:"Service"`
-	ServiceType int      //交易的服务类型【】
-	Description string   //对交易的文字解释【数据库中账单描述】
-	Detail      string   //交易详细信息
+	ServiceType int      //交易的服务类型【【2 写死】】
+	Description string   //对交易的文字解释【停车场名｜停车时常 ：几时几分几秒】
+	Detail      string   //交易详细信息  1|04|3201|3201020001|1104|20200513 143434|03|3201|3201020001|0001|20200513 140805
 }
 
 //IC卡信息
 type ICCard struct {
 	XMLName     xml.Name `xml:"ICCard"`
 	CardType    int      //卡类型，22为储值卡；23记账卡
-	NetNo       string   //网络编码，BCD码 Hex(4) k网络号（16进制）数据库10进制
+	NetNo       string   //网络编码，BCD码 Hex(4) ka网络号（16进制） 数据库10进制
 	CardId      string   //IC卡物理编号，BCD码  Hex(16)   卡号
 	License     string   //0015文件中记录的车牌号
 	PreBalance  string   //交易前余额，以元为单位 Decimal

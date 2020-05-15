@@ -10,6 +10,7 @@ type MessageId struct { //配置文件要通过tag来指定配置文件中的名
 	Messageid int64 `ini:"messageid"`
 }
 
+//注意读取messageid时，要做加锁处理
 func GenerateMessageId() int64 {
 
 	cfg, err := ini.Load("../conf/app.conf") //读配置文件
