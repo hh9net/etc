@@ -106,13 +106,13 @@ func Generatexml() string {
 	//写入文件
 	ioutil.WriteFile("../generatexml/CZ_3201_"+Filename+".xml", xmlOutPutData, os.ModeAppend)
 	//
-	defer fw.Close()
+
 	_, ferr := fw.Write((xmlOutPutData))
 	if ferr != nil {
 		log.Printf("Write xml file error: %v\n", err)
 	}
 	//更新消息包信息
-
+	fw.Close()
 	return "CZ_3201_" + Filename + ".xml"
 }
 

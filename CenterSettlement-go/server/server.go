@@ -1,7 +1,6 @@
 package server
 
 import (
-	"CenterSettlement-go/client"
 	"CenterSettlement-go/generatexml"
 	"fmt"
 	"io"
@@ -94,11 +93,11 @@ func HandleTable() {
 	//查询原始交易数据（在数据层）
 	//准备数据（在数据层）
 	//Xml数据生成Xml文件、压缩，存文件
-	//fname := Generatexml()
+	fname := Generatexml()
 	//Generatexml()
 	//压缩
 	//Lz77Compress(fname)
-	f := "../CZ_3201_00000000000000999999.xml"
+	f := "../generatexml/" + fname
 	generatexml.Lz77zip(f)
 
 	//Md5计算
@@ -121,7 +120,7 @@ func HandleSendXml() {
 	}
 	//if true
 	//read 后  这里应该是要调 数据服务的一个接口
-	client.Sendxml()
+	//client.Sendxml()
 	//调接口成功后 mv文件夹到另一个文件中
 	//
 	//定时器定期扫描sendzipxml文件

@@ -1,8 +1,8 @@
 package storage
 
 import (
-	"CenterSettlement-go/sysinit"
-	"CenterSettlement-go/types"
+	//"CenterSettlement-go/sysinit"
+	//"CenterSettlement-go/types"
 	"github.com/go-xorm/xorm"
 	"log"
 )
