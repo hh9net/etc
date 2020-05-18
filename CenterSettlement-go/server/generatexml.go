@@ -26,7 +26,7 @@ func Generatexml() string {
 
 	Trans := make([]types.Transaction, 0)
 	//获取本省数据
-	jiesuansj := *storage.QueryJiessj()
+	jiesuansj := *storage.QueryJiessjcz()
 	//消息包起始序号
 	Messageid = 999999
 	Filename = fmt.Sprintf("%020d", Messageid)
@@ -121,4 +121,10 @@ func GetMD5Encode(data []byte) string {
 	h := md5.New()
 	h.Write(data)
 	return hex.EncodeToString(h.Sum(nil))
+}
+
+//封装一个函数，处理xml数据的准备
+func xmldata() {
+	//原始交易数据
+
 }

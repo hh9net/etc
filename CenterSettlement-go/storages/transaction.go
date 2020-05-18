@@ -1,19 +1,18 @@
 package storage
 
 import (
-	//"CenterSettlement-go/sysinit"
-	//"CenterSettlement-go/types"
 	"github.com/go-xorm/xorm"
 	"log"
 )
 
-func TransactionCommit(session *xorm.Session) {
+func TransactionCommit(session *xorm.Session) error {
 	defer session.Close()
 	// add Commit() after all actions
 	err := session.Commit()
 	if err != nil {
-		return
+		return err
 	}
+	return nil
 }
 
 func TransactionBegin(engine *xorm.Engine) *xorm.Session {

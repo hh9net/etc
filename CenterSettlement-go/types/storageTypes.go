@@ -3,8 +3,8 @@ package types
 import "time"
 
 type QiTaJiessj struct {
-	Networkcode string
-	QitaJiessj  []BJsJiessj
+	//Networkcode string
+	QitaJiessj []BJsJiessj
 }
 
 //  B_JS_JIESSJ【结算数据】`b_js_jiessj`

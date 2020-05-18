@@ -35,18 +35,19 @@ func sendFile(path string, connect net.Conn) {
 }
 
 //发送
-func Send() {
+func Sendxml() string {
+	//如果发送成功 "ok" 返回一个成功 触发 文件的移动
 	path := "../sendfilexml/"
 	info, serr := os.Stat(path)
 	if serr != nil {
 		fmt.Println("Stat error", serr)
-		return
+		return ""
 	}
 	//连接服务器
 	conn, derr := net.Dial("tcp", "127.0.0.1:8081")
 	if derr != nil {
 		fmt.Println("Dial", derr)
-		return
+		return ""
 	}
 	defer conn.Close()
 
@@ -54,7 +55,7 @@ func Send() {
 
 	if w_err != nil {
 		fmt.Println("Write error", w_err)
-		return
+		return ""
 	}
 
 	buff := make([]byte, 4096)
@@ -62,11 +63,12 @@ func Send() {
 
 	if r_err != nil {
 		fmt.Println("Read error", r_err)
-		return
+		return ""
 	}
 
 	if "ok" == string(buff[:size]) {
 		//如果收到ok应答，发送文件
 		sendFile(path, conn)
 	}
+	return "ok"
 }

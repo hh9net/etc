@@ -1,11 +1,16 @@
 package server
 
 import (
+	"CenterSettlement-go/client"
 	"CenterSettlement-go/generatexml"
+	"CenterSettlement-go/types"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"log"
 	"net"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -43,7 +48,7 @@ func Response(connect net.Conn) {
 	}
 	fileName := string(buff[:size])
 	connect.Write([]byte("ok"))
-	//把读到的文件
+	//把读到的数据 以文件记录
 	ReadFile(fileName, connect)
 }
 
@@ -94,7 +99,7 @@ func HandleTable() {
 	//准备数据（在数据层）
 	//Xml数据生成Xml文件、压缩，存文件
 	fname := Generatexml()
-	//Generatexml()
+	Generatexml()
 	//压缩
 	//Lz77Compress(fname)
 	f := "../generatexml/" + fname
@@ -112,17 +117,51 @@ func HandleTable() {
 
 //线程2 发送数据包
 func HandleSendXml() {
-	//从文件夹sendxml中扫描打包文件（判断这个文件夹下面有没有文件）
+	//从文件夹sendzipxml中扫描打包文件（判断这个文件夹下面有没有文件）
 	tiker := time.NewTicker(time.Second * 2)
 	for {
-
 		fmt.Println(<-tiker.C)
+		//准备数据   //read 后
+		//扫描receive 文件夹 读取文件
+		//获取文件或目录相关信息
+		pwd := "../sendzipxml/"
+		fileInfoList, err := ioutil.ReadDir(pwd)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("该文件夹下有文件的数量 ：", len(fileInfoList))
+		for i := range fileInfoList {
+
+			//判断文件的结尾名
+			if strings.HasSuffix(fileInfoList[i].Name(), ".xml") {
+				fmt.Println(fileInfoList[i].Name()) //打印当前文件或目录下的文件或目录名
+			}
+
+			//		解析文件
+			//		应答数据包
+			//		记账数据包
+			//		争议数据包
+			//		清分数据包
+			//		退费数据包
+		}
+
+		//发送数据
+		var sendStru types.SendStru
+		sendStru.Massageid = "563462"
+		sendStru.Md5_str = "3414"
+		sendStru.Xml_length = "34"
+		sendStru.Xml_msg = []byte("1233213213sadfdasfsdsd")
+		//发送给联网中心
+		ok := client.Sendxml()
+		if ok == "ok" {
+			//调接口成功后 mv文件夹到另一个文件中
+		}
+		if ok == "no" {
+			//	发送失败 触发重发机制
+		}
+
 	}
-	//if true
-	//read 后  这里应该是要调 数据服务的一个接口
-	//client.Sendxml()
-	//调接口成功后 mv文件夹到另一个文件中
-	//
+
 	//定时器定期扫描sendzipxml文件
 	//	读取文件
 	//	准备报文
@@ -147,17 +186,32 @@ func AnalyzeDataPakage() {
 	//定期检查文件夹receive    解压后
 	tiker := time.NewTicker(time.Second * 5)
 	for {
+		fmt.Println("现在")
 		<-tiker.C
-		//扫描receive 文件夹
+		//扫描receive 文件夹 读取文件
+		//获取文件或目录相关信息
+		pwd := "../receive/"
+		fileInfoList, err := ioutil.ReadDir(pwd)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("该文件夹下有文件的数量 ：", len(fileInfoList))
+		for i := range fileInfoList {
+
+			//判断文件的结尾名
+			if strings.HasSuffix(fileInfoList[i].Name(), ".xml") {
+				fmt.Println(fileInfoList[i].Name()) //打印当前文件或目录下的文件或目录名
+			}
+
+			//		解析文件
+			//		应答数据包
+			//		记账数据包
+			//		争议数据包
+			//		清分数据包
+			//		退费数据包
+		}
 
 	}
 	//定时器定期扫描receive文件夹
-	//		读取文件
-	//		解析文件
-	//		应答数据包
-	//		记账数据包
-	//		争议数据包
-	//		清分数据包
-	//		退费数据包
 
 }
