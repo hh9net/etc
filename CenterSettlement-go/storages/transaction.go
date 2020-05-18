@@ -6,12 +6,13 @@ import (
 )
 
 func TransactionCommit(session *xorm.Session) error {
-	defer session.Close()
+
 	// add Commit() after all actions
 	err := session.Commit()
 	if err != nil {
 		return err
 	}
+	session.Close()
 	return nil
 }
 

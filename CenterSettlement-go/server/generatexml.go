@@ -1,6 +1,7 @@
 package server
 
 import (
+	"CenterSettlement-go/conf"
 	storage "CenterSettlement-go/storages"
 	"CenterSettlement-go/types"
 	"crypto/md5"
@@ -27,9 +28,12 @@ func Generatexml() string {
 	Trans := make([]types.Transaction, 0)
 	//获取本省数据
 	jiesuansj := *storage.QueryJiessjcz()
+	if len(jiesuansj) == 0 {
+		log.Println("数据库没有要打包的本省的储值卡的数据")
+	}
 	//消息包起始序号
-	Messageid = 999999
-	Filename = fmt.Sprintf("%020d", Messageid)
+	//Messageid:=conf.GenerateMessageId()
+	Filename = fmt.Sprintf("%020d", conf.GenerateMessageId())
 	count = len(jiesuansj)
 	log.Println(count)
 
@@ -60,7 +64,7 @@ func Generatexml() string {
 		//Trans[Ti].Service.Description=	v.FNbYonghtcsc//  	停车场名｜停车时常
 
 		Trans = append(Trans, Tran)
-		log.Println(Trans)
+		//log.Println(Trans)
 	}
 
 	//赋值
@@ -92,7 +96,7 @@ func Generatexml() string {
 	if err != nil {
 		log.Printf("error: %v\n", err)
 	}
-	log.Println(outputxml)
+	//log.Println(outputxml)
 
 	//创建文件 cz
 	fw, f_werr := os.Create("../generatexml/" + "CZ_3201_" + Filename + ".xml")

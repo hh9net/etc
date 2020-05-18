@@ -94,16 +94,17 @@ func HandleTask(conn net.Conn) {
 
 //数据打包
 func HandleTable() {
-
 	//查询原始交易数据（在数据层）
 	//准备数据（在数据层）
 	//Xml数据生成Xml文件、压缩，存文件
 	fname := Generatexml()
-	Generatexml()
+	time.Sleep(time.Second * 5)
 	//压缩
 	//Lz77Compress(fname)
 	f := "../generatexml/" + fname
+
 	generatexml.Lz77zip(f)
+	log.Println("yasuo")
 
 	//Md5计算
 
@@ -184,9 +185,9 @@ func HandleChannelMessage(conn net.Conn) {
 func AnalyzeDataPakage() {
 
 	//定期检查文件夹receive    解压后
-	tiker := time.NewTicker(time.Second * 5)
+	tiker := time.NewTicker(time.Second * 3)
 	for {
-		fmt.Println("现在")
+		fmt.Println("现在", time.Now().Format("2006-01-02 15:04:05"))
 		<-tiker.C
 		//扫描receive 文件夹 读取文件
 		//获取文件或目录相关信息

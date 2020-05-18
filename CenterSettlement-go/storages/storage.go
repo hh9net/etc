@@ -23,7 +23,7 @@ func QueryJiessjcz() *[]types.BJsJiessj {
 	session := TransactionBegin(xorm)
 	//查询多条数据
 	tests := make([]types.BJsJiessj, 0)
-	qerr := session.Where("F_NB_JIAOYZT=?", 0).And("F_VC_KAWLH=?", types.JS_NETWORK).And("F_VC_KALX=?", types.PRECARD).Limit(100, 0).Find(&tests)
+	qerr := session.Where("F_NB_DABZT=?", 0).And("F_VC_KAWLH=?", types.JS_NETWORK).And("F_NB_KALX=?", types.PRECARD).Limit(100, 0).Find(&tests)
 	if qerr != nil {
 		panic(qerr)
 	}
@@ -48,7 +48,7 @@ func QueryJiessjjz() *[]types.BJsJiessj {
 	session := TransactionBegin(xorm)
 	//查询多条数据
 	tests := make([]types.BJsJiessj, 0)
-	qerr := session.Where("F_NB_JIAOYZT=?", 0).And("F_VC_KAWLH=?", types.JS_NETWORK).And("F_VC_KALX=?", types.CREDITCARD).Limit(100, 0).Find(&tests)
+	qerr := session.Where("F_NB_DABZT=?", 0).And("F_VC_KAWLH=?", types.JS_NETWORK).And("F_NB_KALX=?", types.CREDITCARD).Limit(100, 0).Find(&tests)
 	if qerr != nil {
 		panic(qerr)
 	}
@@ -159,13 +159,13 @@ func QueryJiessjjz() *[]types.BJsJiessj {
 
 func getJiessj(xorm *xorm.Engine, networkcode string, Kalx int) []types.BJsJiessj {
 	tests := make([]types.BJsJiessj, 0)
-	qerr := xorm.Where("F_NB_JIAOYZT=?", 0).And("F_VC_KAWLH=?", networkcode).And("F_VC_KALX=?", Kalx).Limit(100, 0).Find(&tests)
+	qerr := xorm.Where("F_F_NB_DABZT=?", 0).And("F_VC_KAWLH=?", networkcode).And("F_NB_KALX=?", Kalx).Limit(100, 0).Find(&tests)
 	if qerr != nil {
 		panic(qerr)
 	}
 	//log.Printf("卡网络号为 %s 总共查询出 %d 条数据\n", networkcode,len(tests))
 	//for _, v := range tests {
-	// log.Printf("交易状态: %d, 交易记录id: %s, 卡网络号: %s\n", v.FNbJiaoyzt,v.FVcJiaoyjlid,v.FVcKawlh)
+	// log.Printf("打包状态: %d, 交易记录id: %s, 卡网络号: %s\n", v.FNbDabzt,v.FVcJiaoyjlid,v.FVcKawlh)
 	//}
 	return tests
 }
@@ -178,7 +178,7 @@ func YUANSJYXX() *[]types.BJsYuansjyxx {
 	}
 	//查询多条数据
 	tests := make([]types.BJsYuansjyxx, 0)
-	qerr := xorm.Where("F_NB_JIAOYZT=?", 0).Limit(100, 0).Find(&tests)
+	qerr := xorm.Where("F_NB_DABZT=?", 0).Limit(100, 0).Find(&tests)
 	if qerr != nil {
 		panic(qerr)
 	}

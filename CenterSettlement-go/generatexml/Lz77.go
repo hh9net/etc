@@ -7,6 +7,7 @@ package generatexml
 import "C"
 
 import (
+	"log"
 	"unsafe"
 )
 
@@ -14,6 +15,7 @@ import (
 func Lz77zip(fname string) {
 
 	//把CZ_origin.xml  压缩成 "2.xml.lz77"
+	log.Println(fname)
 	orilz77file := fname + ".lz77"
 
 	src2 := C.CString(fname)

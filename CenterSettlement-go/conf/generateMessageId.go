@@ -26,12 +26,12 @@ func GenerateMessageId() int64 {
 
 	newid := id + 1
 	s := strconv.Itoa(int(newid))
-	log.Println(" file new messageid: ", s)
 
 	cfg.Section("").Key("messageid").SetValue(s) //  修改后值然后进行保存
 	Saveerr := cfg.SaveTo("app.conf")
 	if Saveerr != nil {
 		log.Fatal("Fail to SaveTo file:", Saveerr)
 	}
+	log.Println(" file new messageid: ", s)
 	return id
 }
