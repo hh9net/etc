@@ -153,7 +153,7 @@ func HandleSendXml() {
 		sendStru.Xml_length = "34"
 		sendStru.Xml_msg = []byte("1233213213sadfdasfsdsd")
 		//发送给联网中心
-		ok := client.Sendxml()
+		ok := client.Sendxml1()
 		if ok == "ok" {
 			//调接口成功后 mv文件夹到另一个文件中
 		}

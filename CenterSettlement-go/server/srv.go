@@ -1,88 +1,101 @@
 package server
 
 import (
-	"fmt"
+	"encoding/binary"
+	"encoding/hex"
+	"io/ioutil"
+	"log"
 	"net"
 	"net/http"
-	"os"
 )
 
-//模拟联网中心
+type DataPacket struct {
+	Type string
+	Body string
+}
+
+//模拟联网中心，处理结算数据
 func Server() {
-	//创建用与监听客户端连接请求的socket
-	listener, err := net.Listen("tcp", "127.0.0.1:8808")
+	//绑定端口
+	tcpAddr, err := net.ResolveTCPAddr("tcp", ":8181")
 	if err != nil {
-		fmt.Println("Listen err:", err)
-		return
+		log.Println(err.Error())
+	}
+	//监听
+	listener, err := net.ListenTCP("tcp", tcpAddr)
+	if err != nil {
+		log.Println(err.Error())
 	}
 	defer listener.Close()
-	//阻塞等待客户端（浏览器）连接
-	conn, err := listener.Accept()
-	if err != nil {
-		fmt.Println("Accept err:", err)
-		return
-	}
-	defer conn.Close()
-	//调用函数 获取连接客户端的网络地址，组织连接成功
-	fmt.Println(conn.RemoteAddr().String(), "连接成功")
-	//读取客户端发来的数据
 
-	//数据缓冲区
-	buf := make([]byte, 4096)
-
-	n, err := conn.Read(buf) //n 接收数据的长度
-	if err != nil {
-		fmt.Println("Read err:", err)
-		return
-	}
-	result := buf[:n] //切片截取
-	fmt.Printf("客户端发来的内容\n#\n%s#", string(result))
-}
-
-// 浏览器访问时，该函数被回调
-func handler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("ok")) //客户端访问时，被调用，此处要返会接收成功的应答
-}
-func Server2() {
-	// 注册处理函数
-	http.HandleFunc("/hello", handler)
-	// 绑定服务器监听地址
-	http.ListenAndServe("127.0.0.1:8000", nil)
-}
-
-//打开所请求的文件      http://127.0.0.1:8808/00000000000000079766.xml
-func openSendFile(fileName string, w http.ResponseWriter) {
-	filePath := "./jnp" + fileName
-	// 只读打开文件：
-	f, err := os.Open(filePath)
-	// 说明 文件不存在。写错误页面
-	if err != nil {
-		w.Write([]byte(""))
-	}
-	defer f.Close()
-
-	buf := make([]byte, 4096)
-	// 文件存在， 循环读取，写给浏览器
+	//开始接收数据
 	for {
-		n, _ := f.Read(buf)
-		if n == 0 {
-			break
+		conn, err := listener.Accept()
+		if err != nil {
+			log.Println(err.Error())
 		}
-		w.Write(buf[:n])
+		go Handler(conn)
 	}
+}
+func Handler(conn net.Conn) {
+	defer conn.Close()
+	//每次读取数据长度
+	buf := make([]byte, 4096)
+	_, err := conn.Read(buf)
+	if err != nil {
+		return
+	}
+	result, Body := check(buf)
+	if result {
+		log.Printf("接收到报文内容:{%s}\n", hex.EncodeToString(Body))
+	}
+}
+func check(buf []byte) (bool, []byte) {
+	Length := DataLength(buf)
+	if Length < 3 || Length > 4096 {
+		return false, nil
+	}
+	Body := buf[:Length]
+	return uint16(len(Body))-2 != Length, Body
+}
+func DataLength(buf []byte) uint16 {
+	return binary.BigEndian.Uint16(inversion(buf[:2])) + 2
+}
+
+//反转字节
+func inversion(buf []byte) []byte {
+	for i := 0; i < len(buf)/2; i++ {
+		temp := buf[i]
+		buf[i] = buf[len(buf)-1-i]
+		buf[len(buf)-1-i] = temp
+	}
+	return buf
+}
+
+func Server1() {
+	//监听客户端
+	log.Println("监听客户端 127.0.0.1:8808")
+	http.HandleFunc("/", ServerHandle)
+	http.ListenAndServe("127.0.0.1:8808", nil)
 }
 
 //处理函数
-func serverHandle(w http.ResponseWriter, r *http.Request) {
+func ServerHandle(w http.ResponseWriter, r *http.Request) {
 	fileName := r.URL.String()
-	fmt.Println("urlfileName=", fileName)
+	log.Println("urlfileName=", fileName)
+
+	con, _ := ioutil.ReadAll(r.Body) //获取post的数据
+	log.Println(string(con))
+	w.Write([]byte("已经接收"))
+	r.Body.Close()
+
+	//如果文件比较大要循环读取
+
+	//把读取的内容保存成文件 存放在center中
+
+	//判断是否接收完， 如果接收完毕，则回复应答
+	//准备应答报文
 
 	// 封装函数，去到服务器指定目录中找寻文件，存在打开写会给浏览器， 不存在报错
-	openSendFile(fileName, w)
-}
-
-//取出文件
-func Server3() {
-	http.HandleFunc("/", serverHandle)
-	http.ListenAndServe("127.0.0.1:8808", nil)
+	//openSendFile(fileName, w)
 }

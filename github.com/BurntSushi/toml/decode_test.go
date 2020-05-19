@@ -451,14 +451,14 @@ type sphere struct {
 
 func TestDecodeSimpleArray(t *testing.T) {
 	var s1 sphere
-	if _, err := Decode(`center = [0.0, 1.5, 0.0]`, &s1); err != nil {
+	if _, err := Decode(`srvFilecenter = [0.0, 1.5, 0.0]`, &s1); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestDecodeArrayWrongSize(t *testing.T) {
 	var s1 sphere
-	if _, err := Decode(`center = [0.1, 2.3]`, &s1); err == nil {
+	if _, err := Decode(`srvFilecenter = [0.1, 2.3]`, &s1); err == nil {
 		t.Fatal("Expected array type mismatch error")
 	}
 }

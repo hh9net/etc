@@ -3,5 +3,9 @@ package client
 import "testing"
 
 func TestMoveFile(t *testing.T) {
-	MoveFile()
+	//MoveFile()
+}
+
+func TestSendxml(t *testing.T) {
+	Sendxml()
 }
