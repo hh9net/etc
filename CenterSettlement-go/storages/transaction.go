@@ -18,7 +18,9 @@ func TransactionCommit(session *xorm.Session) error {
 
 func TransactionBegin(engine *xorm.Engine) *xorm.Session {
 	session := engine.NewSession()
-
+	if engine == nil {
+		log.Fatalln("Transaction session.Begin engine==nil ")
+	}
 	// add Begin() before any action
 	serr := session.Begin()
 	if serr != nil {
