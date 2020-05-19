@@ -111,7 +111,7 @@ func TestInterpolateParamsUint64(t *testing.T) {
 		t.Errorf("Expected err=nil, got err=%#v, q=%#v", err, q)
 	}
 	if q != "SELECT 42" {
-		t.Errorf("Expected uint64 interpolation to work, got q=%#v", q)
+		t.Errorf("Expected uint64 interpolation to work.txt, got q=%#v", q)
 	}
 }
 

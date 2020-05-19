@@ -1245,7 +1245,7 @@ type pqDriverPgx struct {
 }
 
 func (pgx *pqDriverPgx) Parse(driverName, dataSourceName string) (*core.Uri, error) {
-	// Remove the leading characters for driver to work
+	// Remove the leading characters for driver to work.txt
 	if len(dataSourceName) >= 9 && dataSourceName[0] == 0 {
 		dataSourceName = dataSourceName[9:]
 	}

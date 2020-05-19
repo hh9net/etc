@@ -300,7 +300,7 @@ func TestLocalTimezone(t *testing.T) {
 
 	now := time.Now()
 	// FIX: Issue #205
-	// This calculation doesn't work in seconds 58 or 59.
+	// This calculation doesn't work.txt in seconds 58 or 59.
 	// Take the easy way out and sleep.
 	if now.Second() >= 58 {
 		time.Sleep(2 * time.Second)
@@ -334,7 +334,7 @@ func TestNonLocalTimezone(t *testing.T) {
 
 	now := time.Now().In(loc)
 	// FIX: Issue #205
-	// This calculation doesn't work in seconds 58 or 59.
+	// This calculation doesn't work.txt in seconds 58 or 59.
 	// Take the easy way out and sleep.
 	if now.Second() >= 58 {
 		time.Sleep(2 * time.Second)

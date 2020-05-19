@@ -216,7 +216,7 @@ var fieldCache struct {
 	m map[reflect.Type][]field
 }
 
-// cachedTypeFields is like typeFields but uses a cache to avoid repeated work.
+// cachedTypeFields is like typeFields but uses a cache to avoid repeated work.txt.
 func cachedTypeFields(t reflect.Type) []field {
 	fieldCache.RLock()
 	f := fieldCache.m[t]

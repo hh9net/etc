@@ -251,7 +251,7 @@ func (mc *mysqlConn) readHandshakePacket() (data []byte, plugin string, err erro
 		// last byte being NULL.
 		//
 		// The official Python library uses the fixed length 12
-		// which seems to work but technically could have a hidden bug.
+		// which seems to work.txt but technically could have a hidden bug.
 		authData = append(authData, data[pos:pos+12]...)
 		pos += 13
 

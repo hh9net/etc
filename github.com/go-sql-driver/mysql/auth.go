@@ -247,7 +247,7 @@ func (mc *mysqlConn) auth(authData []byte, plugin string) ([]byte, error) {
 		if !mc.cfg.AllowOldPasswords {
 			return nil, ErrOldPassword
 		}
-		// Note: there are edge cases where this should work but doesn't;
+		// Note: there are edge cases where this should work.txt but doesn't;
 		// this is currently "wontfix":
 		// https://github.com/go-sql-driver/mysql/issues/184
 		authResp := append(scrambleOldPassword(authData[:8], mc.cfg.Passwd), 0)
