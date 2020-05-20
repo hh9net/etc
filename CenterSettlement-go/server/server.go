@@ -54,7 +54,6 @@ func Response(connect net.Conn) {
 
 //接收联网中心发来数据包
 func Receive() {
-
 	//监听联网中心数据端口
 	listen, lerr := net.Listen("tcp", "127.0.0.1:8808")
 	if lerr != nil {
@@ -104,7 +103,7 @@ func HandleTable() {
 	f := "../generatexml/" + fname
 
 	generatexml.Lz77zip(f)
-	log.Println("yasuo")
+	log.Println("压缩ok")
 
 	//Md5计算
 
@@ -187,7 +186,7 @@ func AnalyzeDataPakage() {
 	//定期检查文件夹receive    解压后
 	tiker := time.NewTicker(time.Second * 3)
 	for {
-		fmt.Println("现在", time.Now().Format("2006-01-02 15:04:05"))
+		log.Println("现在", time.Now().Format("2006-01-02 15:04:05"))
 		<-tiker.C
 		//扫描receive 文件夹 读取文件
 		//获取文件或目录相关信息
@@ -202,6 +201,7 @@ func AnalyzeDataPakage() {
 			//判断文件的结尾名
 			if strings.HasSuffix(fileInfoList[i].Name(), ".xml") {
 				fmt.Println(fileInfoList[i].Name()) //打印当前文件或目录下的文件或目录名
+
 			}
 
 			//		解析文件

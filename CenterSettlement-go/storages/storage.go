@@ -74,15 +74,18 @@ type QiTaJiessj struct {
 var (
 	jiessjcz []types.BJsJiessj //储值卡
 	jiessjjz []types.BJsJiessj //记账卡
+	jiessjs  []QiTaJiessj      //返回的数据
 )
 
 //通过交易状态0  卡网络号为（除江苏以外） 卡类型为储值卡 或者记账卡   查询交易结算数据
 //map[string]map[string] []types.BJsJiessj 第一级是数据为记账卡 第二级数据是卡网络号
-func (Qitajiessj *QiTaJiessj) QueryQiTaJiessj() *QiTaJiessj {
+func QueryQiTaJiessj() *QiTaJiessj {
 	xorm, err := sysinit.NewEngine()
 	if err != nil {
 		log.Fatal("连接数据库 error :", err)
 	}
+	Qitajiessj := new(QiTaJiessj)
+
 	//开启事务
 	session := TransactionBegin(xorm)
 	//查询多条数据
@@ -91,10 +94,30 @@ func (Qitajiessj *QiTaJiessj) QueryQiTaJiessj() *QiTaJiessj {
 
 	//把交易状态为0  卡网络号为其他地区的数据记录查询出来  卡类型22/23
 	for _, networkcode := range types.Gl_network {
-		//查询 code de数据
+		//查询 为储值卡的数据
 		jiessjcz = getJiessj(session, networkcode, 22)
+		if jiessjcz == nil {
+			Qitajiessj.Network = networkcode
+			Qitajiessj.KalX = 22
+		}
 
+		for _, jioayisj := range jiessjcz {
+
+			Qitajiessj.Network = networkcode
+			Qitajiessj.KalX = 22
+			for _, sjs := range jiessjs {
+				sjs.Jiessj = append(sjs.Jiessj, jioayisj)
+				sjs.KalX = Qitajiessj.KalX
+				sjs.Network = Qitajiessj.Network
+			}
+
+		}
+
+		//查询 为记账卡的数据
 		jiessjjz = getJiessj(session, networkcode, 23)
+		if jiessjjz == nil {
+
+		}
 
 		//log.Println(networkJiessj)
 
@@ -102,20 +125,23 @@ func (Qitajiessj *QiTaJiessj) QueryQiTaJiessj() *QiTaJiessj {
 	//log.Println(networkJiessjs)
 	//return networkJiessjs
 	terr := TransactionCommit(session)
+	if terr != nil {
+		log.Fatalln("QueryQiTaJiessj TransactionCommit error")
+	}
 
 	return Qitajiessj
 }
 
 func getJiessj(session *xorm.Session, networkcode string, Kalx int) []types.BJsJiessj {
 	tests := make([]types.BJsJiessj, 0)
-	qerr := session.Where("F_NB_DABZT=?", 0).And("F_VC_KAWLH=?", types.JS_NETWORK).And("F_NB_KALX=?", types.PRECARD).Limit(100, 0).Find(&tests)
+	qerr := session.Where("F_NB_DABZT=?", 0).And("F_VC_KAWLH=?", networkcode).And("F_NB_KALX=?", Kalx).Limit(100, 0).Find(&tests)
 	if qerr != nil {
 		panic(qerr)
 	}
-	//log.Printf("卡网络号为 %s 总共查询出 %d 条数据\n", networkcode,len(tests))
-	//for _, v := range tests {
-	// log.Printf("打包状态: %d, 交易记录id: %s, 卡网络号: %s\n", v.FNbDabzt,v.FVcJiaoyjlid,v.FVcKawlh)
-	//}
+	log.Printf("卡网络号为 %s 总共查询出 %d 条数据\n", networkcode, len(tests))
+	for _, v := range tests {
+		log.Printf("打包状态: %d, 交易记录id: %s, 卡网络号: %s\n", v.FNbDabzt, v.FVcJiaoyjlid, v.FVcKawlh)
+	}
 	return tests
 }
 
