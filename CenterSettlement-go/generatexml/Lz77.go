@@ -7,16 +7,19 @@ package generatexml
 import "C"
 
 import (
-	"log"
+	log "github.com/sirupsen/logrus"
 	"unsafe"
 )
 
 // 动态库编译 g++ Lz77.cpp -fPIC -shared -o lz77.so
-func Lz77zip(fname string) {
+func Lz77zip(chname chan string) {
+	fname := <-chname
 
 	//把CZ_origin.xml  压缩成 "2.xml.lz77"
-	log.Println(fname)
 	orilz77file := fname + ".lz77"
+
+	log.Println("ch name:", fname)
+	log.Println("orilz77file :=", orilz77file)
 
 	src2 := C.CString(fname)
 	dest2 := C.CString(orilz77file)

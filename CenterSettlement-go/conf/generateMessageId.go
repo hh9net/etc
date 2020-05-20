@@ -22,16 +22,18 @@ func GenerateMessageId() int64 {
 	if rerr != nil {
 		log.Fatal("Fail to read messageid:", rerr)
 	}
-	log.Println(" file messageid: ", id)
+	log.Println("read conffile messageid: ", id)
 
 	newid := id + 1
 	s := strconv.Itoa(int(newid))
 
 	cfg.Section("").Key("messageid").SetValue(s) //  修改后值然后进行保存
-	Saveerr := cfg.SaveTo("app.conf")
+	Saveerr := cfg.SaveTo("../conf/app.conf")
 	if Saveerr != nil {
 		log.Fatal("Fail to SaveTo file:", Saveerr)
 	}
+
 	log.Println(" file new messageid: ", s)
+	log.Println(" xmlfile new messageid: ", id)
 	return id
 }

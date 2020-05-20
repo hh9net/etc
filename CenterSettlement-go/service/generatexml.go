@@ -1,4 +1,4 @@
-package server
+package service
 
 import (
 	"CenterSettlement-go/conf"
@@ -22,7 +22,7 @@ var (
 )
 
 //线程1
-func Generatexml() string {
+func Generatexml(ch chan string) string {
 	//从数据层获取准备的数据
 
 	Trans := make([]types.Transaction, 0)
@@ -33,9 +33,10 @@ func Generatexml() string {
 	}
 	//消息包起始序号
 	//Messageid:=conf.GenerateMessageId()
+	//log.Println(Messageid)
 	Filename = fmt.Sprintf("%020d", conf.GenerateMessageId())
 	count = len(jiesuansj)
-	log.Println(count)
+	//log.Println(count)
 
 	for i, v := range jiesuansj {
 		//把数据库数据 准备xml需要的  赋值
@@ -107,9 +108,9 @@ func Generatexml() string {
 	headerBytes := []byte(xml.Header)
 	//拼接XML头和实际XML内容
 	xmlOutPutData := append(headerBytes, outputxml...)
+	//这里可以不写，直接使用channel发送给线程2
 	//写入文件
 	ioutil.WriteFile("../generatexml/CZ_3201_"+Filename+".xml", xmlOutPutData, os.ModeAppend)
-	//
 
 	_, ferr := fw.Write((xmlOutPutData))
 	if ferr != nil {
@@ -117,6 +118,8 @@ func Generatexml() string {
 	}
 	//更新消息包信息
 	fw.Close()
+	ch <- "CZ_3201_" + Filename + ".xml"
+
 	return "CZ_3201_" + Filename + ".xml"
 }
 
