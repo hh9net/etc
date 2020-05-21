@@ -34,11 +34,11 @@ import (
 // 动态库编译 g++ Lz77.cpp -fPIC -shared -o lz77.so
 func Lz77UnZip() {
 	fmt.Println("data :", C.testa())
-	lz77file := "CZ_3201_00000000000000079752.xml.lz77"
+	lz77file := "CZ_3201_00000000000000100021.xml.lz77"
 	//lz77file := "CZ_3201_00000000000000000001.xml.lz77"
 
 	//xml源文件
-	originfile := "00000000000000079752.xml"
+	originfile := "CZ_3201_00000000000000100022.xml"
 
 	// 解压文件
 	src1 := C.CString(lz77file)

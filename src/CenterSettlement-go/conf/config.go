@@ -35,6 +35,7 @@ func ReadConfig(path string) (Config, error) {
 	return config, nil
 }
 
+//获取mysql 配置文件信息
 func ConfigInit() *Config {
 	//读配置文件
 	config, err := ReadConfig(conffilepath) //也可以通过os.arg或flag从命令行指定配置文件路径

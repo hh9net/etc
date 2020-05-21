@@ -12,11 +12,10 @@ import (
 )
 
 // 动态库编译 g++ Lz77.cpp -fPIC -shared -o lz77.so
-func Lz77zip(chname chan string) {
-	fname := <-chname
+func Lz77zip(fname string) {
 
 	//把CZ_origin.xml  压缩成 "2.xml.lz77"
-	orilz77file := fname + ".lz77"
+	orilz77file := "../sendzipxml/" + fname + ".lz77"
 
 	log.Println("ch name:", fname)
 	log.Println("orilz77file :=", orilz77file)
