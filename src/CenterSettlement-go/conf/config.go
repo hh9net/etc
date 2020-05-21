@@ -42,6 +42,6 @@ func ConfigInit() *Config {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println(config)
+	//log.Println(config)
 	return &config
 }

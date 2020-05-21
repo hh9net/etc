@@ -18,13 +18,18 @@ import (
 func QueryJiessjcz() *[]types.BJsJiessj {
 	database.DBInit()
 	session := TransactionBegin(database.XormClient)
-
 	//session := TransactionBegin(xorm)
 	//查询多条数据
 	tests := make([]types.BJsJiessj, 0)
-	qerr := session.Where("F_NB_DABZT=?", 0).And("F_VC_KAWLH=?", types.JS_NETWORK).And("F_NB_KALX=?", types.PRECARD).Limit(100, 0).Find(&tests)
+	//SELECT `F_VC_KAWLH`, `F_NB_KALX` FROM `b_js_jiessj` WHERE `F_NB_DABZT` = 0 GROUP BY (`F_VC_KAWLH`, `F_NB_KALX`) HAVING COUNT(*) < 100
+	sql := "SELECT `F_VC_KAWLH`, `F_NB_KALX` FROM `b_js_jiessj` WHERE `F_NB_DABZT` = 0 GROUP BY `F_VC_KAWLH`, `F_NB_KALX` HAVING COUNT(*) < 100"
+	m, qerr := session.QueryString(sql)
+
+	log.Println("查询结果", m)
+
+	//qerr := session.Where("F_NB_DABZT=?", 0).And("F_VC_KAWLH=?", types.JS_NETWORK).And("F_NB_KALX=?", types.PRECARD).Limit(100, 0).Find(&tests)
 	if qerr != nil {
-		panic(qerr)
+		log.Fatalln("查询出错", qerr)
 	}
 	log.Printf("总共查询出 %d 条数据\n", len(tests))
 	for _, v := range tests {
