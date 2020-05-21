@@ -14,7 +14,7 @@ type DataPacket struct {
 	Body string
 }
 
-//模拟联网中心，处理结算数据
+//模拟联网中心，处理结算数据   业务 模拟
 func Server() {
 	//绑定端口
 	tcpAddr, err := net.ResolveTCPAddr("tcp", ":8181")

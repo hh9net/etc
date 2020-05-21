@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-//读取联网中心的数据
+//保存联网中心的数据
 func SaveFile(fileName string, connect net.Conn) {
 	file, ferr := os.Create(fileName)
 	if ferr != nil {
@@ -62,9 +62,7 @@ func HandleTask(conn net.Conn) {
 
 //线程3  接收数据包
 func HandleMessage(conn net.Conn) {
-
 	defer conn.Close()
-
 	fileName := ""
 	Response(conn)
 	//把读到的数据 以文件记录

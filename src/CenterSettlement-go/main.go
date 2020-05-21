@@ -1,6 +1,7 @@
 package main
 
 import (
+	"CenterSettlement-go/conf"
 	"CenterSettlement-go/database"
 	"CenterSettlement-go/service"
 	commonUtils "CenterSettlement-go/utils"
@@ -8,18 +9,10 @@ import (
 	"time"
 )
 
-//日志配置
-var (
-	LogmaxAge       = 365 //日志最大保存时间（天）
-	LogrotationTime = 24  //日志切割时间间隔（小时）
-	LogPath         = "./log"
-	LogFileName     = "CenterSettlement.log"
-)
-
 func main() {
 	// 日志初始化
-
-	commonUtils.InitLogrus(LogPath, LogFileName, time.Duration(24*LogmaxAge)*time.Hour, time.Duration(LogrotationTime)*time.Hour)
+	conf := conf.LogConfigInit() //日志配置
+	commonUtils.InitLogrus(conf.LogPath, conf.LogFileName, time.Duration(24*conf.LogmaxAge)*time.Hour, time.Duration(conf.LogrotationTime)*time.Hour)
 	database.DBInit()
 	log.Println(database.XormClient)
 	//goroutine1
