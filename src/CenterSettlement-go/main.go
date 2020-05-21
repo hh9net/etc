@@ -18,6 +18,7 @@ var (
 
 func main() {
 	// 日志初始化
+
 	commonUtils.InitLogrus(LogPath, LogFileName, time.Duration(24*LogmaxAge)*time.Hour, time.Duration(LogrotationTime)*time.Hour)
 	database.DBInit()
 	log.Println(database.XormClient)
