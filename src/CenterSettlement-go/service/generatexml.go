@@ -22,7 +22,13 @@ var (
 )
 
 //线程1
-func Generatexml(ch chan string) string {
+//处理原始数据的打包
+func HandleGeneratexml() {
+	Generatexml()
+	//xml文件
+
+}
+func Generatexml() string {
 	//从数据层获取准备的数据
 
 	Trans := make([]types.Transaction, 0)
@@ -118,7 +124,7 @@ func Generatexml(ch chan string) string {
 	}
 	//更新消息包信息
 	fw.Close()
-	ch <- "CZ_3201_" + Filename + ".xml"
+	//ch <- "CZ_3201_" + Filename + ".xml"
 
 	return "CZ_3201_" + Filename + ".xml"
 }

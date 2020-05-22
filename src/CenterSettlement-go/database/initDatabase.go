@@ -13,7 +13,7 @@ var XormClient *xorm.Engine
 
 //连接数据库
 func DBInit() {
-	config := conf.ConfigInit()
+	config := conf.ConfigInit() //数据库配置
 	params := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8", config.MUserName, config.MPass, config.MHostname, config.MPort, config.Mdatabasename)
 	x, err := xorm.NewEngine("mysql", params)
 	if x == nil {
