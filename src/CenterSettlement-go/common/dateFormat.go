@@ -29,3 +29,5 @@ func TodayFormat() string {
 	log.Println("now is :", today)
 	return today
 }
+
+//处理时间2017-07-07T11:33:53 转为 2017-07-07 11:33:53
