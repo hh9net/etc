@@ -24,8 +24,8 @@ var (
 //线程1
 //处理原始数据的打包
 func HandleGeneratexml() {
+	//xml文件生成
 	Generatexml()
-	//xml文件
 
 }
 func Generatexml() string {

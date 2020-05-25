@@ -39,7 +39,7 @@ func sendFile(path string, connect net.Conn) {
 
 //发送
 func Sendxml1() string {
-	//如果xml发送成功  会返回一个成功 触发 文件的移动
+	//如果xml发送成功  会返回一个成功 触发 文件的移动 "ok"
 	//path := "../sendzipxml/"
 	//info, serr := os.Stat(path)
 	//if serr != nil {
@@ -90,23 +90,24 @@ type TcpClient struct {
 func Sendxml() {
 	tcpAddr, err := net.ResolveTCPAddr("tcp", ":8181")
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 		return
 	}
 	conn, err := net.DialTCP("tcp", nil, tcpAddr)
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 		return
 	}
 	send(conn)
 }
+
 func send(conn *net.TCPConn) {
 	defer conn.Close()
 	decodeString, _ := hex.DecodeString("2300a78c070000000000000a00000000000000030000000000010618120250ba2700004eb0")
 	//发送
 	_, err := conn.Write(decodeString)
 	if err != nil {
-		fmt.Printf(err.Error())
+		log.Println(err.Error())
 	}
 }
 
@@ -121,7 +122,7 @@ func (client *TcpClient) receivePackets() {
 			close(client.stopChan)
 			break
 		}
-		fmt.Print(msg)
+		log.Println(msg)
 	}
 }
 func (client *TcpClient) send() {

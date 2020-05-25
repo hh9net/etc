@@ -7,5 +7,5 @@ func TestMoveFile(t *testing.T) {
 }
 
 func TestSendxml(t *testing.T) {
-	Sendxml()
+	Sendxml1()
 }

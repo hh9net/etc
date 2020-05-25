@@ -53,6 +53,7 @@ func TcpResponseRecord(resRecord BJsTcpydjl) error {
 	xorm := database.XormClient
 	session := TransactionBegin(xorm)
 	tcpResRecord := new(BJsTcpydjl)
+
 	//赋值
 	tcpResRecord.F_VC_XIAOXXH = resRecord.F_VC_XIAOXXH
 	tcpResRecord.F_NB_FASZ = resRecord.F_NB_FASZ
