@@ -31,3 +31,9 @@ func TodayFormat() string {
 }
 
 //处理时间2017-07-07T11:33:53 转为 2017-07-07 11:33:53
+func DataTimeFormatHandle(datetime string) string {
+	b := []byte(datetime)
+	b[10] = ' '
+	log.Println(datetime, "to", string(b))
+	return string(b)
+}

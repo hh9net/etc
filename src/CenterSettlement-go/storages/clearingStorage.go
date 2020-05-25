@@ -8,7 +8,7 @@ import (
 
 //清分统计
 
-//新增清分统计包记录
+//新增清分包记录
 func ClearingInsert(data types.BJsQingftjxx) error {
 
 	xorm := database.XormClient
