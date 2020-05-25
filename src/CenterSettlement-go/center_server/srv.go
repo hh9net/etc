@@ -17,27 +17,29 @@ type DataPacket struct {
 //模拟联网中心，处理结算数据   业务 模拟
 func Server() {
 	//绑定端口
-	tcpAddr, err := net.ResolveTCPAddr("tcp", ":8181")
+	tcpAddr, err := net.ResolveTCPAddr("tcp", ":8808")
 	if err != nil {
 		log.Println(err.Error())
 	}
 	//监听
+	log.Println("监听客户端 127.0.0.1:8808")
 	listener, err := net.ListenTCP("tcp", tcpAddr)
 	if err != nil {
 		log.Println(err.Error())
 	}
 	defer listener.Close()
 
-	//开始接收数据
+	//联网中心开始接收数据
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
 			log.Println(err.Error())
 		}
-		go Handler(conn)
+		go ReceiveHandler(conn)
 	}
 }
-func Handler(conn net.Conn) {
+
+func ReceiveHandler(conn net.Conn) {
 	defer conn.Close()
 	//每次读取数据长度
 	buf := make([]byte, 4096)
@@ -47,7 +49,7 @@ func Handler(conn net.Conn) {
 	}
 	result, Body := check(buf)
 	if result {
-		log.Printf("接收到报文内容:{%s}\n", hex.EncodeToString(Body))
+		log.Printf("接收到报文内容:{ %s }\n", hex.EncodeToString(Body))
 	}
 }
 func check(buf []byte) (bool, []byte) {
@@ -98,4 +100,5 @@ func ServerHandle(w http.ResponseWriter, r *http.Request) {
 
 	// 封装函数，去到服务器指定目录中找寻文件，存在打开写会给浏览器， 不存在报错
 	//openSendFile(fileName, w)
+
 }

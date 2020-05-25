@@ -53,7 +53,7 @@ func Sendxml1() string {
 		log.Println("Dial", derr)
 		return ""
 	}
-	log.Println("Dial 成功")
+	log.Println("Dial 成功", conn)
 
 	//把报文写给服务端
 
