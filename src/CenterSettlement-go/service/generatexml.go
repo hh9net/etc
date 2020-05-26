@@ -1,6 +1,7 @@
 package service
 
 import (
+	"CenterSettlement-go/common"
 	"CenterSettlement-go/conf"
 	storage "CenterSettlement-go/storages"
 	"CenterSettlement-go/types"
@@ -39,7 +40,7 @@ func Generatexml(Kalx int) string {
 	//从数据层获取准备的数据
 	Trans := make([]types.Transaction, 0)
 	//获取本省数据 储值卡
-	jiesuansj := *storage.QueryJiessj(types.PRECARD)
+	jiesuansj := *storage.QueryJiessj(Kalx)
 	if Kalx == 22 && len(jiesuansj) == 0 {
 		log.Println("数据库没有要打包的本省的储值卡的数据")
 		return ""
@@ -57,7 +58,8 @@ func Generatexml(Kalx int) string {
 		var Tran types.Transaction
 		Tran.TransId = i + 1                                           //包内序号
 		Tran.Time = v.FDtJiaoysj                                       //交易时间
-		Tran.Fee = v.FNbJine / 100                                     //交易金额 yuan
+		yuan := common.Fen2Yuan(v.FNbJine)                             //分转元
+		Tran.Fee = yuan                                                //交易金额 yuan
 		Tran.CustomizedData = time.Now().Format("2006-01-02 15:04:05") //【清分目标日 ？？？】 当前日期
 		//Tran.Service.ServiceType = v.FDtJiaoylx                    //交易类型
 		Tran.Service.Description = v.FVcZhangdms //账单描述  南京南站南广场P3|11小时32分40秒
@@ -93,8 +95,9 @@ func Generatexml(Kalx int) string {
 			ReceiverId:   "0000000000000020",
 			MessageId:    Messageid},
 		Body: types.Body{
-			ContentType:       1,
-			ClearTargetDate:   time.Now().Format("2006-01-02 15:04:05"),
+			ContentType: 1,
+			//清分目标日 当前日期
+			ClearTargetDate:   time.Now().Format("2006-01-02"),
 			ServiceProviderId: "00000000000000FD",
 			IssuerId:          "0000000000000020",
 			MessageId:         Messageid,
@@ -112,16 +115,28 @@ func Generatexml(Kalx int) string {
 		log.Printf("error: %v\n", err)
 	}
 	//log.Println(outputxml)
-
-	//创建文件 cz
+	var fname string
+	//创建xml文件 cz 储值卡
 	if Kalx == types.PRECARD {
-		createxml(Kalx, outputxml)
+		fname = createxml(Kalx, outputxml)
 	}
-
-	return "CZ_3201_" + Filenameid + ".xml"
+	//创建xml文件 jz 记账卡
+	if Kalx == types.CREDITCARD {
+		fname = createxml(Kalx, outputxml)
+	}
+	return fname
 }
-func createxml(Kalx int, outputxml []byte) {
-	fw, f_werr := os.Create("../generatexml/" + "CZ_3201_" + Filenameid + ".xml")
+
+func createxml(Kalx int, outputxml []byte) string {
+	var kalxstr string
+	if Kalx == 22 {
+		kalxstr = "CZ"
+	}
+	if Kalx == 23 {
+		kalxstr = "JZ"
+	}
+	//
+	fw, f_werr := os.Create("../generatexml/" + kalxstr + "_3201_" + Filenameid + ".xml")
 	if f_werr != nil {
 		log.Fatal("Read:", f_werr)
 	}
@@ -131,15 +146,17 @@ func createxml(Kalx int, outputxml []byte) {
 	xmlOutPutData := append(headerBytes, outputxml...)
 	//这里可以不写，直接使用channel发送给线程2
 	//写入文件
-	ioutil.WriteFile("../generatexml/CZ_3201_"+Filenameid+".xml", xmlOutPutData, os.ModeAppend)
+	ioutil.WriteFile("../generatexml/"+kalxstr+"_3201_"+Filenameid+".xml", xmlOutPutData, os.ModeAppend)
 
 	_, ferr := fw.Write((xmlOutPutData))
 	if ferr != nil {
-		log.Printf("Write xml file error: %v\n", err)
+		log.Printf("Write xml file error: %v\n", ferr)
 	}
 	//更新消息包信息
 	fw.Close()
-	//ch <- "CZ_3201_" + Filename + ".xml"
+	//return "../generatexml/"+kalxstr+"_3201_"+Filenameid+".xml"
+	return kalxstr + "_3201_" + Filenameid + ".xml"
+
 }
 
 //返回一个32位md5加密后的字符串

@@ -37,7 +37,7 @@ type BJsJiessj struct {
 	FVcCheph      string    // F_VC_CHEPH   卡内车牌号
 	FNbJiaoyqye   int64     //F_NB_JIAOYQYE	交易前余额	分转元 INT
 	FNbJiaoyhye   int64     //F_NB_JIAOYHYE	交易后余额	分转元 INT
-	FNbJine       int       //F_NB_JINE	金额	INT         分转元
+	FNbJine       int64     //F_NB_JINE	金额	INT         分转元
 	FVcTacm       string    //F_VC_TACM	TAC码	VARCHAR(32)
 	FDtJiaoysj    time.Time //F_DT_JIAOYSJ	交易时间	DATETIME   2020-05-13 14:34:34
 	FDtJiaoylx    string    //F_DT_JIAOYLX	交易类型	VARCHAR(32)

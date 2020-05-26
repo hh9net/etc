@@ -38,7 +38,7 @@ type Transaction struct {
 	XMLName             xml.Name   `xml:"Transaction"`
 	TransId             int        // 包内顺序Id，从1开始递增 ，包内唯一的交易记录
 	Time                time.Time  //交易的发生时间，需要加TAC计算 2020-05-13 14:34:34
-	Fee                 int        //交易的发生金额(元)
+	Fee                 string     //交易的发生金额(元)
 	Service             Service    //服务信息
 	ICCard              ICCard     //IC卡信息
 	Validation          Validation //与校验相关的信息
