@@ -5,7 +5,7 @@ import "testing"
 //不用动态库的
 func TestLz77zip(t *testing.T) {
 	//f:=make(chan string,0)
-	f := "CZ_3201_00000000000000100022xml"
+	f := "CZ_3201_00000000000000100025.xml"
 
 	Lz77zip(f)
 }

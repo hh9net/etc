@@ -1,8 +1,8 @@
 package conf
 
 import (
-	"github.com/gopkg.in/ini.v1"
 	log "github.com/sirupsen/logrus"
+	"gopkg.in/ini.v1"
 )
 
 var logconffilepath = "../conf/app.conf"

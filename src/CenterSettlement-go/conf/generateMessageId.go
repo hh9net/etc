@@ -1,7 +1,7 @@
 package conf
 
 import (
-	"github.com/gopkg.in/ini.v1"
+	"gopkg.in/ini.v1"
 	"log"
 	"strconv"
 )

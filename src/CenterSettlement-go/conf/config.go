@@ -3,7 +3,7 @@ package conf
 import (
 	"log"
 
-	"github.com/gopkg.in/ini.v1"
+	"gopkg.in/ini.v1"
 )
 
 var conffilepath = "../conf/app.conf"
