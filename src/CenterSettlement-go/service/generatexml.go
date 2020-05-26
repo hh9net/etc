@@ -34,7 +34,6 @@ func HandleGeneratexml() {
 		//jz xml文件生成
 		Generatexml(types.CREDITCARD)
 	}
-
 }
 func Generatexml(Kalx int) string {
 	//从数据层获取准备的数据
