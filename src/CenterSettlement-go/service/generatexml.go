@@ -19,7 +19,8 @@ var (
 	Messageid  int64
 	Filenameid string
 	count      int
-	amount     int
+	amount     int64
+	amountStr  string
 )
 
 //线程1
@@ -28,17 +29,23 @@ func HandleGeneratexml() {
 	tiker := time.NewTicker(time.Second * 5)
 	for {
 		<-tiker.C
-		//cz xml文件生成
-		Generatexml(types.PRECARD)
+		//储值卡 cz xml文件生成
+		czfname := Generatexml(types.PRECARD)
+		if czfname != "" {
+			//没有本省的储值卡原始数据
+		}
 
-		//jz xml文件生成
-		Generatexml(types.CREDITCARD)
+		//记账卡 jz xml文件生成
+		jzfname := Generatexml(types.CREDITCARD)
+		if jzfname != "" {
+			//没有本省的记账卡原始数据
+		}
 	}
 }
 func Generatexml(Kalx int) string {
 	//从数据层获取准备的数据
 	Trans := make([]types.Transaction, 0)
-	//获取本省数据 储值卡
+	//获取本省数据
 	jiesuansj := *storage.QueryJiessj(Kalx)
 	if Kalx == 22 && len(jiesuansj) == 0 {
 		log.Println("数据库没有要打包的本省的储值卡的数据")
@@ -59,8 +66,10 @@ func Generatexml(Kalx int) string {
 		Tran.Time = v.FDtJiaoysj                                       //交易时间
 		yuan := common.Fen2Yuan(v.FNbJine)                             //分转元
 		Tran.Fee = yuan                                                //交易金额 yuan
-		Tran.CustomizedData = time.Now().Format("2006-01-02 15:04:05") //【清分目标日 ？？？】 当前日期
-		//Tran.Service.ServiceType = v.FDtJiaoylx                    //交易类型
+		amount = amount + v.FNbJine                                    //总金额
+		Tran.CustomizedData = time.Now().Format("2006-01-02 15:04:05") //【清分目标日】 当前日期
+		Tran.Service.ServiceType = 2                                   //交易服务类型 【写死2】
+
 		Tran.Service.Description = v.FVcZhangdms //账单描述  南京南站南广场P3|11小时32分40秒
 		//Tran.Service.Detail=//交易详细信息 1|04|3201|3201000006|1105|20191204 211733|03|3201|320
 		Tran.ICCard.CardType = v.FNbKalx //卡类型
@@ -82,6 +91,7 @@ func Generatexml(Kalx int) string {
 		Trans = append(Trans, Tran)
 		//log.Println(Trans)
 	}
+	amountStr = common.Fen2Yuan(amount)
 
 	//赋值
 	//把原始交易数据转化成xml文件
@@ -101,7 +111,7 @@ func Generatexml(Kalx int) string {
 			IssuerId:          "0000000000000020",
 			MessageId:         Messageid,
 			Count:             count,
-			Amount:            amount,
+			Amount:            amountStr,
 		}}
 	for _, T := range Trans {
 		jiaoyisj.Body.Transaction = append(jiaoyisj.Body.Transaction, T)
@@ -123,6 +133,8 @@ func Generatexml(Kalx int) string {
 	if Kalx == types.CREDITCARD {
 		fname = createxml(Kalx, outputxml)
 	}
+	//打包成功
+	//
 	return fname
 }
 

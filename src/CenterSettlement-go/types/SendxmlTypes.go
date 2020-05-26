@@ -30,14 +30,14 @@ type Body struct {
 	IssuerId          string        //发行服务机构Id， 表示产生交易记录的发行服务机构。
 	MessageId         int64         //交易消息包Id。配置文件中获得
 	Count             int           //本消息包含的记录数量
-	Amount            int           //交易总金额(元) 数据库为分【注意转换的小数问题】
+	Amount            string        //交易总金额(元) 数据库为分【注意转换的小数问题】
 	Transaction       []Transaction //交易原始数据
 
 }
 type Transaction struct {
 	XMLName             xml.Name   `xml:"Transaction"`
 	TransId             int        // 包内顺序Id，从1开始递增 ，包内唯一的交易记录
-	Time                time.Time  //交易的发生时间，需要加TAC计算 2020-05-13 14:34:34
+	Time                string     //交易的发生时间，需要加TAC计算 2020-05-13 14:34:34
 	Fee                 string     //交易的发生金额(元)
 	Service             Service    //服务信息
 	ICCard              ICCard     //IC卡信息

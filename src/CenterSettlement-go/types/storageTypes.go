@@ -39,7 +39,7 @@ type BJsJiessj struct {
 	FNbJiaoyhye   int64     //F_NB_JIAOYHYE	交易后余额	分转元 INT
 	FNbJine       int64     //F_NB_JINE	金额	INT         分转元
 	FVcTacm       string    //F_VC_TACM	TAC码	VARCHAR(32)
-	FDtJiaoysj    time.Time //F_DT_JIAOYSJ	交易时间	DATETIME   2020-05-13 14:34:34
+	FDtJiaoysj    string    //F_DT_JIAOYSJ	交易时间	DATETIME   2020-05-13 14:34:34
 	FDtJiaoylx    string    //F_DT_JIAOYLX	交易类型	VARCHAR(32)
 	FVcChex       string    //F_VC_CHEX	车型	VARCHAR(32)
 	FVcObuzt      string    //F_VC_OBUZT	OBu状态	VARCHAR(32)
@@ -53,6 +53,7 @@ type BJsJiessj struct {
 	FNbQingfjg    int       //F_NB_QINGFJG  '清分结果 0：未清分、1：已清分'
 	FNbDabzt      int       //F_NB_DABZT	打包状态	INT   0 初始 ；1打包中； 2已打包
 	FNbZhengycljg int       //F_NB_ZHENGYCLJG  '争议处理结果 0:未处理、1：争议放过、2：坏账'
+	FNbJusbj      int       //`F_NB_JUSBJ`   DEFAULT '0' COMMENT '拒收标记 0、正常，1、拒收',
 }
 
 //   B_JS_YUANSJYXX【原始交易消息包表】
@@ -104,6 +105,7 @@ type BJsYuansjymx struct {
 	FVcObuwlbh   string    //F_VC_OBUWLBH	OBU物理编号	VARCHAR(32)
 	FVcObuzt     string    //F_VC_OBUZT	OBU状态	VARCHAR(32)
 	FVcObucph    string    //F_VC_OBUNCPH	OBU内车牌号	VARCHAR(32)
+	FNbWeiyid    int       //`F_NB_WEIYID` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
 }
 
 //   B_JS_YUANSJYYDXX【原始交易应答消息】
@@ -119,6 +121,7 @@ type BJsYuansjyydxx struct {
 	FNbZhixjg    int       //F_NB_ZHIXJG	执行结果	INT
 	FVcQingfmbr  string    //F_VC_QINGFMBR	清分目标日	VARCHAR(32)
 	FVcXiaoxwjlj string    //F_VC_XIAOXWJLJ	消息文件路径	VARCHAR(512)
+	FNbWiyid     int       //`F_NB_WEIYID` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
 }
 
 // B_JS_JIZCLXX【记账处理消息】
@@ -137,6 +140,7 @@ type BJsJizclxx struct {
 	FNbZhixjg      int       //F_NB_ZHIXJG	执行结果	INT
 	FDtChulsj      time.Time //F_DT_CHULSJ	处理时间	DATETIME
 	FVcXiaoxwjlj   string    //F_VC_XIAOXWJLJ	消息文件路径	VARCHAR(512)
+	FNbWeiyid      int       //`F_NB_WEIYID` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
 }
 
 //   B_JS_JIZCLMX【记账处理明细】
@@ -144,6 +148,7 @@ type BJsJizclmx struct {
 	FNbYuansjyxxxh int64 //F_NB_YUANSJYXXXH	原始交易消息序号	BIGINT
 	FNbbaonxh      int   //F_NB_BAONXH	包内序号	INT
 	FNbChuljg      int   //F_NB_CHULJG	处理结果	INT
+	FNbWeiyid      int   //`F_NB_WEIYID` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
 }
 
 //  B_JS_JIZCLYDXX【记账处理应答消息】
@@ -158,6 +163,7 @@ type BJsJizclydxx struct {
 	FVcChulsj    time.Time //F_DT_CHULSJ	处理时间	DATETIME
 	FNbZhixjg    int       //F_NB_ZHIXJG	执行结果	INT
 	FVcXiaoxwjlj string    //F_VC_XIAOXWJLJ	消息文件路径	VARCHAR(512)
+	FNbWeiyid    int       //`F_NB_WEIYID` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
 }
 
 //   B_JS_ZHENGYCLXX【争议交易处理消息】
@@ -177,6 +183,7 @@ type BJsZhengyclxx struct {
 	FNbZhengysl     int       //F_NB_ZHENGYSL	争议数量	INT
 	FNbQuerxyjzdzje int       //F_NB_QUERXYJZDZJE	确认需要记账的总金额	INT
 	FVcXiaoxwjlj    string    //F_VC_XIAOXWJLJ	消息文件路径	VARCHAR(512)
+	FNbWeiyid       int       //`F_NB_WEIYID` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
 }
 
 //     B_JS_ZHENGYJYCLMX【争议交易处理明细】
@@ -188,6 +195,7 @@ type BJsZhengyjyclmx struct {
 	FNbZunjezh        int   //F_NB_ZUNJEZH	组内金额总和	INT
 	FNbYuansbnxh      int   //F_NB_YUANSBNXH	原始包内序号	INT
 	FNbChuljg         int   //F_NB_CHULJG	处理结果	INT
+	FNbWeiyid         int   //`F_NB_WEIYID` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
 }
 
 //    B_JS_ZHENGYJYCLYDXX【争议交易处理应答消息】
@@ -202,6 +210,7 @@ type BJsZhengyclydxx struct {
 	FVcChulsj    time.Time //F_DT_CHULSJ	处理时间	DATETIME
 	FNbZhixjg    int       //F_NB_ZHIXJG	执行结果	INT
 	FVcXiaoxwjlj string    //F_VC_XIAOXWJLJ	消息文件路径	VARCHAR(512)
+	FNbWeiyid    int       //`F_NB_WEIYID` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
 
 }
 
@@ -221,6 +230,7 @@ type BJsQingftjxx struct {
 	FNbYuansjysl     int       //F_NB_YUANSJYSL	原始包交易数量	INT
 	FNbZhengycljgbsl int       //F_NB_ZHENGYCLJGBSL	争议处理结果包数量	INT
 	FVcXiaoxwjlj     string    //F_VC_XIAOXWJLJ	消息文件路径	VARCHAR(512)
+	FNbWeiyid        int       //`F_NB_WEIYID` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
 }
 
 //    B_JS_QINGFTONGJIMX【清分统计明细】
@@ -230,6 +240,7 @@ type BJsQingftongjimx struct {
 	FVcTongxbzxxtid   string //F_VC_TONGXBZXXTID	通行宝中心系统ID	VARCHAR(32)
 	FNbYuansjyxxxh    int64  //F_NB_YUANSJYXXXH	原始交易消息序号	BIGINT
 	FNbZhengycljgwjid int    //F_NB_ZHENGYCLJGWJID	争议处理结果文件ID	INT
+	FNbWeiyid         int    //`F_NB_WEIYID` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
 }
 
 //   B_JS_QINGFTJXXYD【清分统计消息应答】
@@ -244,4 +255,5 @@ type BJsQingftjxxyd struct {
 	FDtChulsj    time.Time //F_DT_CHULSJ	处理时间	DATETIME
 	FNbZhixjg    int       //F_NB_ZHIXJG	执行结果	INT
 	FVcXiaoxwjlj string    //F_VC_XIAOXWJLJ	消息文件路径	VARCHAR(512)
+	FNbWeiyid    int       //`F_NB_WEIYID` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
 }

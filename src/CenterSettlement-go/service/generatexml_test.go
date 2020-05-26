@@ -6,7 +6,7 @@ import (
 )
 
 func TestGeneratexml(t *testing.T) {
-	Generatexml()
+	Generatexml(22)
 }
 
 func TestGetMD5Encode(t *testing.T) {
