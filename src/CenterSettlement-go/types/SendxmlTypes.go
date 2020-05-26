@@ -25,7 +25,7 @@ type Header struct {
 type Body struct {
 	XMLName           xml.Name      `xml:"Body"`
 	ContentType       int           `xml:",attr"` //始终为1
-	ClearTargetDate   time.Time     //日期 如：2017-06-05 清分目标日期：取当前日期
+	ClearTargetDate   string        //日期 如：2017-06-05 清分目标日期：取当前日期
 	ServiceProviderId string        //通行宝中心系统Id，表示消息包中的交易是由收费方产生的
 	IssuerId          string        //发行服务机构Id， 表示产生交易记录的发行服务机构。
 	MessageId         int64         //交易消息包Id。配置文件中获得
@@ -67,8 +67,8 @@ type ICCard struct {
 	NetNo       string   //网络编码，BCD码 Hex(4) ka网络号（16进制） 数据库10进制
 	CardId      string   //IC卡物理编号，BCD码  Hex(16)   卡号
 	License     string   //0015文件中记录的车牌号 卡内车牌号
-	PreBalance  string   //交易前余额，以元为单位 Decimal
-	PostBalance string   //交易后余额，以元为单位 Decimal
+	PreBalance  int64    //交易前余额，以元为单位 Decimal
+	PostBalance int64    //交易后余额，以元为单位 Decimal
 }
 
 //主要用于TAC计算
@@ -113,7 +113,7 @@ type OtherBody struct {
 	IssuerId          string        //发行服务机构Id， 表示产生交易记录的发行服务机构。
 	MessageId         int64         //交易消息包Id。配置文件中获得
 	Count             int           //本消息包含的记录数量
-	Amount            int           //交易总金额(元) 数据库为分【注意转换的小数问题】
+	Amount            string        //交易总金额(元) 数据库为分【注意转换的小数问题】
 	Transaction       []Transaction //交易原始数据
 
 }

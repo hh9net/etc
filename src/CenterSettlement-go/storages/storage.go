@@ -13,21 +13,38 @@ import (
 //在收到联网中心的数据后，解析数据，插入数据
 //在发送给联网中心前查询数据
 //注意事务处理
+//通过交易状态为0，卡网络号为江苏本省， 卡类型为储值卡、查询交易结算数据
+func QueryJiessj(KaLx int) *[]types.BJsJiessj {
+	database.DBInit()
+	xorm := database.XormClient
+	//查询多条数据
+	tests := make([]types.BJsJiessj, 0)
+	qerr := xorm.Where("F_NB_DABZT=?", 0).And("F_VC_KAWLH=?", types.JS_NETWORK).And("F_NB_KALX=?", KaLx).Limit(100, 0).Find(&tests)
+	if qerr != nil {
+		log.Fatalln("查询结算数据出错", qerr)
+	}
+	log.Printf("总共查询出 %d 条数据\n", len(tests))
+	for _, v := range tests {
+		log.Printf("打包状态: %d, 交易记录id: %s, 卡网络号: %s\n", v.FNbDabzt, v.FVcJiaoyjlid, v.FVcKawlh)
+	}
+	return &tests
+}
 
 //通过交易状态为0，卡网络号为江苏本省， 卡类型为储值卡、查询交易结算数据
 func QueryJiessjcz() *[]types.BJsJiessj {
 	database.DBInit()
-	session := TransactionBegin(database.XormClient)
+	xorm := database.XormClient
+	//session := TransactionBegin(database.XormClient)
 	//session := TransactionBegin(xorm)
 	//查询多条数据
 	tests := make([]types.BJsJiessj, 0)
 	//SELECT `F_VC_KAWLH`, `F_NB_KALX` FROM `b_js_jiessj` WHERE `F_NB_DABZT` = 0 GROUP BY (`F_VC_KAWLH`, `F_NB_KALX`) HAVING COUNT(*) < 100
-	sql := "SELECT `F_VC_KAWLH`, `F_NB_KALX` FROM `b_js_jiessj` WHERE `F_NB_DABZT` = 0 GROUP BY `F_VC_KAWLH`, `F_NB_KALX` HAVING COUNT(*) < 100"
-	m, qerr := session.QueryString(sql)
+	//sql := "SELECT `F_VC_KAWLH`, `F_NB_KALX` FROM `b_js_jiessj` WHERE `F_NB_DABZT` = 0 GROUP BY `F_VC_KAWLH`, `F_NB_KALX` HAVING COUNT(*) < 100"
+	//m, qerr := session.QueryString(sql)
 
-	log.Println("查询结果", m)
+	//log.Println("查询结果", m)
 
-	//qerr := session.Where("F_NB_DABZT=?", 0).And("F_VC_KAWLH=?", types.JS_NETWORK).And("F_NB_KALX=?", types.PRECARD).Limit(100, 0).Find(&tests)
+	qerr := xorm.Where("F_NB_DABZT=?", 0).And("F_VC_KAWLH=?", types.JS_NETWORK).And("F_NB_KALX=?", types.PRECARD).Limit(100, 0).Find(&tests)
 	if qerr != nil {
 		log.Fatalln("查询出错", qerr)
 	}
@@ -35,10 +52,7 @@ func QueryJiessjcz() *[]types.BJsJiessj {
 	for _, v := range tests {
 		log.Printf("打包状态: %d, 交易记录id: %s, 卡网络号: %s\n", v.FNbDabzt, v.FVcJiaoyjlid, v.FVcKawlh)
 	}
-	//terr := TransactionCommit(session)
-	//if terr != nil {
-	//	log.Fatal("查询本省交易记录事务提交错误")
-	//}
+
 	return &tests
 }
 
@@ -46,11 +60,10 @@ func QueryJiessjcz() *[]types.BJsJiessj {
 func QueryJiessjjz() *[]types.BJsJiessj {
 	database.DBInit()
 
-	log.Println(database.XormClient)
-	session := TransactionBegin(database.XormClient)
+	xorm := database.XormClient
 	//查询多条数据
 	tests := make([]types.BJsJiessj, 0)
-	qerr := session.Where("F_NB_DABZT=?", 0).And("F_VC_KAWLH=?", types.JS_NETWORK).And("F_NB_KALX=?", types.CREDITCARD).Limit(100, 0).Find(&tests)
+	qerr := xorm.Where("F_NB_DABZT=?", 0).And("F_VC_KAWLH=?", types.JS_NETWORK).And("F_NB_KALX=?", types.CREDITCARD).Limit(100, 0).Find(&tests)
 	if qerr != nil {
 		panic(qerr)
 	}
@@ -59,11 +72,6 @@ func QueryJiessjjz() *[]types.BJsJiessj {
 		log.Printf("打包状态: %d, 交易记录id: %s, 卡网络号: %s\n", v.FNbDabzt, v.FVcJiaoyjlid, v.FVcKawlh)
 	}
 
-	//关闭事务
-	terr := TransactionCommit(session)
-	if terr != nil {
-		log.Fatal("查询本省交易记录事务提交错误")
-	}
 	return &tests
 }
 

@@ -13,7 +13,7 @@ type MessageId struct { //配置文件要通过tag来指定配置文件中的名
 //注意读取messageid时，要做加锁处理
 func GenerateMessageId() int64 {
 
-	cfg, err := ini.Load("../conf/app.conf") //读配置文件
+	cfg, err := ini.Load("../conf/id.conf") //读配置文件
 	if err != nil {
 		log.Fatal("Fail to read file:", err)
 	}
@@ -28,7 +28,7 @@ func GenerateMessageId() int64 {
 	s := strconv.Itoa(int(newid))
 
 	cfg.Section("").Key("messageid").SetValue(s) //  修改后值然后进行保存
-	Saveerr := cfg.SaveTo("../conf/app.conf")
+	Saveerr := cfg.SaveTo("../conf/id.conf")
 	if Saveerr != nil {
 		log.Fatal("Fail to SaveTo file:", Saveerr)
 	}

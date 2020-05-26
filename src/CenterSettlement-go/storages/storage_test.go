@@ -7,9 +7,19 @@ import (
 	"time"
 )
 
+//测试查询本省的结算数据 记账卡
+func TestQueryJiessjjz(t *testing.T) {
+	QueryJiessjjz()
+}
+
+//测试查询本省的结算数据 储值卡
+func TestQueryJiessjcz(t *testing.T) {
+	QueryJiessjcz()
+}
+
 //测试查询本省的结算数据
 func TestQueryJiessj(t *testing.T) {
-	QueryJiessjcz()
+
 }
 
 //测试查询其他地区的结算数据

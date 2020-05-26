@@ -15,42 +15,50 @@ import (
 )
 
 var (
-	Messageid int64
-	Filename  string
-	count     int
-	amount    int
+	Messageid  int64
+	Filenameid string
+	count      int
+	amount     int
 )
 
 //线程1
 //处理原始数据的打包
 func HandleGeneratexml() {
-	//xml文件生成
-	Generatexml()
+	tiker := time.NewTicker(time.Second * 5)
+	for {
+		<-tiker.C
+		//cz xml文件生成
+		Generatexml(types.PRECARD)
+
+		//jz xml文件生成
+		Generatexml(types.CREDITCARD)
+	}
 
 }
-func Generatexml() string {
+func Generatexml(Kalx int) string {
 	//从数据层获取准备的数据
-
 	Trans := make([]types.Transaction, 0)
-	//获取本省数据
-	jiesuansj := *storage.QueryJiessjcz()
-	if len(jiesuansj) == 0 {
+	//获取本省数据 储值卡
+	jiesuansj := *storage.QueryJiessj(types.PRECARD)
+	if Kalx == 22 && len(jiesuansj) == 0 {
 		log.Println("数据库没有要打包的本省的储值卡的数据")
+		return ""
 	}
-	//消息包起始序号
-	//Messageid:=conf.GenerateMessageId()
-	//log.Println(Messageid)
-	Filename = fmt.Sprintf("%020d", conf.GenerateMessageId())
+	if Kalx == 23 && len(jiesuansj) == 0 {
+		log.Println("数据库没有要打包的本省的记账卡的数据")
+		return ""
+	}
 	count = len(jiesuansj)
-	//log.Println(count)
-
+	//消息包序号
+	Messageid = conf.GenerateMessageId()
+	Filenameid = fmt.Sprintf("%020d", Messageid)
 	for i, v := range jiesuansj {
-		//把数据库数据 准备xml需要的  赋值
+		//把数据库数据 准备为 xml需要的  赋值
 		var Tran types.Transaction
-		Tran.TransId = i + 1                         //包内序号
-		Tran.Time = v.FDtJiaoysj                     //交易时间
-		Tran.Fee = v.FNbJine                         //交易金额 yuan
-		Tran.CustomizedData = "===customizedData===" //【清分目标日 ？？？】 当前日期
+		Tran.TransId = i + 1                                           //包内序号
+		Tran.Time = v.FDtJiaoysj                                       //交易时间
+		Tran.Fee = v.FNbJine / 100                                     //交易金额 yuan
+		Tran.CustomizedData = time.Now().Format("2006-01-02 15:04:05") //【清分目标日 ？？？】 当前日期
 		//Tran.Service.ServiceType = v.FDtJiaoylx                    //交易类型
 		Tran.Service.Description = v.FVcZhangdms //账单描述  南京南站南广场P3|11小时32分40秒
 		//Tran.Service.Detail=//交易详细信息 1|04|3201|3201000006|1105|20191204 211733|03|3201|320
@@ -58,9 +66,9 @@ func Generatexml() string {
 		Tran.ICCard.NetNo = v.FVcKawlh   //卡网络号
 		Tran.ICCard.CardId = v.FVcKah    //卡号
 		//Tran.ICCard.License=v.//卡内车牌号
-		//Tran.ICCard.PostBalance=v.FNbJiaoyhye//交易后余额，以元为单位 Decimal
-		//Tran.ICCard.PreBalance=v.FNbJiaoyqye  //交易前余额，以元为单位 Decimal
-		Tran.Validation.TAC = v.FVcTacm //交易TAG码
+		Tran.ICCard.PostBalance = v.FNbJiaoyhye / 100 //交易后余额，以元为单位 Decimal
+		Tran.ICCard.PreBalance = v.FNbJiaoyqye        //交易前余额，以元为单位 Decimal
+		Tran.Validation.TAC = v.FVcTacm               //交易TAG码
 		//Tran.Validation.TransType=//交易标识，2位16进制数，PBOC定义，如06为传统交易，09为复合交
 		//Tran.Validation.TerminalNo//终端机编号
 		//Tran.Validation.TerminalTransNo//PSAM卡脱机交易序号，在MAC1计算过程中得到
@@ -86,7 +94,7 @@ func Generatexml() string {
 			MessageId:    Messageid},
 		Body: types.Body{
 			ContentType:       1,
-			ClearTargetDate:   time.Now(),
+			ClearTargetDate:   time.Now().Format("2006-01-02 15:04:05"),
 			ServiceProviderId: "00000000000000FD",
 			IssuerId:          "0000000000000020",
 			MessageId:         Messageid,
@@ -97,7 +105,7 @@ func Generatexml() string {
 		jiaoyisj.Body.Transaction = append(jiaoyisj.Body.Transaction, T)
 	}
 	//使用MarshalIndent函数，生成的XML格式有缩进
-	outputxml, err := xml.MarshalIndent(jiaoyisj, "  ", "  ")
+	outputxml, err := xml.MarshalIndent(jiaoyisj, " ", " ")
 	//使用Marshal函数，生成的XML格式无缩进
 	//outputxml,err:=xml.Marshal(v)
 	if err != nil {
@@ -106,7 +114,14 @@ func Generatexml() string {
 	//log.Println(outputxml)
 
 	//创建文件 cz
-	fw, f_werr := os.Create("../generatexml/" + "CZ_3201_" + Filename + ".xml")
+	if Kalx == types.PRECARD {
+		createxml(Kalx, outputxml)
+	}
+
+	return "CZ_3201_" + Filenameid + ".xml"
+}
+func createxml(Kalx int, outputxml []byte) {
+	fw, f_werr := os.Create("../generatexml/" + "CZ_3201_" + Filenameid + ".xml")
 	if f_werr != nil {
 		log.Fatal("Read:", f_werr)
 	}
@@ -116,7 +131,7 @@ func Generatexml() string {
 	xmlOutPutData := append(headerBytes, outputxml...)
 	//这里可以不写，直接使用channel发送给线程2
 	//写入文件
-	ioutil.WriteFile("../generatexml/CZ_3201_"+Filename+".xml", xmlOutPutData, os.ModeAppend)
+	ioutil.WriteFile("../generatexml/CZ_3201_"+Filenameid+".xml", xmlOutPutData, os.ModeAppend)
 
 	_, ferr := fw.Write((xmlOutPutData))
 	if ferr != nil {
@@ -125,8 +140,6 @@ func Generatexml() string {
 	//更新消息包信息
 	fw.Close()
 	//ch <- "CZ_3201_" + Filename + ".xml"
-
-	return "CZ_3201_" + Filename + ".xml"
 }
 
 //返回一个32位md5加密后的字符串

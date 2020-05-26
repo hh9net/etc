@@ -21,7 +21,7 @@ func ClearingInsert(data types.BJsQingftjxx) error {
 	//插入
 	_, err := xorm.Insert(qingftongjixx)
 	if err != nil {
-		log.Fatal("新增记账处理的消息记录 error")
+		log.Fatal("新增清分处理包的消息记录 error")
 		return err
 	}
 	return nil
@@ -41,7 +41,7 @@ func ClearingMXInsert(data types.BJsQingftongjimx) error {
 	//插入
 	_, err := xorm.Insert(qingftongjimx)
 	if err != nil {
-		log.Fatal("新增记账处理的消息记录 error")
+		log.Fatal("新增清分统计消息明细包记录 error")
 		return err
 	}
 	return nil
@@ -49,6 +49,23 @@ func ClearingMXInsert(data types.BJsQingftongjimx) error {
 }
 
 //新增清分应答消息包记录
+func ClearingYDInsert(data types.BJsQingftjxxyd) error {
+
+	xorm := database.XormClient
+	//session := TransactionBegin(xorm)
+	qingftongjixxyd := new(types.BJsQingftjxxyd)
+
+	//赋值
+	qingftongjixxyd.FNbQuerdxxxh = data.FNbQuerdxxxh
+
+	//插入
+	_, err := xorm.Insert(qingftongjixxyd)
+	if err != nil {
+		log.Fatal("新增清分应答消息包记录 error")
+		return err
+	}
+	return nil
+}
 
 //更新结算消息记录【清分执行结果，执行时间】
 

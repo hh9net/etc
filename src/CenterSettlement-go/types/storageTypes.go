@@ -191,7 +191,7 @@ type BJsZhengyjyclmx struct {
 }
 
 //    B_JS_ZHENGYJYCLYDXX【争议交易处理应答消息】
-type BJsZhengyclygxx struct {
+type BJsZhengyclydxx struct {
 	FVcBanbh     string    //F_VC_BANBH	版本号	VARCHAR(32)
 	FNbXiaoxlb   int       //F_NB_XIAOXLB	消息类别	INT
 	FNbXiaoxlx   int       //F_NB_XIAOXLX	消息类型	INT
