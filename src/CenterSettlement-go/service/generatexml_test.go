@@ -7,6 +7,7 @@ import (
 )
 
 func TestGeneratexml(t *testing.T) {
+	//Generatexml(22)
 	s := Generatexml(22)
 	generatexml.Lz77zip(s)
 }

@@ -9,7 +9,6 @@ import (
 	"encoding/hex"
 	"encoding/xml"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"time"
@@ -47,11 +46,11 @@ func Generatexml(Kalx int) string {
 	Trans := make([]types.Transaction, 0)
 	//获取本省数据
 	jiesuansj := *storage.QueryJiessj(Kalx)
-	if Kalx == 22 && len(jiesuansj) == 0 {
+	if Kalx == types.PRECARD && len(jiesuansj) == 0 {
 		log.Println("数据库没有要打包的本省的储值卡的数据")
 		return ""
 	}
-	if Kalx == 23 && len(jiesuansj) == 0 {
+	if Kalx == types.CREDITCARD && len(jiesuansj) == 0 {
 		log.Println("数据库没有要打包的本省的记账卡的数据")
 		return ""
 	}
@@ -69,8 +68,12 @@ func Generatexml(Kalx int) string {
 		amount = amount + v.FNbJine                                    //总金额
 		Tran.CustomizedData = time.Now().Format("2006-01-02 15:04:05") //【清分目标日】 当前日期
 		Tran.Service.ServiceType = 2                                   //交易服务类型 【写死2】
+		//获取停车场名称
+		tName := storage.GetTingcc(v.FVcTingccbh)
+		//获取停车时长
 
-		Tran.Service.Description = v.FVcZhangdms //账单描述  南京南站南广场P3|11小时32分40秒
+		Tran.Service.Description = tName + "|" + "" //账单描述  南京南站南广场P3|11小时32分40秒
+		Tran.Service.Description = v.FVcZhangdms
 		//Tran.Service.Detail=//交易详细信息 1|04|3201|3201000006|1105|20191204 211733|03|3201|320
 		Tran.ICCard.CardType = v.FNbKalx //卡类型
 		Tran.ICCard.NetNo = v.FVcKawlh   //卡网络号
@@ -138,6 +141,10 @@ func Generatexml(Kalx int) string {
 	return fname
 }
 
+func description() {
+
+}
+
 func createxml(Kalx int, outputxml []byte) string {
 	var kalxstr string
 	if Kalx == 22 {
@@ -157,7 +164,7 @@ func createxml(Kalx int, outputxml []byte) string {
 	xmlOutPutData := append(headerBytes, outputxml...)
 	//这里可以不写，直接使用channel发送给线程2
 	//写入文件
-	ioutil.WriteFile("../generatexml/"+kalxstr+"_3201_"+Filenameid+".xml", xmlOutPutData, os.ModeAppend)
+	//ioutil.WriteFile("../generatexml/"+kalxstr+"_3201_"+Filenameid+".xml", xmlOutPutData, os.ModeAppend)
 
 	_, ferr := fw.Write((xmlOutPutData))
 	if ferr != nil {
