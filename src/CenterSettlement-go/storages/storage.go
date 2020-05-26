@@ -35,10 +35,10 @@ func QueryJiessjcz() *[]types.BJsJiessj {
 	for _, v := range tests {
 		log.Printf("打包状态: %d, 交易记录id: %s, 卡网络号: %s\n", v.FNbDabzt, v.FVcJiaoyjlid, v.FVcKawlh)
 	}
-	terr := TransactionCommit(session)
-	if terr != nil {
-		log.Fatal("查询本省交易记录事务提交错误")
-	}
+	//terr := TransactionCommit(session)
+	//if terr != nil {
+	//	log.Fatal("查询本省交易记录事务提交错误")
+	//}
 	return &tests
 }
 
