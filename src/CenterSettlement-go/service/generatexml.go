@@ -65,38 +65,51 @@ func Generatexml(Kalx int) string {
 	for i, v := range jiesuansj {
 		//把数据库数据 准备为 xml需要的  赋值
 		var Tran types.Transaction
-		Tran.TransId = i + 1                                           //包内序号
-		Tran.Time = v.FDtJiaoysj                                       //交易时间
+		Tran.TransId = i + 1 //包内序号
+		jiaoysj := common.DateTimeFormat(v.FDtJiaoysj)
+		Tran.Time = jiaoysj                                            //交易时间
 		yuan := common.Fen2Yuan(v.FNbJine)                             //分转元
 		Tran.Fee = yuan                                                //交易金额 yuan
 		amount = amount + v.FNbJine                                    //总金额
 		Tran.CustomizedData = time.Now().Format("2006-01-02 15:04:05") //【清分目标日】 当前日期
-		Tran.Service.ServiceType = 2                                   //交易服务类型 【写死2】
-		//获取停车场名称
-		tName := storage.GetTingcc(v.FVcTingccbh)
-		//获取停车时长
 
-		Tran.Service.Description = tName + "|" + "" //账单描述  南京南站南广场P3|11小时32分40秒
-		Tran.Service.Description = v.FVcZhangdms
-		//Tran.Service.Detail=//交易详细信息 1|04|3201|3201000006|1105|20191204 211733|03|3201|320
-		Tran.ICCard.CardType = v.FNbKalx //卡类型
-		Tran.ICCard.NetNo = v.FVcKawlh   //卡网络号
-		Tran.ICCard.CardId = v.FVcKah    //卡号
-		//Tran.ICCard.License=v.//卡内车牌号
-		Tran.ICCard.PostBalance = v.FNbJiaoyhye / 100 //交易后余额，以元为单位 Decimal
-		Tran.ICCard.PreBalance = v.FNbJiaoyqye        //交易前余额，以元为单位 Decimal
-		Tran.Validation.TAC = v.FVcTacm               //交易TAG码
-		//Tran.Validation.TransType=//交易标识，2位16进制数，PBOC定义，如06为传统交易，09为复合交
+		Tran.Service.ServiceType = types.SERVICETYPE //交易服务类型 【写死2】
+		//账单描述
+		d := common.Description(v.FVcZhangdms)
+		Tran.Service.Description = d //账单描述  南京南站南广场P3|11小时32分40秒
+		//cx:车型 ckz：出口站、入口站ckcd：出口车道，入口车道cksj：出口时间 rksj：入口时间
+		rksj := common.DateTimeFormat(v.FDtYonghrksj)
+		detail := common.Detail(v.FVcChex, v.FVcTingccbh, v.FVcChedid, jiaoysj, rksj)
+		Tran.Service.Detail = detail //交易详细信息 1|04|3201|3201000006|1105|20191204 211733|03|3201|320
+
+		Tran.ICCard.CardType = v.FNbKalx                //卡类型 22,23
+		Tran.ICCard.NetNo = v.FVcKawlh                  //卡网络号
+		Tran.ICCard.CardId = v.FVcKah                   //卡号
+		Tran.ICCard.License = v.FVcCheph + v.FVcObucpys //卡内车牌号 皖EYG511蓝
+		jiaoyqye := common.Fen2Yuan(v.FNbJiaoyqye)
+		Tran.ICCard.PreBalance = jiaoyqye //交易前余额，以元为单位 Decimal
+		jiaoyhye := common.Fen2Yuan(v.FNbJiaoyhye)
+		Tran.ICCard.PostBalance = jiaoyhye //交易后余额，以元为单位 Decimal
+
+		Tran.Validation.TAC = v.FVcTacm             //交易TAG码
+		Tran.Validation.TransType = types.TRANSTYPE //交易标识，2位16进制数，PBOC定义，如06为传统交易，09为复合交
 		//Tran.Validation.TerminalNo//终端机编号
 		//Tran.Validation.TerminalTransNo//PSAM卡脱机交易序号，在MAC1计算过程中得到
-		Tran.OBU.License = v.FVcObucp //OBU中记录的车牌号
+
 		//Tran.OBU.NetNo=//OBU网络号
-		Tran.OBU.OBEState = v.FVcObuzt //2字节的OBU状态
 		Tran.OBU.OBUId = v.FVcObuid
-		//Trans[Ti].Service.Description=	v.FNbYonghtcsc//  	停车场名｜停车时常
+		Tran.OBU.OBEState = v.FVcObuzt //2字节的OBU状态
+		Tran.OBU.License = v.FVcObucp  //OBU中记录的车牌号 【加颜色????】
+		//Tran.CustomizedData=
+		//Tran.Id=
+		name := common.Name(v.FVcZhangdms)
+		Tran.Name = name
+		Tran.ParkTime = v.FNbYonghtcsc
+		Tran.VehicleType = v.FVcChex
+		Tran.AlgorithmIdentifier = types.ALGORITHMIDENTIFIER
 
 		Trans = append(Trans, Tran)
-		//log.Println(Trans)
+
 	}
 	amountStr = common.Fen2Yuan(amount)
 
@@ -141,7 +154,7 @@ func Generatexml(Kalx int) string {
 		fname = createxml(Kalx, outputxml)
 	}
 	//打包成功
-	//
+	//更新打包状态 已打包
 	return fname
 }
 
@@ -157,7 +170,7 @@ func createxml(Kalx int, outputxml []byte) string {
 	if Kalx == 23 {
 		kalxstr = "JZ"
 	}
-	//
+	//CenterSettlement-go
 	fw, f_werr := os.Create("../generatexml/" + kalxstr + "_3201_" + Filenameid + ".xml")
 	if f_werr != nil {
 		log.Fatal("Read:", f_werr)
@@ -168,7 +181,7 @@ func createxml(Kalx int, outputxml []byte) string {
 	xmlOutPutData := append(headerBytes, outputxml...)
 	//这里可以不写，直接使用channel发送给线程2
 	//写入文件
-	//ioutil.WriteFile("../generatexml/"+kalxstr+"_3201_"+Filenameid+".xml", xmlOutPutData, os.ModeAppend)
+	//ioutil.WriteFile("CenterSettlement-go/generatexml/"+kalxstr+"_3201_"+Filenameid+".xml", xmlOutPutData, os.ModeAppend)
 
 	_, ferr := fw.Write((xmlOutPutData))
 	if ferr != nil {

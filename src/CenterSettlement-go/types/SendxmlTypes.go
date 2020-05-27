@@ -47,7 +47,7 @@ type Transaction struct {
 	Id                  string     //停车场消费交易编号(停车场编号+交易发生的时间+流水号 )
 	Name                string     `xml:"name"`                //停车场名称(不超过150个字符)
 	ParkTime            int        `xml:"parkTime"`            //停放时长(单位：分)
-	VehicleType         int        `xml:"vehicleType"`         //收费车型
+	VehicleType         string        `xml:"vehicleType"`         //收费车型
 	AlgorithmIdentifier int        `xml:"algorithmIdentifier"` //算法标识 1-3DEX  2-SM4
 
 }
@@ -67,8 +67,8 @@ type ICCard struct {
 	NetNo       string   //网络编码，BCD码 Hex(4) ka网络号（16进制） 数据库10进制
 	CardId      string   //IC卡物理编号，BCD码  Hex(16)   卡号
 	License     string   //0015文件中记录的车牌号 卡内车牌号
-	PreBalance  int64    //交易前余额，以元为单位 Decimal
-	PostBalance int64    //交易后余额，以元为单位 Decimal
+	PreBalance  string    //交易前余额，以元为单位 Decimal
+	PostBalance string    //交易后余额，以元为单位 Decimal
 }
 
 //主要用于TAC计算

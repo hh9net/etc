@@ -7,9 +7,9 @@ import (
 
 //时间格式化
 //2006-01-02 15:04:05
-func DateTimeFormat() string {
+func DateTimeFormat(time time.Time) string {
 	var dateformat string
-	datetime := time.Now().Format("2006-01-02 15:04:05") //后面的参数是固定的 否则将无输出
+	datetime := time.Format("2006-01-02 15:04:05") //后面的参数是固定的 否则将无输出
 	log.Println("now is :", datetime)
 	return dateformat
 }

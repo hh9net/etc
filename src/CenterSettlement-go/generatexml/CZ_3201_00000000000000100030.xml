@@ -6,18 +6,18 @@
    <MessageType>7</MessageType>
    <SenderId>00000000000000FD</SenderId>
    <ReceiverId>0000000000000020</ReceiverId>
-   <MessageId>100025</MessageId>
+   <MessageId>100030</MessageId>
   </Header>
   <Body ContentType="1">
-   <ClearTargetDate>2020-05-26</ClearTargetDate>
+   <ClearTargetDate>2020-05-27</ClearTargetDate>
    <ServiceProviderId>00000000000000FD</ServiceProviderId>
    <IssuerId>0000000000000020</IssuerId>
-   <MessageId>100025</MessageId>
+   <MessageId>100030</MessageId>
    <Count>1</Count>
    <Amount>10.00</Amount>
    <Transaction>
     <TransId>1</TransId>
-    <Time>2020-04-26 15:31:32</Time>
+    <Time>2020-05-26 15:31:32</Time>
     <Fee>10.00</Fee>
     <Service>
      <ServiceType>2</ServiceType>
@@ -44,7 +44,7 @@
      <OBEState>205</OBEState>
      <License>苏A12345</License>
     </OBU>
-    <CustomizedData>2020-05-26 15:57:43</CustomizedData>
+    <CustomizedData>2020-05-27 17:38:40</CustomizedData>
     <Id></Id>
     <name></name>
     <parkTime>0</parkTime>
