@@ -25,8 +25,10 @@ var (
 //线程1
 //处理原始数据的打包
 func HandleGeneratexml() {
+
 	tiker := time.NewTicker(time.Second * 5)
 	for {
+		log.Println("执行线程1")
 		<-tiker.C
 		//储值卡 cz xml文件生成
 		czfname := Generatexml(types.PRECARD)
@@ -41,6 +43,8 @@ func HandleGeneratexml() {
 		}
 	}
 }
+
+//
 func Generatexml(Kalx int) string {
 	//从数据层获取准备的数据
 	Trans := make([]types.Transaction, 0)
