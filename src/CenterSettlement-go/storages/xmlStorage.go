@@ -24,3 +24,7 @@ func GetTingcc(tingccbh string) string {
 	}
 	return ""
 }
+
+func GetTingchetime() {
+
+}
