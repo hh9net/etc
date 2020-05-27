@@ -4,8 +4,9 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/ini.v1"
 )
-
-var logconffilepath = "../conf/app.conf"
+///Users/nicker/go/etc/src/CenterSettlement-go/conf
+var logconffilepath = "CenterSettlement-go/conf/app.conf"
+//var logconffilepath = "/Users/nicker/go/etc/src/CenterSettlement-go/conf/app.conf"
 
 type LogConfig struct { //配置文件要通过tag来指定配置文件中的名称
 	LogmaxAge       int    `ini:"log_maxAge"`
@@ -19,13 +20,13 @@ func ReadlogConfig(path string) (LogConfig, error) {
 	var logconfig LogConfig
 	conf, err := ini.Load(path) //加载配置文件
 	if err != nil {
-		log.Println("load config file fail!")
+		log.Println("log conf load config file fail!")
 		return logconfig, err
 	}
 	conf.BlockMode = false
 	err = conf.MapTo(&logconfig) //解析成结构体
 	if err != nil {
-		log.Println("mapto config file fail!")
+		log.Println("log conf mapto config file fail!")
 		return logconfig, err
 	}
 	return logconfig, nil

@@ -14,7 +14,8 @@ func AnalyzeDataPakage() {
 	//定期检查文件夹receive    解压后
 	tiker := time.NewTicker(time.Second * 3)
 	for {
-		fmt.Println("现在", time.Now().Format("2006-01-02 15:04:05"))
+		log.Println("执行线程4")
+		log.Println("现在", time.Now().Format("2006-01-02 15:04:05"))
 		<-tiker.C
 		//扫描receive 文件夹 读取文件
 		//获取文件或目录相关信息

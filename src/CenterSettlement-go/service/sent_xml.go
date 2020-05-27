@@ -16,10 +16,11 @@ func HandleSendXml() {
 	tiker := time.NewTicker(time.Second * 2)
 	for {
 		log.Println(<-tiker.C)
+		log.Println("执行线程2")
 		//准备数据   //read 后
 		//扫描receive 文件夹 读取文件
 		//获取文件或目录相关信息
-		pwd := "../sendzipxml/"
+		pwd := "CenterSettlement-go/sendzipxml/"
 		fileInfoList, err := ioutil.ReadDir(pwd)
 		if err != nil {
 			log.Fatal(err)

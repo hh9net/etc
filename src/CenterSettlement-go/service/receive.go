@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"io"
+	"log"
 	"net"
 	"os"
 )
@@ -37,6 +38,7 @@ func Response(connect net.Conn) {
 
 //接收联网中心发来数据包
 func Receive() {
+	log.Println("执行线程4")
 	//监听联网中心数据端口
 	listen, lerr := net.Listen("tcp", "127.0.0.1:8808")
 	if lerr != nil {
