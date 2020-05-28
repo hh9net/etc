@@ -5,7 +5,6 @@ import (
 	"CenterSettlement-go/types"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/go-xorm/xorm"
 	"log"
 )
 
@@ -14,8 +13,28 @@ import (
 //在发送给联网中心前查询数据
 //注意事务处理
 //通过交易状态为0，卡网络号为江苏本省， 卡类型为储值卡、查询交易结算数据
+
+type DB struct {
+	//Db database.XormClient
+}
+
+func QueryQitaJiessj(KaLx int, Diqu string) *[]types.BJsJiessj {
+	//database.DBInit()
+	xorm := database.XormClient
+	//查询多条数据
+	tests := make([]types.BJsJiessj, 0)
+	qerr := xorm.Where("F_NB_DABZT=?", 0).And("F_VC_KAWLH=?", Diqu).And("F_NB_KALX=?", KaLx).Limit(100, 0).Find(&tests)
+	if qerr != nil {
+		log.Fatalln("查询结算数据出错", qerr)
+	}
+	log.Printf("总共查询出 %d 条数据\n", len(tests))
+	for _, v := range tests {
+		log.Printf("打包状态: %d, 交易记录id: %s, 卡网络号: %s\n", v.FNbDabzt, v.FVcJiaoyjlid, v.FVcKawlh)
+	}
+	return &tests
+}
 func QueryJiessj(KaLx int) *[]types.BJsJiessj {
-	database.DBInit()
+	//database.DBInit()
 	xorm := database.XormClient
 	//查询多条数据
 	tests := make([]types.BJsJiessj, 0)
@@ -30,173 +49,88 @@ func QueryJiessj(KaLx int) *[]types.BJsJiessj {
 	return &tests
 }
 
-//通过交易状态为0，卡网络号为江苏本省， 卡类型为储值卡、查询交易结算数据
-func QueryJiessjcz() *[]types.BJsJiessj {
+//通过交易记录id 更新打包状态为打包中
+func UpdatePackaging(Jiaoyjlid []string) error {
 	database.DBInit()
 	xorm := database.XormClient
-	//session := TransactionBegin(database.XormClient)
-	//session := TransactionBegin(xorm)
-	//查询多条数据
-	tests := make([]types.BJsJiessj, 0)
-	//SELECT `F_VC_KAWLH`, `F_NB_KALX` FROM `b_js_jiessj` WHERE `F_NB_DABZT` = 0 GROUP BY (`F_VC_KAWLH`, `F_NB_KALX`) HAVING COUNT(*) < 100
-	//sql := "SELECT `F_VC_KAWLH`, `F_NB_KALX` FROM `b_js_jiessj` WHERE `F_NB_DABZT` = 0 GROUP BY `F_VC_KAWLH`, `F_NB_KALX` HAVING COUNT(*) < 100"
-	//m, qerr := session.QueryString(sql)
 
-	//log.Println("查询结果", m)
+	for _, id := range Jiaoyjlid {
+		Jiessj := new(types.BJsJiessj)
+		Jiessj.FNbDabzt = 1
 
-	qerr := xorm.Where("F_NB_DABZT=?", 0).And("F_VC_KAWLH=?", types.JS_NETWORK).And("F_NB_KALX=?", types.PRECARD).Limit(100, 0).Find(&tests)
-	if qerr != nil {
-		log.Fatalln("查询出错", qerr)
+		_, err := xorm.Table("b_js_jiessj").Where("F_VC_JIAOYJLID=?", id).Update(Jiessj)
+		if err != nil {
+			log.Println("更新打包状态失败", err)
+			return err
+		}
 	}
-	log.Printf("总共查询出 %d 条数据\n", len(tests))
-	for _, v := range tests {
-		log.Printf("打包状态: %d, 交易记录id: %s, 卡网络号: %s\n", v.FNbDabzt, v.FVcJiaoyjlid, v.FVcKawlh)
-	}
+	log.Println("更新打包状态为：打包中 成功")
 
-	return &tests
+	return nil
 }
 
-//通过交易状态为0，卡网络号为江苏本省， 卡类型为记账卡、查询交易结算数据
-func QueryJiessjjz() *[]types.BJsJiessj {
+//打包成功
+//        新增打包记录【插入表b_js_yuansjyxx】
+func PackagingRecordInsert(data types.BJsYuansjyxx) error {
 	database.DBInit()
-
 	xorm := database.XormClient
-	//查询多条数据
-	tests := make([]types.BJsJiessj, 0)
-	qerr := xorm.Where("F_NB_DABZT=?", 0).And("F_VC_KAWLH=?", types.JS_NETWORK).And("F_NB_KALX=?", types.CREDITCARD).Limit(100, 0).Find(&tests)
-	if qerr != nil {
-		panic(qerr)
-	}
-	log.Printf("总共查询出 %d 条数据\n", len(tests))
-	for _, v := range tests {
-		log.Printf("打包状态: %d, 交易记录id: %s, 卡网络号: %s\n", v.FNbDabzt, v.FVcJiaoyjlid, v.FVcKawlh)
-	}
 
-	return &tests
+	Yuansjyxx := new(types.BJsYuansjyxx)
+	Yuansjyxx.FDtDabsj = data.FDtDabsj
+	_, err := xorm.Table("b_js_jiessj").Insert(Yuansjyxx)
+	if err != nil {
+		log.Println("新增打包记录 error")
+		return err
+	}
+	return nil
 }
 
-//通过交易状态0  卡网络号为（除江苏以外） 卡类型为储值卡 或者记账卡   查询交易结算数据
-//map[string]map[string] []types.BJsJiessj 第一级是数据为记账卡 第二级数据是卡网络号
-//func QueryQiTaJiessj() map[int]map[string] []types.BJsJiessj{
-//	xorm, err := sysinit.NewEngine()
-//	if err != nil {
-//		log.Fatal("连接数据库 error :", err)
-//	}
-//	//查询多条数据
-//	networkJiessjs := make(map[string][]types.BJsJiessj, 0)
-//	netsjcz:=	make(map[int]map[string] []types.BJsJiessj)
-//
-//
-//
-//	//把交易状态为0  卡网络号为其他地区的数据记录查询出来  卡类型22/23
-//	for _, networkcode := range types.Gl_network {
-//
-//		//查询 code de数据
-//		switch networkcode {
-//			//SH_NETWORK  string = "3101" // 上海
-//			case types.SH_NETWORK :
-//				shanghaijiessjcz := getJiessj(xorm, networkcode,22)
-//				//netsj[22]=networkJiessjs[types.SH_NETWORK]
-//				shanghaijiessjjz := getJiessj(xorm, networkcode,23)
-//
-//
-//			//ZJ_NETWORK  string = "3301" // 浙江
-//			//AH_NETWORK  string = "3401" // 安徽
-//			//FJ_NETWORK  string = "3501" // 福建
-//			//JX_NETWORK  string = "3601" // 江西
-//			//SD_NETWORK  string = "3701" // 山东
-//			//SD_NETWORK2 string = "3702" // 山东
-//			//
-//			///* 华北区路网代码定义*/
-//			//BJ_NETWORK  string = "1101" // 北京
-//			//TJ_NETWORK  string = "1201" // 天津
-//			//HEB_NETWORK string = "1301" // 河北
-//			//SX_NETWORK  string = "1401" // 山西
-//			//NM_NETWORK  string = "1501" // 内蒙古
-//			//
-//			///* 东北区路网代码定义*/
-//			//LN_NETWORK  string = "2101" // 辽宁
-//			//JL_NETWORK  string = "2201" // 吉林
-//			//HLJ_NETWORK string = "2301" // 黑龙江
-//			//
-//			///*华中、华南区路网代码定义*/
-//			//HEN_NETWORK  string = "4101" // 河南
-//			//HUB_NETWORK  string = "4201" // 湖北
-//			//HUB_NETWORK2 string = "4202" // 湖北
-//			//
-//			//HUN_NETWORK  string = "4301" // 湖南
-//			//GD_NETWORK   string = "4401" // 广东
-//			//GX_NETWORK   string = "4501" // 广西
-//			//HAIN_NETWORK string = "4601" // 海南
-//			//
-//			///*西南区路网代码定义*/
-//			//CQ_NETWORK  string = "5001" // 重庆
-//			//SC_NETWORK  string = "5101" // 四川
-//			//SC_NETWORK2 string = "5102" // 四川
-//			//SC_NETWORK3 string = "5103" // 四川
-//			//SC_NETWORK4 string = "5104" // 四川
-//			//SC_NETWORK5 string = "5105" // 四川
-//			//GZ_NETWORK  string = "5201" // 贵州
-//			//YN_NETWORK  string = "5301" // 云南
-//			//XZ_NETWORK  string = "5401" // 西藏
-//			//
-//			///*西北区路网代码定义*/
-//			//SHANXI_NETWORK  string = "6101" // 陕西
-//			//SHANXI_NETWORK2 string = "6102" // 陕西
-//			//SHANXI_NETWORK3 string = "6103" // 陕西
-//			//SHANXI_NETWORK4 string = "6104" // 陕西
-//			//SHANXI_NETWORK5 string = "6105" // 陕西
-//			//SHANXI_NETWORK6 string = "6106" // 陕西
-//			//SHANXI_NETWORK7 string = "6107" // 陕西
-//			//
-//			//GS_NETWORK string = "6201" // 甘肃
-//			//QH_NETWORK string = "6301" // 青海
-//			//NX_NETWORK string = "6401" // 宁夏
-//			//XJ_NETWORK string = "6501" // 新疆
-//			//
-//			//ARMY_CARDNETWORK string = "501" // 军车卡的网络编号
-//			//
-//		}
-//		jiessjcz := getJiessj(xorm, networkcode,22)
-//
-//
-//		//log.Println(networkJiessj)
-//
-//	}
-//	log.Println(networkJiessjs)
-//	return networkJiessjs
-//}
-
-func getJiessj(xorm *xorm.Engine, networkcode string, Kalx int) []types.BJsJiessj {
-	tests := make([]types.BJsJiessj, 0)
-	qerr := xorm.Where("F_F_NB_DABZT=?", 0).And("F_VC_KAWLH=?", networkcode).And("F_NB_KALX=?", Kalx).Limit(100, 0).Find(&tests)
-	if qerr != nil {
-		panic(qerr)
-	}
-	//log.Printf("卡网络号为 %s 总共查询出 %d 条数据\n", networkcode,len(tests))
-	//for _, v := range tests {
-	// log.Printf("打包状态: %d, 交易记录id: %s, 卡网络号: %s\n", v.FNbDabzt,v.FVcJiaoyjlid,v.FVcKawlh)
-	//}
-	return tests
-}
-
-//   B_JS_YUANSJYXX【原始交易消息包表】
-func YUANSJYXX() *[]types.BJsYuansjyxx {
+//        新增打包明细记录
+func PackagingMXRecordInsert() error {
 	database.DBInit()
+	xorm := database.XormClient
 
-	log.Println(database.XormClient)
-	session := TransactionBegin(database.XormClient)
-	//查询多条数据
-	tests := make([]types.BJsYuansjyxx, 0)
-	qerr := session.Where("F_NB_DABZT=?", 0).Limit(100, 0).Find(&tests)
-	if qerr != nil {
-		panic(qerr)
+	Yuansjymx := new(types.BJsYuansjymx)
+	//赋值
+	_, err := xorm.Table("b_js_jiessj").Insert(Yuansjymx)
+	if err != nil {
+		log.Println("新增打包明细记录 error")
+		return err
 	}
-	log.Printf("总共查询出 %d 条数据\n", len(tests))
-	for _, v := range tests {
-		log.Printf("消息包序号: %d\n", v.FNbXiaoxxh)
-	}
-	return &tests
+	return nil
+
 }
 
-//更新结算数据
+//        新增打包应答记录
+func PackagingResRecordInsert(data types.BJsYuansjyydxx) error {
+	database.DBInit()
+	xorm := database.XormClient
+
+	Yuansjyydxx := new(types.BJsYuansjyydxx)
+	//赋值
+	_, err := xorm.Table("b_js_jiessj").Insert(Yuansjyydxx)
+	if err != nil {
+		log.Println("新增打包明细记录 error")
+		return err
+	}
+	return nil
+}
+
+//        更新结算数据打包结果【打包状态：已打包、原始交易包号、包内序号】
+func UpdateDataPackagingResults(Jiaoyjlid []string) error {
+	database.DBInit()
+	xorm := database.XormClient
+	for _, id := range Jiaoyjlid {
+		Jiessj := new(types.BJsJiessj)
+		Jiessj.FNbDabzt = 1
+
+		_, err := xorm.Table("b_js_jiessj").Where("F_VC_JIAOYJLID=?", id).Update(Jiessj)
+		if err != nil {
+			log.Println("更新打包状态失败", err)
+			return err
+		}
+	}
+	log.Println("更新打包状态为：打包中 成功")
+
+	return nil
+}

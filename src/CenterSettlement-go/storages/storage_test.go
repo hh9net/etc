@@ -59,3 +59,9 @@ func TestTcpResponseRecordInsert(t *testing.T) {
 	}
 	log.Println(resRecord)
 }
+
+//
+func TestUpdatePackaging(t *testing.T) {
+	s := []string{"051700000111022020042615313200000173", "320102000111032020042414232900000585"}
+	UpdatePackaging(s)
+}

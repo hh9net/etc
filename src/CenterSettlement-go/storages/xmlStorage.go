@@ -15,14 +15,14 @@ func GetTingcc(tingccbh string) string {
 	is, err := xorm.Where("F_VC_TINGCCBH=?", tingccbh).Get(tingcc)
 	if is == false {
 		log.Println("没有该停车场")
+		return ""
 	}
 	if err != nil {
-		log.Fatal("查询停车场名称 error ")
+		log.Println("查询停车场名称 error ")
+		return ""
 	}
 	if is == true {
 		return tingcc.F_VC_MINGC
 	}
-	return ""
+	return tingcc.F_VC_MINGC
 }
-
-

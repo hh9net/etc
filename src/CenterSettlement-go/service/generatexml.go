@@ -29,41 +29,58 @@ func HandleGeneratexml() {
 	for {
 		log.Println("执行线程1")
 		<-tiker.C
-		//储值卡 cz xml文件生成
-		czfname := Generatexml(types.PRECARD)
-		if czfname != "" {
-			//没有本省的储值卡原始数据
-			log.Println("没有本省的储值卡原始数据")
-		}
+		////储值卡 cz xml文件生成
+		//czfname := Generatexml(types.PRECARD,"3201")
+		//if czfname != "" {
+		//	//没有本省的储值卡原始数据
+		//	log.Println("没有本省的储值卡原始数据")
+		//}
+		//
+		////记账卡 jz xml文件生成
+		//jzfname := Generatexml(types.CREDITCARD,"3201")
+		//if jzfname != "" {
+		//	//没有本省的记账卡原始数据
+		//	log.Println("没有本省的记账卡原始数据")
+		//}
 
-		//记账卡 jz xml文件生成
-		jzfname := Generatexml(types.CREDITCARD)
-		if jzfname != "" {
-			//没有本省的记账卡原始数据
-			log.Println("没有本省的记账卡原始数据")
+		//其他省市地区    xml文件生成
+		for _, Diqu := range types.Gl_network {
+
+			//储值卡 cz xml文件生成
+			czfn := GenarateOtherxml(types.PRECARD, Diqu)
+			if czfn != "" {
+				//没有储值卡原始数据
+				log.Println("没有此地区储值卡原始数据", Diqu)
+			}
+
+			//记账卡 jz xml文件生成
+			jzfn := GenarateOtherxml(types.CREDITCARD, Diqu)
+			if jzfn != "" {
+				//没有记账卡原始数据
+				log.Println("没有此地区记账卡原始数据", Diqu)
+			}
 		}
 	}
 }
 
 //
-func Generatexml(Kalx int) string {
+func GenarateOtherxml(Kalx int, Diqu string) string {
 	//从数据层获取准备的数据
 	//获取本省数据
-	jiesuansj := *storage.QueryJiessj(Kalx)
+	jiesuansj := *storage.QueryQitaJiessj(Kalx, Diqu)
 	if Kalx == types.PRECARD && len(jiesuansj) == 0 {
-		log.Println("数据库没有要打包的本省的储值卡的数据")
+		log.Println("数据库没有此地区要打包的储值卡的数据", Diqu)
 		return ""
 	}
 	if Kalx == types.CREDITCARD && len(jiesuansj) == 0 {
-		log.Println("数据库没有要打包的本省的记账卡的数据")
+		log.Println("数据库没有此地区要打包的记账卡的数据", Diqu)
 		return ""
 	}
-
 	//消息包序号
 	Messageid = conf.GenerateMessageId()
 	Filenameid = fmt.Sprintf("%020d", Messageid)
-
-	jiaoyisj := TransAssignment(jiesuansj)
+	//赋值
+	jiaoyisj := TransAssignment(jiesuansj, Messageid)
 
 	//使用MarshalIndent函数，生成的XML格式有缩进
 	outputxml, err := xml.MarshalIndent(jiaoyisj, " ", " ")
@@ -72,25 +89,37 @@ func Generatexml(Kalx int) string {
 	if err != nil {
 		log.Printf("error: %v\n", err)
 	}
+	//更新结算数据为打包中  jiesuansj
+	sjid := make([]string, 0)
+	for _, v := range jiesuansj {
+		sjid = append(sjid, v.FVcJiaoyjlid)
+	}
+	err = storage.UpdatePackaging(sjid)
+	if err != nil {
+		log.Println("更新包号错误")
+	}
+
 	var fname string
 	//创建xml文件 cz 储值卡
 	if Kalx == types.PRECARD {
 		fname = createxml(Kalx, outputxml)
+		//打包成功
+		//
 	}
 	//创建xml文件 jz 记账卡
 	if Kalx == types.CREDITCARD {
 		fname = createxml(Kalx, outputxml)
 	}
-	//打包成功
+
 	//更新打包状态 已打包
+
 	return fname
 }
 
 //赋值
-func TransAssignment(jiesuansj []types.BJsJiessj) *types.Message {
+func TransAssignment(jiesuansj []types.BJsJiessj, Messageid int64) *types.Message {
 	Trans := make([]types.Transaction, 0)
 	count = len(jiesuansj)
-
 	for i, v := range jiesuansj {
 		//把数据库数据 准备为 xml需要的  赋值
 		var Tran types.Transaction
@@ -103,9 +132,15 @@ func TransAssignment(jiesuansj []types.BJsJiessj) *types.Message {
 		Tran.CustomizedData = time.Now().Format("2006-01-02 15:04:05") //【清分目标日】 当前日期
 
 		Tran.Service.ServiceType = types.SERVICETYPE //交易服务类型 【写死2】
-		//账单描述
-		d := common.Description(v.FVcZhangdms)
-		Tran.Service.Description = d //账单描述  南京南站南广场P3|11小时32分40秒
+		//账单描述[????] 南京南站南广场P3|11小时32分40秒
+		//通过用户账单描述获取 账单信息
+		//d := common.Description(v.FVcZhangdms)
+
+		//停车场名称
+		name := storage.GetTingcc(v.FVcTingccbh)
+		//停车时长
+		tcsj := common.TimeDifference(v.FDtYonghrksj, v.FDtJiaoysj)
+		Tran.Service.Description = name + tcsj //账单描述  南京南站南广场P3|11小时32分40秒
 		//cx:车型 ckz：出口站、入口站ckcd：出口车道，入口车道cksj：出口时间 rksj：入口时间
 		rksj := common.DateTimeFormat(v.FDtYonghrksj)
 		detail := common.Detail(v.FVcChex, v.FVcTingccbh, v.FVcChedid, jiaoysj, rksj)
@@ -136,10 +171,14 @@ func TransAssignment(jiesuansj []types.BJsJiessj) *types.Message {
 		customizedData := common.CustomizedData(v.FVcTacm, jyje, types.TRANSTYPE, v.FVcJiamkh, v.FVcKajmjyxh, jiaoysj, jyhje, jyqje, v.FVcKajyxh)
 		Tran.CustomizedData = customizedData
 
-		//停车场消费交易编号(停车场编号+交易发生的时间+流水号【怎么取】 )
-		ID := common.GetId(v.FVcTingccbh, jiaoysj, "12")
+		//停车场消费交易编号(停车场编号+交易发生的时间+流水号【怎么取】)
+		//流水号  FVcChedjyxh 取后两位
+		liush := common.GetLiush(v.FVcChedjyxh)
+		ID := common.GetId(v.FVcTingccbh, jiaoysj, liush)
 		Tran.Id = ID
-		name := common.Name(v.FVcZhangdms)
+
+		//停车场名称
+		//= common.Name(v.FVcZhangdms)
 		Tran.Name = name
 		Tran.ParkTime = v.FNbYonghtcsc
 		Tran.VehicleType = v.FVcChex
@@ -173,7 +212,6 @@ func TransAssignment(jiesuansj []types.BJsJiessj) *types.Message {
 	for _, T := range Trans {
 		jiaoyisj.Body.Transaction = append(jiaoyisj.Body.Transaction, T)
 	}
-
 	return jiaoyisj
 }
 

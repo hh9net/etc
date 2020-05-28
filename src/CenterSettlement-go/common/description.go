@@ -52,11 +52,15 @@ func Name(data string) string {
 	log.Println(data)
 	return d
 }
+func GetLiush(FVcChedjyxh string) string {
+	Liush := []byte(FVcChedjyxh)
+	return string(Liush[len(FVcChedjyxh)-2:])
+}
 
 //停车场消费交易编号(停车场编号+交易发生的时间+流水号 )
 func GetId(tingccbh string, jysj string, liush string) string {
-	s := tingccbh + jysj + liush
-	return s
+	hb := tingccbh + jysj + liush
+	return hb
 }
 
 //TAC校验码	TAC	hexbinary	8【TAC码 FVcTacm（32位）】
@@ -76,4 +80,29 @@ func CustomizedData(tac string, jyje string, jylx string, zdjbh string, zdlsh st
 	sj := Jytime(jysj)
 	s := tac + jyje + jylx + zdjbh + zdlsh + sj + "0000" + jyhye + jyqye + kjsq
 	return s
+}
+
+/*
+时间常量
+*/
+const (
+	//定义每分钟的秒数
+	SecondsPerMinute = 60
+	//定义每小时的秒数
+	SecondsPerHour = SecondsPerMinute * 60
+	//定义每天的秒数
+	SecondsPerDay = SecondsPerHour * 24
+)
+
+/*
+时间转换函数
+*/
+func ResolveTime(seconds int) (day int, hour int, minute int) {
+	//每分钟秒数
+	minute = seconds / SecondsPerMinute
+	//每小时秒数
+	hour = seconds / SecondsPerHour
+	//每天秒数
+	day = seconds / SecondsPerDay
+	return
 }
