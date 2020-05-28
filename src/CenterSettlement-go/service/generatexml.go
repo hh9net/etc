@@ -25,7 +25,6 @@ var (
 //线程1
 //处理原始数据的打包
 func HandleGeneratexml() {
-
 	tiker := time.NewTicker(time.Second * 5)
 	for {
 		log.Println("执行线程1")
@@ -34,12 +33,14 @@ func HandleGeneratexml() {
 		czfname := Generatexml(types.PRECARD)
 		if czfname != "" {
 			//没有本省的储值卡原始数据
+			log.Println("没有本省的储值卡原始数据")
 		}
 
 		//记账卡 jz xml文件生成
 		jzfname := Generatexml(types.CREDITCARD)
 		if jzfname != "" {
 			//没有本省的记账卡原始数据
+			log.Println("没有本省的记账卡原始数据")
 		}
 	}
 }
@@ -47,7 +48,6 @@ func HandleGeneratexml() {
 //
 func Generatexml(Kalx int) string {
 	//从数据层获取准备的数据
-	Trans := make([]types.Transaction, 0)
 	//获取本省数据
 	jiesuansj := *storage.QueryJiessj(Kalx)
 	if Kalx == types.PRECARD && len(jiesuansj) == 0 {
@@ -58,10 +58,39 @@ func Generatexml(Kalx int) string {
 		log.Println("数据库没有要打包的本省的记账卡的数据")
 		return ""
 	}
-	count = len(jiesuansj)
+
 	//消息包序号
 	Messageid = conf.GenerateMessageId()
 	Filenameid = fmt.Sprintf("%020d", Messageid)
+
+	jiaoyisj := TransAssignment(jiesuansj)
+
+	//使用MarshalIndent函数，生成的XML格式有缩进
+	outputxml, err := xml.MarshalIndent(jiaoyisj, " ", " ")
+	//使用Marshal函数，生成的XML格式无缩进
+	//outputxml,err:=xml.Marshal(v)
+	if err != nil {
+		log.Printf("error: %v\n", err)
+	}
+	var fname string
+	//创建xml文件 cz 储值卡
+	if Kalx == types.PRECARD {
+		fname = createxml(Kalx, outputxml)
+	}
+	//创建xml文件 jz 记账卡
+	if Kalx == types.CREDITCARD {
+		fname = createxml(Kalx, outputxml)
+	}
+	//打包成功
+	//更新打包状态 已打包
+	return fname
+}
+
+//赋值
+func TransAssignment(jiesuansj []types.BJsJiessj) *types.Message {
+	Trans := make([]types.Transaction, 0)
+	count = len(jiesuansj)
+
 	for i, v := range jiesuansj {
 		//把数据库数据 准备为 xml需要的  赋值
 		var Tran types.Transaction
@@ -91,17 +120,25 @@ func Generatexml(Kalx int) string {
 		jiaoyhye := common.Fen2Yuan(v.FNbJiaoyhye)
 		Tran.ICCard.PostBalance = jiaoyhye //交易后余额，以元为单位 Decimal
 
-		Tran.Validation.TAC = v.FVcTacm             //交易TAG码
-		Tran.Validation.TransType = types.TRANSTYPE //交易标识，2位16进制数，PBOC定义，如06为传统交易，09为复合交
-		//Tran.Validation.TerminalNo//终端机编号
-		//Tran.Validation.TerminalTransNo//PSAM卡脱机交易序号，在MAC1计算过程中得到
+		Tran.Validation.TAC = v.FVcTacm                 //交易TAG码
+		Tran.Validation.TransType = types.TRANSTYPE     //交易标识，2位16进制数，PBOC定义，如06为传统交易，09为复合交
+		Tran.Validation.TerminalNo = v.FVcJiamkh        //终端机编号  加密卡号
+		Tran.Validation.TerminalTransNo = v.FVcKajmjyxh //PSAM卡脱机交易序号，在MAC1计算过程中得到  加密加密序列号
 
-		//Tran.OBU.NetNo=//OBU网络号
+		Tran.OBU.NetNo = v.FVcKawlh //OBU网络号
 		Tran.OBU.OBUId = v.FVcObuid
-		Tran.OBU.OBEState = v.FVcObuzt //2字节的OBU状态
-		Tran.OBU.License = v.FVcObucp  //OBU中记录的车牌号 【加颜色????】
-		//Tran.CustomizedData=
-		//Tran.Id=
+		Tran.OBU.OBEState = v.FVcObuzt               //2字节的OBU状态
+		Tran.OBU.License = v.FVcObucp + v.FVcObucpys //OBU中记录的车牌号 皖EYG511蓝 【加颜色????】
+
+		jyje := common.ToHexFormat(v.FNbJine, 8)  //
+		jyhje := common.ToHexFormat(v.FNbJine, 8) //
+		jyqje := common.ToHexFormat(v.FNbJine, 8) //
+		customizedData := common.CustomizedData(v.FVcTacm, jyje, types.TRANSTYPE, v.FVcJiamkh, v.FVcKajmjyxh, jiaoysj, jyhje, jyqje, v.FVcKajyxh)
+		Tran.CustomizedData = customizedData
+
+		//停车场消费交易编号(停车场编号+交易发生的时间+流水号【怎么取】 )
+		ID := common.GetId(v.FVcTingccbh, jiaoysj, "12")
+		Tran.Id = ID
 		name := common.Name(v.FVcZhangdms)
 		Tran.Name = name
 		Tran.ParkTime = v.FNbYonghtcsc
@@ -136,30 +173,8 @@ func Generatexml(Kalx int) string {
 	for _, T := range Trans {
 		jiaoyisj.Body.Transaction = append(jiaoyisj.Body.Transaction, T)
 	}
-	//使用MarshalIndent函数，生成的XML格式有缩进
-	outputxml, err := xml.MarshalIndent(jiaoyisj, " ", " ")
-	//使用Marshal函数，生成的XML格式无缩进
-	//outputxml,err:=xml.Marshal(v)
-	if err != nil {
-		log.Printf("error: %v\n", err)
-	}
-	//log.Println(outputxml)
-	var fname string
-	//创建xml文件 cz 储值卡
-	if Kalx == types.PRECARD {
-		fname = createxml(Kalx, outputxml)
-	}
-	//创建xml文件 jz 记账卡
-	if Kalx == types.CREDITCARD {
-		fname = createxml(Kalx, outputxml)
-	}
-	//打包成功
-	//更新打包状态 已打包
-	return fname
-}
 
-func description() {
-
+	return jiaoyisj
 }
 
 func createxml(Kalx int, outputxml []byte) string {

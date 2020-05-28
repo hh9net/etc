@@ -47,7 +47,7 @@ type Transaction struct {
 	Id                  string     //停车场消费交易编号(停车场编号+交易发生的时间+流水号 )
 	Name                string     `xml:"name"`                //停车场名称(不超过150个字符)
 	ParkTime            int        `xml:"parkTime"`            //停放时长(单位：分)
-	VehicleType         string        `xml:"vehicleType"`         //收费车型
+	VehicleType         string     `xml:"vehicleType"`         //收费车型
 	AlgorithmIdentifier int        `xml:"algorithmIdentifier"` //算法标识 1-3DEX  2-SM4
 
 }
@@ -67,8 +67,8 @@ type ICCard struct {
 	NetNo       string   //网络编码，BCD码 Hex(4) ka网络号（16进制） 数据库10进制
 	CardId      string   //IC卡物理编号，BCD码  Hex(16)   卡号
 	License     string   //0015文件中记录的车牌号 卡内车牌号
-	PreBalance  string    //交易前余额，以元为单位 Decimal
-	PostBalance string    //交易后余额，以元为单位 Decimal
+	PreBalance  string   //交易前余额，以元为单位 Decimal
+	PostBalance string   //交易后余额，以元为单位 Decimal
 }
 
 //主要用于TAC计算
@@ -76,8 +76,8 @@ type Validation struct {
 	XMLName         xml.Name `xml:"Validation"`
 	TAC             string   //交易时产生的TAC码，8位16进制数   Hex(8)
 	TransType       string   //交易标识，2位16进制数，PBOC定义，如06为传统交易，09为复合交易  Hex(2)【09】
-	TerminalNo      string   //12位16进制数据，即PSAM号，PSAM中0016文件中的终端机编号  Hex(2)
-	TerminalTransNo string   //8位16进制数，PSAM卡脱机交易序号，在MAC1计算过程中得到  Hex(8)
+	TerminalNo      string   //12位16进制数据，即PSAM号，PSAM中0016文件中的终端机编号  Hex(2) 	加密卡号
+	TerminalTransNo string   //8位16进制数，PSAM卡脱机交易序号，在MAC1计算过程中得到  Hex(8) 加密序列号
 }
 
 type OBU struct {

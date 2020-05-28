@@ -8,7 +8,7 @@ import (
 )
 
 //this file is made to finish it that change a number from base 10 to hex
-func ToHex(ten int) string {
+func ToHex(ten int64) string {
 	s := fmt.Sprintf("%020x", ten)
 	return s
 }
@@ -37,7 +37,7 @@ func HexToTen(Hex string) {
 	fmt.Println(num)
 }
 
-func ToHexFormat(ten int, numb int) string {
+func ToHexFormat(ten int64, numb int) string {
 	var s string
 	switch numb {
 	case 2:

@@ -7,7 +7,7 @@ import (
 )
 
 func TestToHex(t *testing.T) {
-	a := 49
+	a := int64(49)
 	s := ToHex(a)
 	log.Println(s)
 	//00000000000000000031 20位
@@ -26,6 +26,6 @@ func TestHexToTen(t *testing.T) {
 }
 
 func TestToHexFormat(t *testing.T) {
-	s := ToHexFormat(49, 23)
+	s := ToHexFormat(int64(49), 8)
 	log.Println(s)
 }
