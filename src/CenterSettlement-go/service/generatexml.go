@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -94,6 +95,7 @@ func GenarateOtherxml(Kalx int, Diqu string) string {
 	for _, v := range jiesuansj {
 		sjid = append(sjid, v.FVcJiaoyjlid)
 	}
+	//更新打包状态
 	err = storage.UpdatePackaging(sjid)
 	if err != nil {
 		log.Println("更新包号错误")
@@ -103,8 +105,71 @@ func GenarateOtherxml(Kalx int, Diqu string) string {
 	//创建xml文件 cz 储值卡
 	if Kalx == types.PRECARD {
 		fname = createxml(Kalx, outputxml)
+
 		//打包成功
-		//
+		//        新增打包记录【插入表】
+		var yuansjyxx types.BJsYuansjyxx
+		yuansjyxx.FVcBanbh = "00010000"                               //版本号
+		yuansjyxx.FNbXiaoxlb = 5                                      //消息类别
+		yuansjyxx.FNbXiaoxlx = 7                                      //消息类型
+		yuansjyxx.FVcFaszid = "00000000000000FD"                      //发送者ID
+		yuansjyxx.FVcJieszid = "0000000000000020"                     //接受者ID
+		yuansjyxx.FNbXiaoxxh = Messageid                              //消息序号【消息包号】
+		yuansjyxx.FDtDabsj = time.Now().Format("2020-01-02 15:04:05") // 打包时间
+		yuansjyxx.FVcQingfmbr = jiaoyisj.Body.ClearTargetDate         //清分目标日
+		yuansjyxx.FVcTingccqffid = "00000000000000FD"                 //停车场清分方ID
+		yuansjyxx.FVcFaxfwjgid = "0000000000000020"                   //发行服务机构ID 0000000000000020
+		yuansjyxx.FNbJilsl = jiaoyisj.Body.Count                      //记录数量
+		yuansjyxx.FNbZongje = jiaoyisj.Body.Amount                    //总金额
+		yuansjyxx.FVcXiaoxwjlj = "generatexml"                        //消息文件路径
+		err1 := storage.PackagingRecordInsert(yuansjyxx)
+		if err1 != nil {
+			log.Println("新增消息包打包记录 error ")
+		}
+
+		//        新增打包明细记录
+		var yuansjymx types.BJsYuansjymx
+		yuansjymx.FVcXiaoxxh = Messageid
+		for _, T := range jiaoyisj.Body.Transaction {
+			yuansjymx.FNbBaonxh = T.TransId
+			yuansjymx.FDtJiaoysj = T.Time
+			yuansjymx.FNbJine = T.Fee
+			yuansjymx.FVcDingzjyxx = T.CustomizedData
+			yuansjymx.FVcJiaoybh = T.Id
+			yuansjymx.FVcTingccmc = T.Name
+			yuansjymx.FNbTingfsc = T.ParkTime
+			cx, _ := strconv.Atoi(T.VehicleType)
+			yuansjymx.FNbShoufcx = cx
+			yuansjymx.FNbSuanfbs = T.AlgorithmIdentifier
+			yuansjymx.FNbFuwlx = T.Service.ServiceType
+			yuansjymx.FVcZhangdsm = T.Service.Description
+			yuansjymx.FVcJiaoyxxxx = T.Service.Detail
+			yuansjymx.FNbKalx = T.ICCard.CardType
+			yuansjymx.FVcWanglbm = T.ICCard.NetNo
+			yuansjymx.FVcKawlbh = T.ICCard.CardId
+			yuansjymx.FVcKancph = T.ICCard.License
+			//yuansjymx.FVcKajyxh=T.ICCard.   //卡交易序号
+			jyqye, _ := strconv.Atoi(T.ICCard.PreBalance)
+			yuansjymx.FNbJiaoyqye = int64(jyqye)
+			jyhye, _ := strconv.Atoi(T.ICCard.PostBalance)
+			yuansjymx.FNbJiaoyhye = int64(jyhye)
+			yuansjymx.FVcTacm = T.Validation.TAC
+			yuansjymx.FVcjiaoybs = T.Validation.TransType
+			yuansjymx.FVcZongdjh = T.Validation.TerminalNo
+			yuansjymx.FVcZongdjyxh = T.Validation.TerminalTransNo
+			yuansjymx.FVcObuwlbh = T.OBU.NetNo
+			yuansjymx.FVcObuzt = T.OBU.OBEState
+			yuansjymx.FVcObuncph = T.OBU.License
+		}
+		err2 := storage.PackagingMXRecordInsert(yuansjymx)
+		if err2 != nil {
+			log.Println("新增消息包打包记录 error ")
+		}
+		//        新增打包应答记录
+		//        更新结算数据打包结果【打包状态：已打包、原始交易包号、包内序号】
+
+		storage.UpdateDataPackagingResults(sjid)
+
 	}
 	//创建xml文件 jz 记账卡
 	if Kalx == types.CREDITCARD {
@@ -125,11 +190,10 @@ func TransAssignment(jiesuansj []types.BJsJiessj, Messageid int64) *types.Messag
 		var Tran types.Transaction
 		Tran.TransId = i + 1 //包内序号
 		jiaoysj := common.DateTimeFormat(v.FDtJiaoysj)
-		Tran.Time = jiaoysj                                            //交易时间
-		yuan := common.Fen2Yuan(v.FNbJine)                             //分转元
-		Tran.Fee = yuan                                                //交易金额 yuan
-		amount = amount + v.FNbJine                                    //总金额
-		Tran.CustomizedData = time.Now().Format("2006-01-02 15:04:05") //【清分目标日】 当前日期
+		Tran.Time = jiaoysj                //交易时间
+		yuan := common.Fen2Yuan(v.FNbJine) //分转元
+		Tran.Fee = yuan                    //交易金额 yuan
+		amount = amount + v.FNbJine        //总金额
 
 		Tran.Service.ServiceType = types.SERVICETYPE //交易服务类型 【写死2】
 		//账单描述[????] 南京南站南广场P3|11小时32分40秒

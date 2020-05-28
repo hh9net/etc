@@ -86,7 +86,7 @@ func PackagingRecordInsert(data types.BJsYuansjyxx) error {
 }
 
 //        新增打包明细记录
-func PackagingMXRecordInsert() error {
+func PackagingMXRecordInsert(data types.BJsYuansjymx) error {
 	database.DBInit()
 	xorm := database.XormClient
 

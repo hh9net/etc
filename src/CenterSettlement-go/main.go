@@ -15,7 +15,8 @@ func main() {
 	commonUtils.InitLogrus(conf.LogPath, conf.LogFileName, time.Duration(24*conf.LogmaxAge)*time.Hour,
 		time.Duration(conf.LogrotationTime)*time.Hour)
 	database.DBInit() //连接数据库 初始化为全局变量
-	//log.Println(database.XormClient)
+	//主线程处理压缩与解压缩
+
 	//goroutine1
 	go service.HandleGeneratexml()
 	//goroutine2
@@ -24,7 +25,7 @@ func main() {
 	go service.AnalyzeDataPakage()
 	//goroutine3
 	service.Receive()
-	for{
+	for {
 		tiker := time.NewTicker(time.Second * 2)
 		for {
 			log.Println(<-tiker.C)

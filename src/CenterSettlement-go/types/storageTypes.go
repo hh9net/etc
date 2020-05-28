@@ -21,39 +21,39 @@ type BJsJiessj struct {
 	FNbJizbxh      int    //F_NB_JIZBXH	记账包序号	INT
 	FNbZhengyclbxh int64  //F_NB_ZHENGYCLBXH	争议处理包序号	BIGINT  记账结果：争议放过、坏账时
 	//FNbQingfjg     int       //F_NB_QINGFJG  		清分结果 0：未清分  1：已清分   2：争议放过  3：坏账 ；
-	FNbQingfbxh   int64  //F_NB_QINGFBXH	清分包序号	BIGINT
-	FVcXiaofjlbh  string //F_VC_XIAOFJLBH	消费记录编号	VARCHAR(128)
-	FVcJiamkh     string //F_VC_JIAMKH	加密卡号	VARCHAR(32)终端
-	FVcKajmjyxh   string //F_VC_KAJMJYXH	加密卡交易序号	VARCHAR(32)终端
-	FVcObuid      string //F_VC_OBUID	Obuid	VARCHAR(32)
-	FVcObufxf     string //F_VC_OBUFXF	obu发行方	VARCHAR(32)
-	FVcObucp      string //F_VC_OBUCP	obu内车牌	VARCHAR(32)
-	FVcObucpys    string //F_VC_OBUCPYS	obu车牌颜色	VARCHAR(32)
-	FVcKah        string //F_VC_KAH	    卡号	VARCHAR(32)
-	FVcKawlh      string //F_VC_KAWLH	卡网络号	VARCHAR(32)
-	FVcKajyxh     string //F_VC_KAJYXH	卡交易序号	VARCHAR(32)
-	FVcKafxf      string //F_VC_KAFXF	卡发行方	VARCHAR(32)
-	FNbKalx       int    //F_NB_KALX	卡类型	INT  储值卡22，23 记账卡
-	FVcCheph      string // F_VC_CHEPH   卡内车牌号
-	FNbJiaoyqye   int64  //F_NB_JIAOYQYE	交易前余额	分转元 INT
-	FNbJiaoyhye   int64  //F_NB_JIAOYHYE	交易后余额	分转元 INT
-	FNbJine       int64  //F_NB_JINE	金额	INT         分转元
-	FVcTacm       string //F_VC_TACM	TAC码	VARCHAR(32)
+	FNbQingfbxh   int64     //F_NB_QINGFBXH	清分包序号	BIGINT
+	FVcXiaofjlbh  string    //F_VC_XIAOFJLBH	消费记录编号	VARCHAR(128)
+	FVcJiamkh     string    //F_VC_JIAMKH	加密卡号	VARCHAR(32)终端
+	FVcKajmjyxh   string    //F_VC_KAJMJYXH	加密卡交易序号	VARCHAR(32)终端
+	FVcObuid      string    //F_VC_OBUID	Obuid	VARCHAR(32)
+	FVcObufxf     string    //F_VC_OBUFXF	obu发行方	VARCHAR(32)
+	FVcObucp      string    //F_VC_OBUCP	obu内车牌	VARCHAR(32)
+	FVcObucpys    string    //F_VC_OBUCPYS	obu车牌颜色	VARCHAR(32)
+	FVcKah        string    //F_VC_KAH	    卡号	VARCHAR(32)
+	FVcKawlh      string    //F_VC_KAWLH	卡网络号	VARCHAR(32)
+	FVcKajyxh     string    //F_VC_KAJYXH	卡交易序号	VARCHAR(32)
+	FVcKafxf      string    //F_VC_KAFXF	卡发行方	VARCHAR(32)
+	FNbKalx       int       //F_NB_KALX	卡类型	INT  储值卡22，23 记账卡
+	FVcCheph      string    // F_VC_CHEPH   卡内车牌号
+	FNbJiaoyqye   int64     //F_NB_JIAOYQYE	交易前余额	分转元 INT
+	FNbJiaoyhye   int64     //F_NB_JIAOYHYE	交易后余额	分转元 INT
+	FNbJine       int64     //F_NB_JINE	金额	INT         分转元
+	FVcTacm       string    //F_VC_TACM	TAC码	VARCHAR(32)
 	FDtJiaoysj    time.Time //F_DT_JIAOYSJ	交易时间	DATETIME   2020-05-13 14:34:34
-	FDtJiaoylx    string //F_DT_JIAOYLX	交易类型	VARCHAR(32)
-	FVcChex       string //F_VC_CHEX	车型	VARCHAR(32)
-	FVcObuzt      string //F_VC_OBUZT	OBu状态	VARCHAR(32)
-	FVcSuanfbs    string //F_VC_SUANFBS	算法标识	VARCHAR(32)     【交易标识】
+	FDtJiaoylx    string    //F_DT_JIAOYLX	交易类型	VARCHAR(32)
+	FVcChex       string    //F_VC_CHEX	车型	VARCHAR(32)
+	FVcObuzt      string    //F_VC_OBUZT	OBu状态	VARCHAR(32)
+	FVcSuanfbs    string    //F_VC_SUANFBS	算法标识	VARCHAR(32)     【交易标识】
 	FDtYonghrksj  time.Time //F_DT_YONGHRKSJ	用户入口时间	DATETIME
-	FNbYonghtcsc  int    //F_NB_YONGHTCSC	用户停车时长(分)	INT  天时分秒
-	FVcZhangdms   string //F_VC_ZHANGDMS	账单描述（给用户通知的信息）	VARCHAR(32)
-	FVcMiybbh     string //F_VC_MIYBBH	密钥版本号	VARCHAR(32)
-	FVcObuyyxlh   string //F_VC_OBUYYXLH	obu应用序列号	VARCHAR(32)
-	FVcChedjyxh   string //F_VC_CHDJYXH	车道交易序号	VARCHAR(32)
-	FNbQingfjg    int    //F_NB_QINGFJG  '清分结果 0：未清分、1：已清分'
-	FNbDabzt      int    //F_NB_DABZT	打包状态	INT   0 初始 ；1打包中； 2已打包
-	FNbZhengycljg int    //F_NB_ZHENGYCLJG  '争议处理结果 0:未处理、1：争议放过、2：坏账'
-	FNbJusbj      int    //`F_NB_JUSBJ`   DEFAULT '0' COMMENT '拒收标记 0、正常，1、拒收',
+	FNbYonghtcsc  int       //F_NB_YONGHTCSC	用户停车时长(分)	INT  天时分秒
+	FVcZhangdms   string    //F_VC_ZHANGDMS	账单描述（给用户通知的信息）	VARCHAR(32)
+	FVcMiybbh     string    //F_VC_MIYBBH	密钥版本号	VARCHAR(32)
+	FVcObuyyxlh   string    //F_VC_OBUYYXLH	obu应用序列号	VARCHAR(32)
+	FVcChedjyxh   string    //F_VC_CHDJYXH	车道交易序号	VARCHAR(32)
+	FNbQingfjg    int       //F_NB_QINGFJG  '清分结果 0：未清分、1：已清分'
+	FNbDabzt      int       //F_NB_DABZT	打包状态	INT   0 初始 ；1打包中； 2已打包
+	FNbZhengycljg int       //F_NB_ZHENGYCLJG  '争议处理结果 0:未处理、1：争议放过、2：坏账'
+	FNbJusbj      int       //`F_NB_JUSBJ`   DEFAULT '0' COMMENT '拒收标记 0、正常，1、拒收',
 }
 
 //   B_JS_YUANSJYXX【原始交易消息包表】
@@ -64,7 +64,7 @@ type BJsYuansjyxx struct {
 	FVcFaszid      string    //F_VC_FASZID	发送者ID	VARCHAR(32)
 	FVcJieszid     string    //F_VC_JIESZID	接收者ID	VARCHAR(32)
 	FNbXiaoxxh     int64     //F_NB_XIAOXXH	消息序号	BIGINT
-	FDtDabsj       time.Time //F_DT_DABSJ	打包时间	DATETIME
+	FDtDabsj       string    //F_DT_DABSJ	打包时间	DATETIME
 	FNbFaszt       int       //F_NB_FASZT	发送状态	INT
 	FDtFassj       time.Time //F_DT_FASSJ	发送时间	DATETIME
 	FNbYingdzt     int       //F_NB_YINGDZT	应答状态	INT
@@ -72,40 +72,40 @@ type BJsYuansjyxx struct {
 	FVcTingccqffid string    //F_VC_TINGCCQFFID	停车场清分方ID	VARCHAR(32)
 	FVcFaxfwjgid   string    //F_VC_FAXFWJGID	发行服务机构ID	VARCHAR(32)
 	FNbJilsl       int       //F_NB_JILSL	记录数量	INT
-	FNbZongje      int       //F_NB_ZONGJE	总金额	INT
+	FNbZongje      string    //F_NB_ZONGJE	总金额	INT
 	FVcXiaoxwjlj   string    //F_VC_XIAOXWJLJ	消息文件路径	VARCHAR(512)
 }
 
 //   B_JS_YUANSJYMX【原始交易明细】
 type BJsYuansjymx struct {
-	FVcXiaoxxh   int64     //F_VC_XIAOXXH	消息序号	BIGINT
-	FNbBaonxh    int       //F_NB_BAONXH	包内序号	INT
-	FDtJiaoysj   time.Time //F_DT_JIAOYSJ	交易时间	DATETIME
-	FNbJine      int       //F_NB_JINE	金额	INT
-	FVcDingzjyxx string    //F_VC_DINGZJYXX	定制交易信息	VARCHAR(512) CustomizedData
-	FVcJiaoybh   string    //F_VC_JIAOYBH	交易编号	VARCHAR(128)  停车场编号+交易发生时间+流水号
-	FVcTingccmc  string    //F_VC_TINGCCMC	停车场名称	VARCHAR(256)
-	FNbTingfsc   int       //F_NB_TINGFSC	停放时长	INT
-	FNbShoufcx   int       //F_NB_SHOUFCX	收费车型	INT
-	FNbSuanfbs   int       //F_NB_SUANFBS	算法标识	INT    1：3DEX、2：SM4',
-	FNbFuwlx     int       //F_NB_FUWLX	服务类型	INT
-	FVcZhangdsm  string    //F_VC_ZHANGDSM	账单说明	VARCHAR(256)
-	FVcJiaoyxxxx string    //F_VC_JIAOYXXXX	交易详细信息	VARCHAR(512)
-	FNbKalx      int       //F_NB_KALX	卡类型	INT
-	FVcWanglbm   string    //F_VC_WANGLBM	网络编码	VARCHAR(32)
-	FVcKawlbh    string    //F_VC_KAWLBH	卡物理编号	VARCHAR(32)
-	FVcKancph    string    //F_VC_KANCPH	卡内车牌号	VARCHAR(32)
-	FVcKajtxh    string    //F_VC_KAJYXH	卡交易序号	VARCHAR(32)
-	FNbJiaoyqye  int64     //F_NB_JIAOYQYE	交易前余额	INT
-	FNbJiaoyhye  int64     //F_NB_JIAOYHYE	交易后余额	INT
-	FVcTacm      string    //F_VC_TACM	TAC码	VARCHAR(32)
-	FVcjiaoybs   string    //F_VC_JIAOYBS	交易标识	VARCHAR(32) 交易标识【取09】 2位16进制数，PBOC定义，如06为传统交易，09为复合交易',
-	FVcZongdjh   string    //F_VC_ZONGDJH	终端机号	VARCHAR(32)
-	FVcZongdjyxh string    //F_VC_ZONGDJYXH	终端交易序号	VARCHAR(32)
-	FVcObuwlbh   string    //F_VC_OBUWLBH	OBU物理编号	VARCHAR(32)
-	FVcObuzt     string    //F_VC_OBUZT	OBU状态	VARCHAR(32)
-	FVcObucph    string    //F_VC_OBUNCPH	OBU内车牌号	VARCHAR(32)
-	FNbWeiyid    int       //`F_NB_WEIYID` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+	FVcXiaoxxh   int64  //F_VC_XIAOXXH	消息序号	BIGINT
+	FNbBaonxh    int    //F_NB_BAONXH	包内序号	INT
+	FDtJiaoysj   string //F_DT_JIAOYSJ	交易时间	DATETIME
+	FNbJine      string //F_NB_JINE	金额	INT
+	FVcDingzjyxx string //F_VC_DINGZJYXX	定制交易信息	VARCHAR(512) CustomizedData
+	FVcJiaoybh   string //F_VC_JIAOYBH	交易编号	VARCHAR(128)  停车场编号+交易发生时间+流水号
+	FVcTingccmc  string //F_VC_TINGCCMC	停车场名称	VARCHAR(256)
+	FNbTingfsc   int    //F_NB_TINGFSC	停放时长	INT
+	FNbShoufcx   int    //F_NB_SHOUFCX	收费车型	INT
+	FNbSuanfbs   int    //F_NB_SUANFBS	算法标识	INT    1：3DEX、2：SM4',
+	FNbFuwlx     int    //F_NB_FUWLX	服务类型	INT
+	FVcZhangdsm  string //F_VC_ZHANGDSM	账单说明	VARCHAR(256)
+	FVcJiaoyxxxx string //F_VC_JIAOYXXXX	交易详细信息	VARCHAR(512)
+	FNbKalx      int    //F_NB_KALX	卡类型	INT
+	FVcWanglbm   string //F_VC_WANGLBM	网络编码	VARCHAR(32)
+	FVcKawlbh    string //F_VC_KAWLBH	卡物理编号	VARCHAR(32)
+	FVcKancph    string //F_VC_KANCPH	卡内车牌号	VARCHAR(32)
+	FVcKajyxh    string //F_VC_KAJYXH	卡交易序号	VARCHAR(32)
+	FNbJiaoyqye  int64  //F_NB_JIAOYQYE	交易前余额	INT
+	FNbJiaoyhye  int64  //F_NB_JIAOYHYE	交易后余额	INT
+	FVcTacm      string //F_VC_TACM	TAC码	VARCHAR(32)
+	FVcjiaoybs   string //F_VC_JIAOYBS	交易标识	VARCHAR(32) 交易标识【取09】 2位16进制数，PBOC定义，如06为传统交易，09为复合交易',
+	FVcZongdjh   string //F_VC_ZONGDJH	终端机号	VARCHAR(32)
+	FVcZongdjyxh string //F_VC_ZONGDJYXH	终端交易序号	VARCHAR(32)
+	FVcObuwlbh   string //F_VC_OBUWLBH	OBU物理编号	VARCHAR(32)
+	FVcObuzt     string //F_VC_OBUZT	OBU状态	VARCHAR(32)
+	FVcObuncph   string //F_VC_OBUNCPH	OBU内车牌号	VARCHAR(32)
+	FNbWeiyid    int    //`F_NB_WEIYID` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
 }
 
 //   B_JS_YUANSJYYDXX【原始交易应答消息】

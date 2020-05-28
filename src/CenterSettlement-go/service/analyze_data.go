@@ -32,15 +32,19 @@ func AnalyzeDataPakage() {
 				fmt.Println(fileInfoList[i].Name()) //打印当前文件或目录下的文件或目录名
 			}
 
-			//		解析文件
+			//		解析xml文件
+
 			//		应答数据包
+
 			//		记账数据包
+
 			//		争议数据包
+
 			//		清分数据包
+
 			//		退费数据包【不做】
 		}
 
 	}
-	//定时器定期扫描receive文件夹
 
 }
