@@ -1,12 +1,9 @@
 package server
 
 import (
-	"encoding/binary"
-	"encoding/hex"
-	"io/ioutil"
+	"CenterSettlement-go/types"
 	"log"
 	"net"
-	"net/http"
 )
 
 type DataPacket struct {
@@ -43,53 +40,30 @@ func ReceiveHandler(conn net.Conn) {
 	defer conn.Close()
 	//每次读取数据长度
 	buf := make([]byte, 4096)
-	_, err := conn.Read(buf)
+	n, err := conn.Read(buf)
 	if err != nil {
 		return
 	}
-	result, Body := check(buf)
-	if result {
-		log.Printf("接收到报文内容:{ %s }\n", hex.EncodeToString(Body))
-	}
-}
-func check(buf []byte) (bool, []byte) {
-	Length := DataLength(buf)
-	if Length < 3 || Length > 4096 {
-		return false, nil
-	}
-	Body := buf[:Length]
-	return uint16(len(Body))-2 != Length, Body
-}
-func DataLength(buf []byte) uint16 {
-	return binary.BigEndian.Uint16(inversion(buf[:2])) + 2
-}
 
-//反转字节
-func inversion(buf []byte) []byte {
-	for i := 0; i < len(buf)/2; i++ {
-		temp := buf[i]
-		buf[i] = buf[len(buf)-1-i]
-		buf[len(buf)-1-i] = temp
-	}
-	return buf
-}
+	data := string(buf[:n])
+	log.Println("接收数据", data)
+	log.Println(data)
+	var replyStru types.ReplyStru
+	replyStru.Massageid = "00000000000000100025"
+	replyStru.Result = "1"
+	m := []byte(replyStru.Massageid)
+	r := []byte(replyStru.Result)
+	d := append(m, r...)
+	log.Println(string(d))
+	// 返回ok
+	conn.Write(d)
+	//即时应答
+	//conn.Write([]byte ("ok"))
 
-func Server1() {
-	//监听客户端
-	log.Println("监听客户端 127.0.0.1:8808")
-	http.HandleFunc("/", ServerHandle)
-	http.ListenAndServe("127.0.0.1:8808", nil)
-}
-
-//处理函数
-func ServerHandle(w http.ResponseWriter, r *http.Request) {
-	fileName := r.URL.String()
-	log.Println("urlfileName=", fileName)
-
-	con, _ := ioutil.ReadAll(r.Body) //获取post的数据
-	log.Println(string(con))
-	w.Write([]byte("已经接收"))
-	r.Body.Close()
+	//result, Body := check(buf)
+	//if result {
+	//	log.Printf("接收到报文内容:{ %s }\n", hex.EncodeToString(Body))
+	//}
 
 	//如果文件比较大要循环读取
 
@@ -100,5 +74,4 @@ func ServerHandle(w http.ResponseWriter, r *http.Request) {
 
 	// 封装函数，去到服务器指定目录中找寻文件，存在打开写会给浏览器， 不存在报错
 	//openSendFile(fileName, w)
-
 }

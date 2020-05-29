@@ -7,8 +7,8 @@ import (
 
 func TestGeneratexml(t *testing.T) {
 	//Generatexml(22)
-	s := Generatexml(22)
-	log.Println(s)
+	//s := Generatexml(22)
+	//log.Println(s)
 	//generatexml.Lz77zip(s)
 }
 
