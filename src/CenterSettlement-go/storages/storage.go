@@ -3,7 +3,6 @@ package storage
 import (
 	"CenterSettlement-go/database"
 	"CenterSettlement-go/types"
-
 	_ "github.com/go-sql-driver/mysql"
 	"log"
 )
@@ -85,23 +84,55 @@ func PackagingRecordInsert(data types.BJsYuansjyxx) error {
 	return nil
 }
 
-//        新增打包明细记录
-func PackagingMXRecordInsert(data types.BJsYuansjymx) error {
+//   新增打包明细记录
+func PackagingMXRecordInsert(mx []types.BJsYuansjymx) error {
 	database.DBInit()
 	xorm := database.XormClient
 
 	Yuansjymx := new(types.BJsYuansjymx)
 	//赋值
-	_, err := xorm.Table("b_js_jiessj").Insert(Yuansjymx)
-	if err != nil {
-		log.Println("新增打包明细记录 error")
-		return err
+
+	for _, v := range mx {
+		Yuansjymx.FVcXiaoxxh = v.FVcXiaoxxh
+		Yuansjymx.FNbBaonxh = v.FNbBaonxh
+		Yuansjymx.FDtJiaoysj = v.FDtJiaoysj
+		Yuansjymx.FNbJine = v.FNbJine
+		Yuansjymx.FVcDingzjyxx = v.FVcDingzjyxx
+		Yuansjymx.FVcJiaoybh = v.FVcJiaoybh
+		Yuansjymx.FVcTingccmc = v.FVcTingccmc
+		Yuansjymx.FNbTingfsc = v.FNbTingfsc
+
+		Yuansjymx.FNbShoufcx = v.FNbShoufcx
+		Yuansjymx.FNbSuanfbs = v.FNbSuanfbs
+		Yuansjymx.FNbFuwlx = v.FNbFuwlx
+		Yuansjymx.FVcZhangdsm = v.FVcZhangdsm
+		Yuansjymx.FVcJiaoyxxxx = v.FVcJiaoyxxxx
+		Yuansjymx.FNbKalx = v.FNbKalx
+		Yuansjymx.FVcWanglbm = v.FVcWanglbm
+		Yuansjymx.FVcKawlbh = v.FVcKawlbh
+		Yuansjymx.FVcKancph = v.FVcKancph
+		//yuansjymx.FVcKajyxh=v.ICCard.   //卡交易序号
+
+		Yuansjymx.FNbJiaoyqye = v.FNbJiaoyqye
+		Yuansjymx.FNbJiaoyhye = v.FNbJiaoyhye
+		Yuansjymx.FVcTacm = v.FVcTacm
+		Yuansjymx.FVcjiaoybs = v.FVcjiaoybs
+		Yuansjymx.FVcZongdjh = v.FVcZongdjh
+		Yuansjymx.FVcZongdjyxh = v.FVcZongdjyxh
+		Yuansjymx.FVcObuwlbh = v.FVcObuwlbh
+		Yuansjymx.FVcObuzt = v.FVcObuzt
+		Yuansjymx.FVcObuncph = v.FVcObuncph
+
+		_, err := xorm.Table("b_js_jiessj").Insert(Yuansjymx)
+		if err != nil {
+			log.Println("新增打包明细记录 error")
+			return err
+		}
 	}
 	return nil
-
 }
 
-//        新增打包应答记录
+//   新增打包应答记录
 func PackagingResRecordInsert(data types.BJsYuansjyydxx) error {
 	database.DBInit()
 	xorm := database.XormClient
@@ -116,7 +147,7 @@ func PackagingResRecordInsert(data types.BJsYuansjyydxx) error {
 	return nil
 }
 
-//        更新结算数据打包结果【打包状态：已打包、原始交易包号、包内序号】
+//   更新结算数据打包结果【打包状态：已打包、原始交易包号、包内序号】
 func UpdateDataPackagingResults(Jiaoyjlid []string) error {
 	database.DBInit()
 	xorm := database.XormClient

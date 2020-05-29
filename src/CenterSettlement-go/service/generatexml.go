@@ -128,6 +128,7 @@ func GenarateOtherxml(Kalx int, Diqu string) string {
 		}
 
 		//        新增打包明细记录
+		var mx []types.BJsYuansjymx
 		var yuansjymx types.BJsYuansjymx
 		yuansjymx.FVcXiaoxxh = Messageid
 		for _, T := range jiaoyisj.Body.Transaction {
@@ -161,7 +162,8 @@ func GenarateOtherxml(Kalx int, Diqu string) string {
 			yuansjymx.FVcObuzt = T.OBU.OBEState
 			yuansjymx.FVcObuncph = T.OBU.License
 		}
-		err2 := storage.PackagingMXRecordInsert(yuansjymx)
+		mx = append(mx, yuansjymx)
+		err2 := storage.PackagingMXRecordInsert(mx)
 		if err2 != nil {
 			log.Println("新增消息包打包记录 error ")
 		}
