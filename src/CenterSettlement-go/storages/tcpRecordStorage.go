@@ -6,6 +6,7 @@ import (
 )
 
 //tcp发送与接收包记录
+
 //表字段
 //请求记录表
 type BJsTcpqqjl struct {
@@ -49,7 +50,6 @@ func TcpSendRecordInsert(record BJsTcpqqjl) error {
 }
 
 //2、即使应答包记录存储
-
 func TcpResponseRecordInsert(resRecord BJsTcpydjl) error {
 	xorm := database.XormClient
 	//session := TransactionBegin(xorm)

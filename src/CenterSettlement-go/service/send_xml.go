@@ -33,9 +33,9 @@ func HandleSendXml() {
 
 				//		解析文件  获取数据
 				var sendStru types.SendStru
-				sendStru.Massageid = "Massageid"
-				sendStru.Md5_str = "Md5_str"
-				sendStru.Xml_length = "Xml_length"
+				sendStru.Massageid = "00000000000000100025"
+				sendStru.Md5_str = "@234567812345678123456781234567@"
+				sendStru.Xml_length = "#1122#"
 				sendStru.Xml_msgName = fileInfoList[i].Name()
 
 				//连接联网中心服务器
@@ -62,7 +62,6 @@ func HandleSendXml() {
 					log.Println("发送失败")
 
 				}
-			_:
 				conn.Close()
 			}
 		}
@@ -81,6 +80,7 @@ func ImmediateResponseProcessing(str string, name string) {
 		s := "../sendzipxml/" + name
 		des := "../sendxmlsucceed/" + name
 		client.MoveFile(s, des)
+
 	}
 	if string(b[len(str)-1:]) == "0" {
 		//

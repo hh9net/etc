@@ -1,4 +1,4 @@
-package generatexml
+package receive
 
 /*
 #include <stdlib.h>
@@ -11,11 +11,11 @@ import (
 	"unsafe"
 )
 
-// 动态库编译 g++ Lz77.cpp -fPIC -shared -o lz77.so
+// 静态编译 g++ Lz77.cpp -fPIC -shared -o lz77.so
 func Lz77zip(fname string) {
 
 	//把CZ_origin.xml  压缩成 "2.xml.lz77"
-	orilz77file := "../sendzipxml/" + fname + ".lz77"
+	orilz77file := "../receive/" + fname + ".lz77"
 
 	log.Println("ch name:", fname)
 	log.Println("orilz77file :=", orilz77file)
@@ -28,13 +28,11 @@ func Lz77zip(fname string) {
 	defer C.free(unsafe.Pointer(dest2))
 }
 
-func Lz77Unzip() {
+func Lz77Unzipxml() {
 	//2.xml.lz77 解压为 1.xml
-	originfile := "1.xml"
+	originfile := "../receive/" + "00000000000000100025.xml"
+	orilz77file := "../receive/" + "00000000000000100025.xml.lz77"
 
-	orilz77file := "2.xml.lz77"
-
-	// src1 := C.CString(lz77file)
 	src1 := C.CString(orilz77file)
 	dest1 := C.CString(originfile)
 	// 解压

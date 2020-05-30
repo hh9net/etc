@@ -69,7 +69,7 @@ func UpdatePackaging(Jiaoyjlid []string) error {
 }
 
 //打包成功
-//        新增打包记录【插入表b_js_yuansjyxx】
+//   新增打包记录【插入表b_js_yuansjyxx】
 func PackagingRecordInsert(data types.BJsYuansjyxx) error {
 	database.DBInit()
 	xorm := database.XormClient

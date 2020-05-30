@@ -30,19 +30,18 @@ func AnalyzeDataPakage() {
 			//判断文件的结尾名
 			if strings.HasSuffix(fileInfoList[i].Name(), ".xml") {
 				fmt.Println(fileInfoList[i].Name()) //打印当前文件或目录下的文件或目录名
+
+				//		解析xml文件
+
+				//		记账数据包
+
+				//		争议数据包
+
+				//		清分数据包
+
+				//		退费数据包【不做】
 			}
 
-			//		解析xml文件
-
-			//		应答数据包
-
-			//		记账数据包
-
-			//		争议数据包
-
-			//		清分数据包
-
-			//		退费数据包【不做】
 		}
 
 	}

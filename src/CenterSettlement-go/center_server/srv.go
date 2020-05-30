@@ -2,8 +2,10 @@ package server
 
 import (
 	"CenterSettlement-go/types"
+	"io/ioutil"
 	"log"
 	"net"
+	"os"
 )
 
 type DataPacket struct {
@@ -46,8 +48,26 @@ func ReceiveHandler(conn net.Conn) {
 	}
 
 	data := string(buf[:n])
-	log.Println("接收数据", data)
+	log.Println("接收数据")
 	log.Println(data)
+
+	msgid := string(buf[:20])
+	log.Println("消息包Massageid", msgid)
+
+	msglength := string(buf[20:26])
+	log.Println("消息包msglength", msglength)
+
+	msgmd5 := string(buf[26:58])
+	log.Println("消息包msgmd5：", msgmd5)
+
+	msg := string(buf[58:])
+	log.Println("消息包msg：")
+	log.Println(msg)
+
+	//保存为文件
+	RevFile(msgid, buf[58:])
+
+	//即时应答
 	var replyStru types.ReplyStru
 	replyStru.Massageid = "00000000000000100025"
 	replyStru.Result = "1"
@@ -57,13 +77,6 @@ func ReceiveHandler(conn net.Conn) {
 	log.Println(string(d))
 	// 返回ok
 	conn.Write(d)
-	//即时应答
-	//conn.Write([]byte ("ok"))
-
-	//result, Body := check(buf)
-	//if result {
-	//	log.Printf("接收到报文内容:{ %s }\n", hex.EncodeToString(Body))
-	//}
 
 	//如果文件比较大要循环读取
 
@@ -74,4 +87,41 @@ func ReceiveHandler(conn net.Conn) {
 
 	// 封装函数，去到服务器指定目录中找寻文件，存在打开写会给浏览器， 不存在报错
 	//openSendFile(fileName, w)
+}
+
+func RevFile(fileName string, data []byte) {
+
+	//err := ioutil.WriteFile("test.txt",data, 0644)
+	err := ioutil.WriteFile("../receive/"+fileName+".xml.lz77", data, os.ModeAppend)
+	if err != nil {
+		log.Println("联网中心保存文件失败  ioutil.WriteFile  err =", err)
+		return
+	}
+
+	//fs,err := os.Create("../receice/"+fileName)
+	//defer fs.Close()
+	//if err != nil {
+	//	log.Println("os.Create err =",err)
+	//	return
+	//}
+	//// 拿到数据
+	////buf := make([]byte ,1024*10)
+	//for {
+	//	n,err := fs.Read(buf)
+	//	if err != nil {
+	//		log.Println("fs.Read error =",err)
+	//		if err == io.EOF {
+	//			log.Println("文件结束了",err)
+	//		}
+	//		return
+	//	}
+	//	if n == 0 {
+	//		log.Println("文件结束了",err)
+	//		return
+	//	}
+	//	n,werr :=fs.Write(buf[:n])
+	//	if werr != nil {
+	//		log.Println("联网中心保存文件失败",err)
+	//	}
+	//}
 }
