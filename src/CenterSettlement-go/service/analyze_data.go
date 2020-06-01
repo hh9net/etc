@@ -19,7 +19,7 @@ func AnalyzeDataPakage() {
 		<-tiker.C
 		//扫描receive 文件夹 读取文件
 		//获取文件或目录相关信息
-		pwd := "../receive/"
+		pwd := "CenterSettlement-go/receive/"
 		fileInfoList, err := ioutil.ReadDir(pwd)
 		if err != nil {
 			log.Fatal(err)

@@ -66,3 +66,6 @@ func InsertResMessageData(data types.BJsJizclydxx) error {
 }
 
 //4、更新记账处理消息记录  执行结果、处理时间
+func update() {
+
+}

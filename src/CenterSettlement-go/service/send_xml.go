@@ -20,7 +20,7 @@ func HandleSendXml() {
 
 		//扫描receive 文件夹 读取文件
 		//获取文件或目录相关信息
-		pwd := "../sendzipxml/"
+		pwd := "CenterSettlement-go/sendzipxml/"
 		fileInfoList, err := ioutil.ReadDir(pwd)
 		if err != nil {
 			log.Fatal(err)
@@ -77,8 +77,8 @@ func ImmediateResponseProcessing(str string, name string) {
 		log.Println("收到联网中心的接收成功的即时应答")
 		log.Println("发送成功")
 		//成功后 mv文件夹到另一个文件中
-		s := "../sendzipxml/" + name
-		des := "../sendxmlsucceed/" + name
+		s := "CenterSettlement-go/sendzipxml/" + name
+		des := "CenterSettlement-go/sendxmlsucceed/" + name
 		client.MoveFile(s, des)
 
 	}
