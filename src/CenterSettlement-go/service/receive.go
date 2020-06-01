@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/xml"
 	"fmt"
 	"io"
 	"log"
@@ -9,26 +10,57 @@ import (
 )
 
 //保存联网中心的数据
-func SaveFile(fileName string, connect net.Conn) {
+func SaveFile(connect net.Conn) {
+	var fileName string
+
+	buf := make([]byte, 1024*4)
+	n, rerr := connect.Read(buf)
+	if rerr != nil {
+		if rerr == io.EOF {
+			fmt.Println("EOF error", rerr)
+		} else {
+			fmt.Println("Read error", rerr)
+		}
+		return
+	}
+
+	data := string(buf[:n])
+	log.Println("接收数据")
+	log.Println(data)
+
+	msgid := string(buf[:20])
+	log.Println("消息包Massageid", msgid)
+
+	msglength := string(buf[20:26])
+	log.Println("消息包msglength", msglength)
+
+	msgmd5 := string(buf[26:58])
+	log.Println("消息包msgmd5：", msgmd5)
+
+	msg := string(buf[58:])
+	log.Println("消息包msg：")
+	log.Println(msg)
+	fileName = msgid
 	file, ferr := os.Create(fileName)
 	if ferr != nil {
 		fmt.Println("Create", ferr)
 		return
 	}
 	defer file.Close()
-	buff := make([]byte, 1024*4)
-	for {
-		size, rerr := connect.Read(buff)
-		if rerr != nil {
-			if rerr == io.EOF {
-				fmt.Println("EOF error", rerr)
-			} else {
-				fmt.Println("Read error", rerr)
-			}
-			return
-		}
-		file.Write(buff[:size])
+
+	//加入XML头
+	headerBytes := []byte(xml.Header)
+	//拼接XML头和实际XML内容
+	xmlOutPutData := append(headerBytes, buf[58:]...)
+	//这里可以不写，直接使用channel发送给线程2
+	//写入文件
+	_, fwerr := file.Write((xmlOutPutData))
+	if fwerr != nil {
+		log.Printf("Write xml file error: %v\n", ferr)
 	}
+	//更新消息包信息
+	file.Close()
+
 }
 
 //响应联网中心的应答
@@ -45,7 +77,7 @@ func Receive() {
 		fmt.Println("Listen", lerr)
 		return
 	}
-	fmt.Println("等待联网中心发送文件")
+	log.Println("等待联网中心发送文件")
 	for {
 		connect, cerr := listen.Accept()
 		if cerr != nil {
@@ -65,10 +97,12 @@ func HandleTask(conn net.Conn) {
 //线程3  接收数据包
 func HandleMessage(conn net.Conn) {
 	defer conn.Close()
-	fileName := ""
-	Response(conn)
+	//fileName := ""
 	//把读到的数据 以文件记录
-	SaveFile(fileName, conn)
+	SaveFile(conn)
+	//接收数据即时应答
+	Response(conn)
+
 	//这里可以选择不存储，直接使用channnel将数据发送给线程4
 	//监听channel数据，将接收到的数据存储到指定文件夹
 	conn.Write([]byte("ok"))

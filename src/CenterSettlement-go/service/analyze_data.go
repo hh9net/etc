@@ -1,7 +1,8 @@
 package service
 
 import (
-	"fmt"
+	"CenterSettlement-go/types"
+	"encoding/xml"
 	"io/ioutil"
 	"log"
 	"strings"
@@ -17,21 +18,49 @@ func AnalyzeDataPakage() {
 		log.Println("执行线程4")
 		log.Println("现在", time.Now().Format("2006-01-02 15:04:05"))
 		<-tiker.C
-		//扫描receive 文件夹 读取文件
+		//扫描receive 文件夹 读取文件x信息
 		//获取文件或目录相关信息
-		pwd := "CenterSettlement-go/receive/"
+		//pwd := "CenterSettlement-go/receive/"
+		pwd := "../receive/"
 		fileInfoList, err := ioutil.ReadDir(pwd)
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println("该文件夹下有文件的数量 ：", len(fileInfoList))
+		log.Println("该文件夹下有文件的数量 ：", len(fileInfoList))
 		for i := range fileInfoList {
 
 			//判断文件的结尾名
 			if strings.HasSuffix(fileInfoList[i].Name(), ".xml") {
-				fmt.Println(fileInfoList[i].Name()) //打印当前文件或目录下的文件或目录名
+				log.Println(fileInfoList[i].Name()) //打印当前文件或目录下的文件或目录名
 
 				//		解析xml文件
+				//获取xml文件位置
+				content, err := ioutil.ReadFile("../receive/" + fileInfoList[i].Name())
+				if err != nil {
+					log.Println("读文件位置错误信息：", err)
+				}
+
+				//将文件转换为对象
+				var result types.Message
+				err = xml.Unmarshal(content, &result)
+				if err != nil {
+					log.Println("读receive文件夹中xml文件的内容的错误信息：", err)
+				}
+
+				log.Println("result:", result)
+				//原始交易数据
+				if result.Header.MessageClass == 5 && result.Header.MessageType == 7 {
+					//
+					return
+				}
+				if result.Header.MessageClass == 5 && result.Header.MessageType == 5 {
+					//
+
+				}
+				if result.Header.MessageClass == 5 && result.Header.MessageType == 5 {
+					//
+
+				}
 
 				//		记账数据包
 

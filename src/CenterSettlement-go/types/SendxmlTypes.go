@@ -15,8 +15,8 @@ type Message struct {
 type Header struct {
 	XMLName      xml.Name `xml:"Header"`
 	Version      string   //统一 00010000 Hex(8) Header
-	MessageClass int32    //消息传输的机制5
-	MessageType  int32    //消息的应用类型7
+	MessageClass int64    //消息传输的机制5
+	MessageType  int64    //消息的应用类型7
 	SenderId     string   // Hex(16位，不足补零) 发送方Id
 	ReceiverId   string   //Hex(16位，不足补零) 接收方Id
 	MessageId    int64    //消息序号，从1开始，逐1递增 ，8字节
@@ -98,8 +98,8 @@ type OtherMessage struct {
 type OtherHeader struct {
 	XMLName      xml.Name `xml:"Header"`
 	Version      string   //统一 00010000 Hex(8) Header
-	MessageClass int32    //消息传输的机制
-	MessageType  int32    //消息的应用类型
+	MessageClass int      //消息传输的机制
+	MessageType  int      //消息的应用类型
 	SenderId     string   // Hex(16位，不足补零) 发送方Id
 	ReceiverId   string   //Hex(16位，不足补零) 接收方Id
 	MessageId    int64    //消息序号，从1开始，逐1递增 ，8字节
