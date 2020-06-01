@@ -1,6 +1,7 @@
 package service
 
 import (
+	"CenterSettlement-go/types"
 	"encoding/xml"
 	"fmt"
 	"io"
@@ -10,7 +11,7 @@ import (
 )
 
 //保存联网中心的数据
-func SaveFile(connect net.Conn) {
+func SaveFile(connect net.Conn) string {
 	var fileName string
 
 	buf := make([]byte, 1024*4)
@@ -21,7 +22,7 @@ func SaveFile(connect net.Conn) {
 		} else {
 			fmt.Println("Read error", rerr)
 		}
-		return
+		return ""
 	}
 
 	data := string(buf[:n])
@@ -40,11 +41,12 @@ func SaveFile(connect net.Conn) {
 	msg := string(buf[58:])
 	log.Println("消息包msg：")
 	log.Println(msg)
+	//包号作为文件的名字 ，后面再修改名字在解析文件之后，修改文件名
 	fileName = msgid
 	file, ferr := os.Create(fileName)
 	if ferr != nil {
 		fmt.Println("Create", ferr)
-		return
+		return ""
 	}
 
 	//加入XML头
@@ -59,12 +61,22 @@ func SaveFile(connect net.Conn) {
 	}
 	//更新消息包信息
 	defer file.Close()
-
+	return fileName
 }
 
 //响应联网中心的应答
-func Response(connect net.Conn) {
-	connect.Write([]byte("ok"))
+func Response(Filename string, connect net.Conn) {
+
+	//即时应答
+	var replyStru types.ReplyStru
+	replyStru.Massageid = Filename
+	replyStru.Result = "1"
+	m := []byte(replyStru.Massageid)
+	r := []byte(replyStru.Result)
+	d := append(m, r...)
+	log.Println(string(d))
+	// 返回ok
+	connect.Write(d)
 }
 
 //接收联网中心发来数据包
@@ -95,17 +107,12 @@ func HandleTask(conn net.Conn) {
 
 //线程3  接收数据包
 func HandleMessage(conn net.Conn) {
-	defer conn.Close()
+
 	//fileName := ""
 	//把读到的数据 以文件记录
-	SaveFile(conn)
+	Filename := SaveFile(conn)
 	//接收数据即时应答
-	Response(conn)
+	Response(Filename, conn)
+	defer conn.Close()
 
-	//这里可以选择不存储，直接使用channnel将数据发送给线程4
-	//监听channel数据，将接收到的数据存储到指定文件夹
-	conn.Write([]byte("ok"))
-	//监听联网中心端口
-	//	接收数据包
-	//	存储数据包至receive文件夹
 }

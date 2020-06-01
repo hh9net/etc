@@ -53,20 +53,21 @@ func AnalyzeDataPakage() {
 					//
 					return
 				}
-				if result.Header.MessageClass == 5 && result.Header.MessageType == 5 {
-					//
-
-				}
-				if result.Header.MessageClass == 5 && result.Header.MessageType == 5 {
-					//
-
-				}
-
 				//		记账数据包
+				if result.Header.MessageClass == 5 && result.Header.MessageType == 5 {
+					//
 
+				}
 				//		争议数据包
+				if result.Header.MessageClass == 5 && result.Header.MessageType == 7 {
+					//
 
+				}
 				//		清分数据包
+				if result.Header.MessageClass == 5 && result.Header.MessageType == 5 {
+					//
+
+				}
 
 				//		退费数据包【不做】
 			}

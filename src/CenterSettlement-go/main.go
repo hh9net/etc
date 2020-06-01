@@ -3,25 +3,24 @@ package main
 import (
 	"CenterSettlement-go/conf"
 	"CenterSettlement-go/database"
-	"CenterSettlement-go/lib7z"
 	"CenterSettlement-go/service"
 	commonUtils "CenterSettlement-go/utils"
-	"fmt"
 	log "github.com/sirupsen/logrus"
 	"time"
 )
 
-func test(lib *lib7z.Lz77so) {
-	file := "generatexml/CZ_3201_00000000000000100048.xml"
-
-	for i := 0; i <= 5; i++ {
-		filenew := fmt.Sprintf("%d.xml.lz77", i)
-		fileextra := fmt.Sprintf("%d.xml", i)
-		lib.Comresslz77(file, filenew)
-		lib.Depresslz77(filenew, fileextra)
-
-	}
-}
+//
+//func test(lib *lib7z.Lz77so) {
+//	file := "generatexml/CZ_3201_00000000000000100048.xml"
+//
+//	for i := 0; i <= 5; i++ {
+//		filenew := fmt.Sprintf("%d.xml.lz77", i)
+//		fileextra := fmt.Sprintf("%d.xml", i)
+//		lib.Comresslz77(file, filenew)
+//		lib.Depresslz77(filenew, fileextra)
+//
+//	}
+//}
 
 func main() {
 	//var libtest lib7z.Lz77so
