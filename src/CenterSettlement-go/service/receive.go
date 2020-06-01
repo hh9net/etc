@@ -46,7 +46,6 @@ func SaveFile(connect net.Conn) {
 		fmt.Println("Create", ferr)
 		return
 	}
-	defer file.Close()
 
 	//加入XML头
 	headerBytes := []byte(xml.Header)
@@ -59,7 +58,7 @@ func SaveFile(connect net.Conn) {
 		log.Printf("Write xml file error: %v\n", ferr)
 	}
 	//更新消息包信息
-	file.Close()
+	defer file.Close()
 
 }
 
