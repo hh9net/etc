@@ -7,7 +7,7 @@ import (
 )
 
 ///Users/nicker/go/etc/src/CenterSettlement-go/conf
-var conffilepath = "CenterSettlement-go/conf/app.conf"
+var conffilepath = "../conf/app.conf"
 
 //var conffilepath = "CenterSettlement-go/conf/app.conf"
 

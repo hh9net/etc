@@ -14,6 +14,12 @@ func TestAnalyzeDataPakage(t *testing.T) {
 	//线程4   解析
 	AnalyzeDataPakage()
 }
+
+//发送
 func TestHandleSendXml(t *testing.T) {
 	HandleSendXml()
+}
+
+func TestHandleGeneratexml(t *testing.T) {
+	HandleGeneratexml()
 }

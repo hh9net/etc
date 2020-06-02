@@ -18,11 +18,14 @@ type DB struct {
 }
 
 func QueryQitaJiessj(KaLx int, Diqu string) *[]types.BJsJiessj {
-	//database.DBInit()
+
+	database.DBInit()
 	xorm := database.XormClient
 	//查询多条数据
 	tests := make([]types.BJsJiessj, 0)
-	qerr := xorm.Where("F_NB_DABZT=?", 0).And("F_VC_KAWLH=?", Diqu).And("F_NB_KALX=?", KaLx).Limit(100, 0).Find(&tests)
+	//qerr := xorm.Where("F_NB_DABZT=?", 0).And("F_VC_KAWLH=?", Diqu).And("F_NB_KALX=?", KaLx).Limit(100, 0).Find(&tests)
+	//测试 每次查两条
+	qerr := xorm.Where("F_NB_DABZT=?", 0).And("F_VC_KAWLH=?", Diqu).And("F_NB_KALX=?", KaLx).Limit(2, 0).Find(&tests)
 	if qerr != nil {
 		log.Fatalln("查询结算数据出错", qerr)
 	}
@@ -58,7 +61,7 @@ func UpdatePackaging(Jiaoyjlid []string) error {
 	for _, id := range Jiaoyjlid {
 		Jiessj := new(types.BJsJiessj)
 		Jiessj.FNbDabzt = 1
-
+		log.Printf("交易记录id:%s 打包状态更新为：1", id)
 		_, err := xorm.Table("b_js_jiessj").Where("F_VC_JIAOYJLID=?", id).Update(Jiessj)
 		if err != nil {
 			log.Println("更新打包状态失败", err)
@@ -75,12 +78,25 @@ func UpdatePackaging(Jiaoyjlid []string) error {
 func PackagingRecordInsert(data types.BJsYuansjyxx) error {
 	database.DBInit()
 	xorm := database.XormClient
+	yuansjyxx := new(types.BJsYuansjyxx)
 
-	Yuansjyxx := new(types.BJsYuansjyxx)
-	Yuansjyxx.FDtDabsj = data.FDtDabsj
-	_, err := xorm.Table("b_js_jiessj").Insert(Yuansjyxx)
+	yuansjyxx.FVcBanbh = data.FVcBanbh             //版本号
+	yuansjyxx.FNbXiaoxlb = data.FNbXiaoxlb         //消息类别
+	yuansjyxx.FNbXiaoxlx = data.FNbXiaoxlx         //消息类型
+	yuansjyxx.FVcFaszid = data.FVcFaszid           //发送者ID
+	yuansjyxx.FVcJieszid = data.FVcJieszid         //接受者ID
+	yuansjyxx.FNbXiaoxxh = data.FNbXiaoxxh         //消息序号【消息包号】
+	yuansjyxx.FDtDabsj = data.FDtDabsj             // 打包时间
+	yuansjyxx.FVcQingfmbr = data.FVcQingfmbr       //清分目标日
+	yuansjyxx.FVcTingccqffid = data.FVcTingccqffid //停车场清分方ID
+	yuansjyxx.FVcFaxfwjgid = data.FVcFaxfwjgid     //发行服务机构ID 0000000000000020
+	yuansjyxx.FNbJilsl = data.FNbJilsl             //记录数量
+	yuansjyxx.FNbZongje = data.FNbZongje           //总金额
+	yuansjyxx.FVcXiaoxwjlj = data.FVcXiaoxwjlj     //消息文件路径
+
+	_, err := xorm.Table("b_js_yuansjyxx").Insert(yuansjyxx)
 	if err != nil {
-		log.Println("新增打包记录 error")
+		log.Println("新增打包记录 error", err)
 		return err
 	}
 	return nil
@@ -125,7 +141,7 @@ func PackagingMXRecordInsert(mx []types.BJsYuansjymx) error {
 		Yuansjymx.FVcObuzt = v.FVcObuzt
 		Yuansjymx.FVcObuncph = v.FVcObuncph
 
-		_, err := xorm.Table("b_js_jiessj").Insert(Yuansjymx)
+		_, err := xorm.Table("b_js_yuansjymx").Insert(Yuansjymx)
 		if err != nil {
 			log.Println("新增打包明细记录 error")
 			return err

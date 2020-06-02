@@ -6,7 +6,7 @@ import (
 )
 
 ///Users/nicker/go/etc/src/CenterSettlement-go/conf
-var logconffilepath = "CenterSettlement-go/conf/app.conf"
+var logconffilepath = "../conf/app.conf"
 
 //var logconffilepath = "CenterSettlement-go/conf/app.conf"
 

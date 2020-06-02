@@ -10,9 +10,12 @@ import (
 func TimeDifference(intime time.Time, outtime time.Time) string {
 
 	var day string
-	inTime, _ := time.Parse("2006-01-02 15:04:05", intime.String())
-	outTime, _ := time.Parse("2006-01-02 15:04:05", outtime.String())
-	t := outTime.Sub(inTime).String()
+	in := intime.Format("2006-01-02 15:04:05")
+	out := outtime.Format("2006-01-02 15:04:05")
+	inT, _ := time.Parse("2006-01-02 15:04:05", in)
+	outT, _ := time.Parse("2006-01-02 15:04:05", out)
+	t := outT.Sub(inT).String()
+	//t := outTime.Sub(inTime).String()
 	log.Println("时间差", t)
 	if strings.Contains(t, "h") {
 		//h

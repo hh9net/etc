@@ -2,6 +2,8 @@ package storage
 
 import (
 	"CenterSettlement-go/database"
+	"CenterSettlement-go/service"
+	"CenterSettlement-go/types"
 	log "github.com/sirupsen/logrus"
 	"testing"
 	"time"
@@ -9,12 +11,12 @@ import (
 
 //测试查询本省的结算数据 记账卡
 func TestQueryJiessjjz(t *testing.T) {
-	QueryJiessjjz()
+	//QueryJiessjjz()
 }
 
 //测试查询本省的结算数据 储值卡
 func TestQueryJiessjcz(t *testing.T) {
-	QueryJiessjcz()
+	//QueryJiessjcz()
 }
 
 //测试查询本省的结算数据
@@ -62,6 +64,36 @@ func TestTcpResponseRecordInsert(t *testing.T) {
 
 //
 func TestUpdatePackaging(t *testing.T) {
-	s := []string{"051700000111022020042615313200000173", "320102000111032020042414232900000585"}
+	s := []string{"320700001111022020060209372900000432", "320700001111022020060209372900000431"}
 	UpdatePackaging(s)
+}
+func TestGetTingcc(t *testing.T) {
+	GetTingcc("4242420021")
+}
+
+func TestPackagingResRecordInsert(t *testing.T) {
+	var yuansjyxx types.BJsYuansjyxx
+	yuansjyxx.FVcBanbh = "00010000"                               //版本号
+	yuansjyxx.FNbXiaoxlb = 5                                      //消息类别
+	yuansjyxx.FNbXiaoxlx = 7                                      //消息类型
+	yuansjyxx.FVcFaszid = "00000000000000FD"                      //发送者ID
+	yuansjyxx.FVcJieszid = "0000000000000020"                     //接受者ID
+	yuansjyxx.FNbXiaoxxh = 12343454                               //消息序号【消息包号】
+	yuansjyxx.FDtDabsj = time.Now().Format("2020-01-02 15:04:05") // 打包时间
+	yuansjyxx.FVcQingfmbr = "jiaoyisj.Body.ClearTargetDate "      //清分目标日
+	yuansjyxx.FVcTingccqffid = "00000000000000FD"                 //停车场清分方ID
+	yuansjyxx.FVcFaxfwjgid = "0000000000000020"                   //发行服务机构ID 0000000000000020
+	yuansjyxx.FNbJilsl = 2                                        //记录数量
+	yuansjyxx.FNbZongje = "212"                                   //总金额
+	yuansjyxx.FVcXiaoxwjlj = "generatexml/+ fname  "              //消息文件路径
+	err := PackagingRecordInsert(yuansjyxx)
+	if err != nil {
+		log.Println("PackagingRecordInsert error")
+	}
+}
+
+func TestPackagingMXRecordInsert(t *testing.T) {
+
+	mx := service.YuanshiMsgMXAssignment(jiaoyisj)
+	PackagingMXRecordInsert(mx)
 }

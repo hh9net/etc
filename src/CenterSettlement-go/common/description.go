@@ -17,9 +17,15 @@ func Description(data string) string {
 //cx:车型 ckz：出口站、入口站ckcd：出口车道，入口车道cksj：出口时间 rksj：入口时间
 func Detail(cx string, ckz string, ckcd string, cksj string, rksj string) string {
 	//2020-05-03 12:13:11
+	log.Println("cksj", cksj)
+	log.Println("rksj", rksj)
+
+	log.Printf("(cx %s, ckz %s, ckcd %s, cksj %s, rksj %s", cx, ckz, ckcd, cksj, rksj)
 	csj := timeDetail(cksj)
 	rsj := timeDetail(rksj)
 	detail := cx + "|04|" + "3201|" + ckz + "|" + ckcd + "|" + csj + "|03|" + "3201|" + ckz + "|" + ckcd + "|" + rsj
+	log.Printf(detail)
+
 	return detail
 }
 

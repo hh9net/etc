@@ -66,7 +66,7 @@ type ICCard struct {
 	CardType    int      //卡类型，22为储值卡；23记账卡
 	NetNo       string   //网络编码，BCD码 Hex(4) ka网络号（16进制） 数据库10进制
 	CardId      string   //IC卡物理编号，BCD码  Hex(16)   卡号
-	License     string   //0015文件中记录的车牌号 卡内车牌号
+	License     string   //0015文件中记录的车牌号 卡内车牌号 【含颜色】
 	PreBalance  string   //交易前余额，以元为单位 Decimal
 	PostBalance string   //交易后余额，以元为单位 Decimal
 }
@@ -85,7 +85,7 @@ type OBU struct {
 	NetNo    string   //4501  OBU网络号
 	OBUId    string   //OBU物理编号，BCD码  4501191509252866
 	OBEState string   //2字节的OBU状态
-	License  string   //OBU中记录的车牌号
+	License  string   //OBU中记录的车牌号 【含颜色】
 }
 
 //一个原始交易数据包

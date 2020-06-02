@@ -11,18 +11,22 @@ func GetTingcc(tingccbh string) string {
 	database.DBInit()
 	xorm := database.XormClient
 	//停车场信息
-	tingcc := new(types.BTccTingcc)
-	is, err := xorm.Where("F_VC_TINGCCBH=?", tingccbh).Get(tingcc)
-	if is == false {
-		log.Println("没有该停车场")
-		return ""
-	}
+
+	//is, err := xorm.Table("b_tcc_tingcc").Where("F_VC_TINGCCBH=?", tingccbh).Get(&tingcc)
+	tingcc := &types.BTccTingcc{FVcTingccbh: tingccbh}
+	is, err := xorm.Get(tingcc)
 	if err != nil {
-		log.Println("查询停车场名称 error ")
+		log.Println("查询停车场名称 error ", err)
 		return ""
 	}
-	if is == true {
-		return tingcc.F_VC_MINGC
+	if is == false {
+		log.Println("没有该停车场", err)
+		return ""
 	}
-	return tingcc.F_VC_MINGC
+
+	if is == true {
+		log.Println("查询停车场名称  ", tingcc.FVcMingc)
+		return tingcc.FVcMingc
+	}
+	return tingcc.FVcMingc
 }
