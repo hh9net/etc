@@ -67,7 +67,7 @@ func HandleGeneratexml() {
 //
 func GenarateOtherxml(Kalx int, Diqu string) string {
 	//从数据层获取准备的数据
-	//获取本省数据
+	//获取数据
 	jiesuansj := *storage.QueryQitaJiessj(Kalx, Diqu)
 	if Kalx == types.PRECARD && len(jiesuansj) == 0 {
 		log.Println("数据库没有此地区要打包的储值卡的数据", Diqu)

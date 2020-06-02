@@ -32,6 +32,8 @@ func QueryQitaJiessj(KaLx int, Diqu string) *[]types.BJsJiessj {
 	}
 	return &tests
 }
+
+//江苏本省
 func QueryJiessj(KaLx int) *[]types.BJsJiessj {
 	//database.DBInit()
 	xorm := database.XormClient
