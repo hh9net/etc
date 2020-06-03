@@ -21,7 +21,9 @@ func HandleSendXml() {
 		//扫描receive 文件夹 读取文件
 		//获取文件或目录相关信息
 		//pwd := "CenterSettlement-go/sendzipxml/"
-		pwd := "../sendzipxml/"
+		//pwd := "../sendzipxml/"
+
+		pwd := "../generatexml/"
 
 		fileInfoList, err := ioutil.ReadDir(pwd)
 		if err != nil {
@@ -30,8 +32,9 @@ func HandleSendXml() {
 		log.Println("该文件夹下有文件的数量 ：", len(fileInfoList))
 		for i := range fileInfoList {
 			//判断文件的结尾名
-			if strings.HasSuffix(fileInfoList[i].Name(), ".xml.lz77") {
+			if strings.HasSuffix(fileInfoList[i].Name(), ".xml") {
 				log.Println("打印当前文件或目录下的文件名", fileInfoList[i].Name())
+				//解析文件
 
 				//		解析文件  获取数据
 				var sendStru types.SendStru

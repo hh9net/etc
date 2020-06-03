@@ -17,10 +17,10 @@ func Description(data string) string {
 //cx:车型 ckz：出口站、入口站ckcd：出口车道，入口车道cksj：出口时间 rksj：入口时间
 func Detail(cx string, ckz string, ckcd string, cksj string, rksj string) string {
 	//2020-05-03 12:13:11
-	log.Println("cksj", cksj)
-	log.Println("rksj", rksj)
+	//log.Println("cksj", cksj)
+	//log.Println("rksj", rksj)
 
-	log.Printf("(cx %s, ckz %s, ckcd %s, cksj %s, rksj %s", cx, ckz, ckcd, cksj, rksj)
+	//log.Printf("(cx %s, ckz %s, ckcd %s, cksj %s, rksj %s", cx, ckz, ckcd, cksj, rksj)
 	csj := timeDetail(cksj)
 	rsj := timeDetail(rksj)
 	detail := cx + "|04|" + "3201|" + ckz + "|" + ckcd + "|" + csj + "|03|" + "3201|" + ckz + "|" + ckcd + "|" + rsj
@@ -60,12 +60,14 @@ func Name(data string) string {
 }
 func GetLiush(FVcChedjyxh string) string {
 	Liush := []byte(FVcChedjyxh)
+	log.Println(len(FVcChedjyxh))
 	return string(Liush[len(FVcChedjyxh)-2:])
 }
 
 //停车场消费交易编号(停车场编号+交易发生的时间+流水号 )
 func GetId(tingccbh string, jysj string, liush string) string {
-	hb := tingccbh + jysj + liush
+	sj := Jytime(jysj)
+	hb := tingccbh + sj + liush
 	return hb
 }
 

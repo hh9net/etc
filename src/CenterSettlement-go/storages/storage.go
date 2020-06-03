@@ -25,7 +25,7 @@ func QueryQitaJiessj(KaLx int, Diqu string) *[]types.BJsJiessj {
 	tests := make([]types.BJsJiessj, 0)
 	//qerr := xorm.Where("F_NB_DABZT=?", 0).And("F_VC_KAWLH=?", Diqu).And("F_NB_KALX=?", KaLx).Limit(100, 0).Find(&tests)
 	//测试 每次查两条
-	qerr := xorm.Where("F_NB_DABZT=?", 0).And("F_VC_KAWLH=?", Diqu).And("F_NB_KALX=?", KaLx).Limit(2, 0).Find(&tests)
+	qerr := xorm.Where("F_NB_DABZT=?", 0).And("F_VC_KAWLH=?", Diqu).And("F_NB_KALX=?", KaLx).Limit(10, 0).Find(&tests)
 	if qerr != nil {
 		log.Fatalln("查询结算数据出错", qerr)
 	}
@@ -79,7 +79,7 @@ func PackagingRecordInsert(data types.BJsYuansjyxx) error {
 	database.DBInit()
 	xorm := database.XormClient
 	yuansjyxx := new(types.BJsYuansjyxx)
-
+	log.Println("PackagingRecordInsert data : ", data)
 	yuansjyxx.FVcBanbh = data.FVcBanbh             //版本号
 	yuansjyxx.FNbXiaoxlb = data.FNbXiaoxlb         //消息类别
 	yuansjyxx.FNbXiaoxlx = data.FNbXiaoxlx         //消息类型
@@ -99,6 +99,7 @@ func PackagingRecordInsert(data types.BJsYuansjyxx) error {
 		log.Println("新增打包记录 error", err)
 		return err
 	}
+	log.Println("新增打包记录 成功")
 	return nil
 }
 
@@ -134,18 +135,19 @@ func PackagingMXRecordInsert(mx []types.BJsYuansjymx) error {
 		Yuansjymx.FNbJiaoyqye = v.FNbJiaoyqye
 		Yuansjymx.FNbJiaoyhye = v.FNbJiaoyhye
 		Yuansjymx.FVcTacm = v.FVcTacm
-		Yuansjymx.FVcjiaoybs = v.FVcjiaoybs
+		Yuansjymx.FVcJiaoybs = v.FVcJiaoybs
 		Yuansjymx.FVcZongdjh = v.FVcZongdjh
 		Yuansjymx.FVcZongdjyxh = v.FVcZongdjyxh
 		Yuansjymx.FVcObuwlbh = v.FVcObuwlbh
 		Yuansjymx.FVcObuzt = v.FVcObuzt
 		Yuansjymx.FVcObuncph = v.FVcObuncph
-
+		log.Println("明细：", Yuansjymx)
 		_, err := xorm.Table("b_js_yuansjymx").Insert(Yuansjymx)
 		if err != nil {
-			log.Println("新增打包明细记录 error")
+			log.Println("新增打包明细记录 error", err)
 			return err
 		}
+		log.Println("新增打包明细记录 成功", err)
 	}
 	return nil
 }
@@ -166,20 +168,23 @@ func PackagingResRecordInsert(data types.BJsYuansjyydxx) error {
 }
 
 //   更新结算数据打包结果【打包状态：已打包、原始交易包号、包内序号】
-func UpdateDataPackagingResults(Jiaoyjlid []string) error {
+func UpdateDataPackagingResults(Jiaoyjlid []string, Msgid int64) error {
 	database.DBInit()
 	xorm := database.XormClient
-	for _, id := range Jiaoyjlid {
+	for i, idstr := range Jiaoyjlid {
 		Jiessj := new(types.BJsJiessj)
-		Jiessj.FNbDabzt = 1
+		Jiessj.FNbDabzt = 2
+		Jiessj.FNbYuansjybxh = Msgid
+		//Xuh, _ := strconv.Atoi(idstr)
+		Jiessj.FNbJiaoybnxh = i + 1
 
-		_, err := xorm.Table("b_js_jiessj").Where("F_VC_JIAOYJLID=?", id).Update(Jiessj)
+		_, err := xorm.Table("b_js_jiessj").Where("F_VC_JIAOYJLID=?", idstr).Update(Jiessj)
 		if err != nil {
 			log.Println("更新打包状态失败", err)
 			return err
 		}
 	}
-	log.Println("更新打包状态为：打包中 成功")
+	log.Println("更新打包状态为：已达包、原始交易包号、包内序号 成功")
 
 	return nil
 }

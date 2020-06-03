@@ -9,6 +9,7 @@ import (
 	"encoding/hex"
 	"encoding/xml"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"strconv"
@@ -102,14 +103,14 @@ func Genaratexml(Kalx int, Diqu string) string {
 
 	var fname string
 	//创建xml文件 cz 储值卡
-	if Kalx == types.PRECARD {
-		fname = createxml(Diqu, Kalx, outputxml)
 
+	fname = createxml(Diqu, Kalx, outputxml)
+	if fname != "" {
 		//打包成功
-		//  新增打包记录【插入原始交易消息表】
+
 		//原始记录消息包赋值
 		yuansjyxx := YuanshiMsgAssignment(jiaoyisj, fname)
-		//insert
+		//  新增打包记录【插入原始交易消息表】
 		err1 := storage.PackagingRecordInsert(yuansjyxx)
 		if err1 != nil {
 			log.Println("新增消息包打包记录 error ", err1)
@@ -119,21 +120,15 @@ func Genaratexml(Kalx int, Diqu string) string {
 		mx := YuanshiMsgMXAssignment(jiaoyisj)
 		err2 := storage.PackagingMXRecordInsert(mx)
 		if err2 != nil {
-			log.Println("新增消息包打包记录 error ")
+			log.Println("新增消息包打包记录 error ", err2)
 		}
 		//        新增打包应答记录
 		//        更新结算数据打包结果【打包状态：已打包、原始交易包号、包内序号】
-
-		storage.UpdateDataPackagingResults(sjid)
-
+		err3 := storage.UpdateDataPackagingResults(sjid, Messageid)
+		if err3 != nil {
+			log.Println("新增消息包打包记录 error ", err3)
+		}
 	}
-	//创建xml文件 jz 记账卡
-	if Kalx == types.CREDITCARD {
-		fname = createxml(Diqu, Kalx, outputxml)
-	}
-
-	//更新打包状态 已打包
-
 	return fname
 }
 
@@ -170,7 +165,7 @@ func TransAssignment(jiesuansj []types.BJsJiessj, Messageid int64) *types.Messag
 
 		detail := common.Detail(v.FVcChex, v.FVcTingccbh, v.FVcChedid, jiaoysj, rksj)
 		Tran.Service.Detail = detail //交易详细信息 1|04|3201|3201000006|1105|20191204 211733|03|3201|320
-		log.Println("Tran.Service.Detail ：", Tran.Service.Detail)
+		//log.Println("Tran.Service.Detail ：", Tran.Service.Detail)
 		Tran.ICCard.CardType = v.FNbKalx //卡类型 22,23
 		Tran.ICCard.NetNo = v.FVcKawlh   //卡网络号
 		Tran.ICCard.CardId = v.FVcKah    //卡号
@@ -185,19 +180,16 @@ func TransAssignment(jiesuansj []types.BJsJiessj, Messageid int64) *types.Messag
 		Tran.Validation.TransType = types.TRANSTYPE     //交易标识，2位16进制数，PBOC定义，如06为传统交易，09为复合交
 		Tran.Validation.TerminalNo = v.FVcJiamkh        //终端机编号  加密卡号
 		Tran.Validation.TerminalTransNo = v.FVcKajmjyxh //PSAM卡脱机交易序号，在MAC1计算过程中得到  加密加密序列号
-
-		Tran.OBU.NetNo = v.FVcKawlh //OBU网络号
+		Tran.OBU.NetNo = v.FVcKawlh                     //OBU网络号
 		Tran.OBU.OBUId = v.FVcObuid
 		Tran.OBU.OBEState = v.FVcObuzt //2字节的OBU状态
 		obucpys := ChePYS(v.FVcObucpys)
-		Tran.OBU.License = v.FVcObucp + obucpys //OBU中记录的车牌号 皖EYG511蓝 【加颜色????】
-
+		Tran.OBU.License = v.FVcObucp + obucpys   //OBU中记录的车牌号 皖EYG511蓝 【加颜色????】
 		jyje := common.ToHexFormat(v.FNbJine, 8)  //
 		jyhje := common.ToHexFormat(v.FNbJine, 8) //
 		jyqje := common.ToHexFormat(v.FNbJine, 8) //
 		customizedData := common.CustomizedData(v.FVcTacm, jyje, types.TRANSTYPE, v.FVcJiamkh, v.FVcKajmjyxh, jiaoysj, jyhje, jyqje, v.FVcKajyxh)
 		Tran.CustomizedData = customizedData
-
 		//停车场消费交易编号(停车场编号+交易发生的时间+流水号【怎么取】)
 		//流水号  FVcChedjyxh 取后两位
 		liush := common.GetLiush(v.FVcChedjyxh)
@@ -212,7 +204,6 @@ func TransAssignment(jiesuansj []types.BJsJiessj, Messageid int64) *types.Messag
 		Tran.AlgorithmIdentifier = types.ALGORITHMIDENTIFIER
 
 		Trans = append(Trans, Tran)
-
 	}
 	amountStr = common.Fen2Yuan(amount)
 
@@ -252,16 +243,17 @@ func YuanshiMsgAssignment(jiaoyisj *types.Message, fname string) types.BJsYuansj
 	yuansjyxx.FVcJieszid = "0000000000000020"                     //接受者ID
 	yuansjyxx.FNbXiaoxxh = jiaoyisj.Body.MessageId                //消息序号【消息包号】
 	yuansjyxx.FDtDabsj = time.Now().Format("2020-01-02 15:04:05") // 打包时间
-	yuansjyxx.FVcQingfmbr = jiaoyisj.Body.ClearTargetDate         //清分目标日
-	yuansjyxx.FVcTingccqffid = "00000000000000FD"                 //停车场清分方ID
-	yuansjyxx.FVcFaxfwjgid = "0000000000000020"                   //发行服务机构ID 0000000000000020
-	yuansjyxx.FNbJilsl = jiaoyisj.Body.Count                      //记录数量
-	yuansjyxx.FNbZongje = jiaoyisj.Body.Amount                    //总金额
-	yuansjyxx.FVcXiaoxwjlj = "generatexml/" + fname               //消息文件路径
+	log.Println("打包时间", yuansjyxx.FDtDabsj)
+	yuansjyxx.FVcQingfmbr = jiaoyisj.Body.ClearTargetDate //清分目标日
+	yuansjyxx.FVcTingccqffid = "00000000000000FD"         //停车场清分方ID
+	yuansjyxx.FVcFaxfwjgid = "0000000000000020"           //发行服务机构ID 0000000000000020
+	yuansjyxx.FNbJilsl = jiaoyisj.Body.Count              //记录数量
+	yuansjyxx.FNbZongje = jiaoyisj.Body.Amount            //总金额
+	yuansjyxx.FVcXiaoxwjlj = "generatexml/" + fname       //消息文件路径
 	return yuansjyxx
 }
 
-//原始交易消息明细赋值
+//原始交易消息明细 赋值
 func YuanshiMsgMXAssignment(jiaoyisj *types.Message) []types.BJsYuansjymx {
 	var mx []types.BJsYuansjymx
 	var yuansjymx types.BJsYuansjymx
@@ -290,7 +282,7 @@ func YuanshiMsgMXAssignment(jiaoyisj *types.Message) []types.BJsYuansjymx {
 		jyhye, _ := strconv.Atoi(T.ICCard.PostBalance)
 		yuansjymx.FNbJiaoyhye = int64(jyhye)                  //交易后余额
 		yuansjymx.FVcTacm = T.Validation.TAC                  //TAC码
-		yuansjymx.FVcjiaoybs = T.Validation.TransType         //交易标识
+		yuansjymx.FVcJiaoybs = T.Validation.TransType         //交易标识
 		yuansjymx.FVcZongdjh = T.Validation.TerminalNo        //终端机号
 		yuansjymx.FVcZongdjyxh = T.Validation.TerminalTransNo //终端交易序号
 		yuansjymx.FVcObuwlbh = T.OBU.NetNo                    //obu物理编号
@@ -315,14 +307,14 @@ func createxml(Kawlh string, Kalx int, outputxml []byte) string {
 		log.Fatal("Read:", f_werr)
 	}
 	//加入XML头
-	headerBytes := []byte(xml.Header)
+	//headerBytes := []byte(xml.Header)
 	//拼接XML头和实际XML内容
-	xmlOutPutData := append(headerBytes, outputxml...)
+	//xmlOutPutData := append(headerBytes, outputxml...)
 	//这里可以不写，直接使用channel发送给线程2
 	//写入文件
 	//ioutil.WriteFile("CenterSettlement-go/generatexml/"+kalxstr+"_3201_"+Filenameid+".xml", xmlOutPutData, os.ModeAppend)
 
-	_, ferr := fw.Write((xmlOutPutData))
+	_, ferr := fw.Write((outputxml))
 	if ferr != nil {
 		log.Printf("Write xml file error: %v\n", ferr)
 	}
@@ -334,7 +326,6 @@ func createxml(Kawlh string, Kalx int, outputxml []byte) string {
 }
 
 //车牌号颜色转换
-
 func ChePYS(in string) string {
 	var ys string
 	switch in {
@@ -358,6 +349,8 @@ func ChePYS(in string) string {
 		ys = "绿"
 	case "12":
 		ys = "红"
+	case "10000":
+		ys = ""
 	}
 	return ys
 }
@@ -367,6 +360,13 @@ func GetMD5Encode(data []byte) string {
 	h := md5.New()
 	h.Write(data)
 	return hex.EncodeToString(h.Sum(nil))
+}
+
+//
+func GetMD5code() {
+	md5 := md5.New()
+	io.Copy(md5, file)
+	MD5Str := hex.EncodeToString(md5.Sum(nil))
 }
 
 //封装一个函数，处理xml数据的准备

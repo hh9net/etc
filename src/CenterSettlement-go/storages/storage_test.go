@@ -93,6 +93,24 @@ func TestPackagingResRecordInsert(t *testing.T) {
 }
 
 func TestPackagingMXRecordInsert(t *testing.T) {
+	jiaoyisj := &types.Message{
+		Header: types.Header{
+			Version:      "00010000",
+			MessageClass: 5,
+			MessageType:  7,
+			SenderId:     "00000000000000FD",
+			ReceiverId:   "0000000000000020",
+			MessageId:    12345},
+		Body: types.Body{
+			ContentType: 1,
+			//清分目标日 当前日期
+			ClearTargetDate:   time.Now().Format("2006-01-02"),
+			ServiceProviderId: "00000000000000FD",
+			IssuerId:          "0000000000000020",
+			MessageId:         12345,
+			Count:             2,
+			Amount:            "amountStr",
+		}}
 
 	mx := service.YuanshiMsgMXAssignment(jiaoyisj)
 	PackagingMXRecordInsert(mx)

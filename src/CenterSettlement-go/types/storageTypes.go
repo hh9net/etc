@@ -99,7 +99,7 @@ type BJsYuansjymx struct {
 	FNbJiaoyqye  int64  //F_NB_JIAOYQYE	交易前余额	INT
 	FNbJiaoyhye  int64  //F_NB_JIAOYHYE	交易后余额	INT
 	FVcTacm      string //F_VC_TACM	TAC码	VARCHAR(32)
-	FVcjiaoybs   string //F_VC_JIAOYBS	交易标识	VARCHAR(32) 交易标识【取09】 2位16进制数，PBOC定义，如06为传统交易，09为复合交易',
+	FVcJiaoybs   string //F_VC_JIAOYBS	交易标识	VARCHAR(32) 交易标识【取09】 2位16进制数，PBOC定义，如06为传统交易，09为复合交易',
 	FVcZongdjh   string //F_VC_ZONGDJH	终端机号	VARCHAR(32)
 	FVcZongdjyxh string //F_VC_ZONGDJYXH	终端交易序号	VARCHAR(32)
 	FVcObuwlbh   string //F_VC_OBUWLBH	OBU物理编号	VARCHAR(32)
