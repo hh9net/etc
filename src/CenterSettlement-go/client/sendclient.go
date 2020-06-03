@@ -1,7 +1,7 @@
 package client
 
 import (
-	storage "CenterSettlement-go/storages"
+	storage "CenterSettlement-go/storage"
 	"CenterSettlement-go/types"
 	"io"
 	"log"
@@ -40,11 +40,9 @@ func connsendFile(data []byte, fname string, connect net.Conn) error {
 			log.Println("err", werr)
 			return werr
 		}
+		log.Println("发送报文到联网中心成功")
+		return nil
 	}
-
-	log.Println("发送报文到联网中心成功")
-
-	return nil
 }
 
 //发送
@@ -57,14 +55,26 @@ func Sendxml(sendStru *types.SendStru, conn net.Conn) {
 	data = append(data, md5...)
 	err := connsendFile(data, sendStru.Xml_msgName, conn)
 	if err != nil {
-		log.Println("connsendFile err:", err)
-
+		log.Println("connsendFile error:", err)
 	}
 	//发送成功
 	Mid, _ := strconv.Atoi(sendStru.Massageid)
-	err1 := storage.SendedUpdateYuansjyxx(int64(Mid), sendStru.Xml_msgName)
+	//原始交易消息包发送成功更新 发送状态 发送时间 发送成功后消息包的文件路径
+	err1, DBsj := storage.SendedUpdateYuansjyxx(int64(Mid), sendStru.Xml_msgName)
 	if err1 != nil {
-		log.Println("storage.SendedUpdateYuansjyxx  err:", err1)
-
+		log.Println("storage.SendedUpdateYuansjyxx  error:", err1)
 	}
+	//TCP发送记录
+	var record storage.BJsTcpqqjl
+	record.FVcXiaoxxh = strconv.Itoa(Mid)
+	record.FDtZuixsj = DBsj
+	record.FNbChongfcs = 0
+	record.FNbFasz = 1
+	record.FNbMd5 = sendStru.Md5_str
+	err2 := storage.TcpSendRecordInsert(record)
+	if err2 != nil {
+		log.Println("storage.TcpSendRecordInsert error:", err2)
+	}
+	log.Println("TCP发送记录 成功")
+
 }

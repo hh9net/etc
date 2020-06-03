@@ -170,7 +170,7 @@ func UpdateYuansjyxx(Mid int64) error {
 }
 
 // 原始交易消息包发送成功更新 发送状态 发送时间 发送成功后消息包的文件路径
-func SendedUpdateYuansjyxx(Mid int64, fname string) error {
+func SendedUpdateYuansjyxx(Mid int64, fname string) (error, string) {
 	database.DBInit()
 	xorm := database.XormClient
 	log.Println(fname)
@@ -181,10 +181,10 @@ func SendedUpdateYuansjyxx(Mid int64, fname string) error {
 	_, err := xorm.Table("b_js_yuansjyxx").Where("F_NB_XIAOXXH=?", Mid).Update(yuansjyxx)
 	if err != nil {
 		log.Println(" 根据 包号 更新 发送状态 发送时间 发送成功后消息包的文件路径 error", err)
-		return err
+		return err, ""
 	}
 	log.Println(" 根据 包号 更新 发送状态 发送时间 发送成功后消息包的文件路径  成功")
-	return nil
+	return nil, yuansjyxx.FDtFassj
 }
 
 //   新增打包应答记录

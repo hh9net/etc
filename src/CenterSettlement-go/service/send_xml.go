@@ -4,7 +4,7 @@ import (
 	"CenterSettlement-go/client"
 	"CenterSettlement-go/common"
 	"CenterSettlement-go/lz77zip"
-	storage "CenterSettlement-go/storages"
+	storage "CenterSettlement-go/storage"
 	"CenterSettlement-go/types"
 	"fmt"
 	"io/ioutil"

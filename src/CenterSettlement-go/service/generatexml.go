@@ -3,7 +3,7 @@ package service
 import (
 	"CenterSettlement-go/common"
 	"CenterSettlement-go/conf"
-	storage "CenterSettlement-go/storages"
+	storage "CenterSettlement-go/storage"
 	"CenterSettlement-go/types"
 	"crypto/md5"
 	"encoding/hex"
