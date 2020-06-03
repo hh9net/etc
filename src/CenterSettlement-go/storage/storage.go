@@ -202,8 +202,8 @@ func PackagingResRecordInsert(data types.BJsYuansjyydxx) error {
 	return nil
 }
 
-//   更新结算数据打包结果【打包状态：已打包、原始交易包号、包内序号】
-func UpdateDataPackagingResults(Jiaoyjlid []string, Msgid int64) error {
+//   更新结算数据打包结果【打包状态：已打包、原始交易包号、包内序号、清分目标日】
+func UpdateDataPackagingResults(Jiaoyjlid []string, Msgid int64, jiaoyisj *types.Message) error {
 	database.DBInit()
 	xorm := database.XormClient
 	for i, idstr := range Jiaoyjlid {
@@ -212,6 +212,7 @@ func UpdateDataPackagingResults(Jiaoyjlid []string, Msgid int64) error {
 		Jiessj.FNbYuansjybxh = Msgid
 		//Xuh, _ := strconv.Atoi(idstr)
 		Jiessj.FNbJiaoybnxh = i + 1
+		Jiessj.FVcQingfmbr = jiaoyisj.Body.ClearTargetDate //打包当天日期
 
 		_, err := xorm.Table("b_js_jiessj").Where("F_VC_JIAOYJLID=?", idstr).Update(Jiessj)
 		if err != nil {

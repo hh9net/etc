@@ -1,6 +1,7 @@
 package service
 
 import (
+	"CenterSettlement-go/common"
 	"CenterSettlement-go/types"
 	"encoding/xml"
 	"io/ioutil"
@@ -16,7 +17,7 @@ func AnalyzeDataPakage() {
 	tiker := time.NewTicker(time.Second * 3)
 	for {
 		log.Println("执行线程4")
-		log.Println("现在", time.Now().Format("2006-01-02 15:04:05"))
+		log.Println("现在", common.DateTimeNowFormat())
 		<-tiker.C
 		//扫描receive 文件夹 读取文件x信息
 		//获取文件或目录相关信息

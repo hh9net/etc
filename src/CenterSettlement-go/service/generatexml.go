@@ -122,8 +122,8 @@ func Genaratexml(Kalx int, Diqu string) string {
 			log.Println("新增打包明细记录 error ", err2)
 		}
 		//        新增打包应答记录
-		//        更新结算数据打包结果【打包状态：已打包、原始交易包号、包内序号】
-		err3 := storage.UpdateDataPackagingResults(sjid, Messageid)
+		//        更新结算数据打包结果【打包状态：已打包、原始交易包号、包内序号、清分目标日】
+		err3 := storage.UpdateDataPackagingResults(sjid, Messageid, jiaoyisj)
 		if err3 != nil {
 			log.Println("更新结算数据打包结果 error ", err3)
 		}
@@ -148,7 +148,7 @@ func TransAssignment(jiesuansj []types.BJsJiessj, Messageid int64) *types.Messag
 		amount = amount + v.FNbJine        //总金额
 
 		Tran.Service.ServiceType = types.SERVICETYPE //交易服务类型 【写死2】
-		//账单描述[????] 南京南站南广场P3|11小时32分40秒
+		//账单描述  南京南站南广场P3|11小时32分40秒
 		//通过用户账单描述获取 账单信息
 		//d := common.Description(v.FVcZhangdms)
 
@@ -219,7 +219,7 @@ func TransAssignment(jiesuansj []types.BJsJiessj, Messageid int64) *types.Messag
 		Body: types.Body{
 			ContentType: 1,
 			//清分目标日 当前日期
-			ClearTargetDate:   time.Now().Format("2006-01-02"),
+			ClearTargetDate:   common.TodayFormat(),
 			ServiceProviderId: "00000000000000FD",
 			IssuerId:          "0000000000000020",
 			MessageId:         Messageid,
@@ -235,13 +235,13 @@ func TransAssignment(jiesuansj []types.BJsJiessj, Messageid int64) *types.Messag
 //原始记录消息包赋值
 func YuanshiMsgAssignment(jiaoyisj *types.Message, fname string) types.BJsYuansjyxx {
 	var yuansjyxx types.BJsYuansjyxx
-	yuansjyxx.FVcBanbh = "00010000"                               //版本号
-	yuansjyxx.FNbXiaoxlb = 5                                      //消息类别
-	yuansjyxx.FNbXiaoxlx = 7                                      //消息类型
-	yuansjyxx.FVcFaszid = "00000000000000FD"                      //发送者ID
-	yuansjyxx.FVcJieszid = "0000000000000020"                     //接受者ID
-	yuansjyxx.FNbXiaoxxh = jiaoyisj.Body.MessageId                //消息序号【消息包号】
-	yuansjyxx.FDtDabsj = time.Now().Format("2020-01-02 15:04:05") // 打包时间
+	yuansjyxx.FVcBanbh = "00010000"                 //版本号
+	yuansjyxx.FNbXiaoxlb = 5                        //消息类别
+	yuansjyxx.FNbXiaoxlx = 7                        //消息类型
+	yuansjyxx.FVcFaszid = "00000000000000FD"        //发送者ID
+	yuansjyxx.FVcJieszid = "0000000000000020"       //接受者ID
+	yuansjyxx.FNbXiaoxxh = jiaoyisj.Body.MessageId  //消息序号【消息包号】
+	yuansjyxx.FDtDabsj = common.DateTimeNowFormat() // 打包时间
 	log.Println("打包时间", yuansjyxx.FDtDabsj)
 	yuansjyxx.FVcQingfmbr = jiaoyisj.Body.ClearTargetDate //清分目标日
 	yuansjyxx.FVcTingccqffid = "00000000000000FD"         //停车场清分方ID

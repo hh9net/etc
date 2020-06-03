@@ -3,6 +3,7 @@ package service
 import (
 	"CenterSettlement-go/client"
 	"CenterSettlement-go/common"
+	"CenterSettlement-go/conf"
 	"CenterSettlement-go/lz77zip"
 	storage "CenterSettlement-go/storage"
 	"CenterSettlement-go/types"
@@ -49,7 +50,9 @@ func HandleSendXml() {
 				//		解析文件  获取数据
 				sendStru := ParsingXMLFiles(fileInfoList[i].Name())
 				//连接联网中心服务器
-				conn, derr := net.Dial("tcp", "127.0.0.1:8808")
+				address := conf.AddressConfigInit()
+				Address := address.AddressIp + ":" + address.AddressPort
+				conn, derr := net.Dial("tcp", Address)
 				if derr != nil {
 					log.Println("Dial", derr)
 					//return ""
@@ -126,7 +129,16 @@ func ImmediateResponseProcessing(str string, name string) {
 		log.Println("收到联网中心的接收成功的即时应答")
 		log.Println("原始交易数据 发送成功")
 		//TCP 记录联网中心的即时应答
+		var resRecord storage.BJsTcpydjl
+		resRecord.FVcXiaoxxh = string(b[:len(str)-1])
+		resRecord.FNbFasz = 2
+		resRecord.FNbChongfcs = 0
+		resRecord.FDtZuixsj = common.DateTimeNowFormat()
+		err := storage.TcpResponseRecordInsert(resRecord)
+		if err != nil {
+			log.Println(" TCP应答记录插入 error: ", err)
 
+		}
 		//成功后 mv文件夹到另一个文件中
 
 		s := "../sendzipxml/" + name

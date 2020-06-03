@@ -13,6 +13,11 @@ func DateTimeFormat(t time.Time) string {
 	return datetime
 }
 
+//2006-01-02 15:04:05
+func DateTimeNowFormat() string {
+	return time.Now().Format("2006-01-02 15:04:05")
+}
+
 //2006-01-02T15:04:05
 func DateFormat() string {
 	datetime := time.Now().Format("2006-01-02 15:04:05") //后面的参数是固定的 否则将无法正常输出
@@ -24,9 +29,7 @@ func DateFormat() string {
 
 // 2006-01-02
 func TodayFormat() string {
-	today := time.Now().Format("2006-01-02")
-	log.Println("now is :", today)
-	return today
+	return time.Now().Format("2006-01-02")
 }
 
 //处理时间2017-07-07T11:33:53 转为 2017-07-07 11:33:53

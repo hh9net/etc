@@ -1,6 +1,7 @@
 package server
 
 import (
+	"CenterSettlement-go/conf"
 	"CenterSettlement-go/types"
 	"io/ioutil"
 	"log"
@@ -15,13 +16,15 @@ type DataPacket struct {
 
 //模拟联网中心，处理结算数据   业务 模拟
 func Server() {
-	//绑定端口
-	tcpAddr, err := net.ResolveTCPAddr("tcp", ":8808")
+	//绑定端口8806
+	address := conf.AddressConfigInit()
+	Address := address.AddressIp + ":" + address.AddressPort
+	tcpAddr, err := net.ResolveTCPAddr("tcp", Address)
 	if err != nil {
 		log.Println(err.Error())
 	}
 	//监听
-	log.Println("监听客户端 127.0.0.1:8808")
+	log.Println("监听客户端 127.0.0.1:8806")
 	listener, err := net.ListenTCP("tcp", tcpAddr)
 	if err != nil {
 		log.Println(err.Error())

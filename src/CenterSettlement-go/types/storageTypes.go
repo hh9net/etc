@@ -54,6 +54,7 @@ type BJsJiessj struct {
 	FNbDabzt      int       //F_NB_DABZT	打包状态	INT   0 初始 ；1打包中； 2已打包
 	FNbZhengycljg int       //F_NB_ZHENGYCLJG  '争议处理结果 0:未处理、1：争议放过、2：坏账'
 	FNbJusbj      int       //`F_NB_JUSBJ`   DEFAULT '0' COMMENT '拒收标记 0、正常，1、拒收',
+	FVcQingfmbr   string    // `F_NB_QINGFMBR` int(11) DEFAULT NULL COMMENT '清分目标日',
 }
 
 //   B_JS_YUANSJYXX【原始交易消息包表】

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"CenterSettlement-go/conf"
 	"CenterSettlement-go/types"
 	"encoding/xml"
 	"fmt"
@@ -82,8 +83,10 @@ func Response(Filename string, connect net.Conn) {
 //接收联网中心发来数据包
 func Receive() {
 	log.Println("执行线程4")
-	//监听联网中心数据端口
-	listen, lerr := net.Listen("tcp", "127.0.0.1:8808")
+	//监听联网中心数据端口 "127.0.0.1:8809"
+	address := conf.ListeningAddressConfigInit()
+	Address := address.ListeningAddressIp + ":" + address.ListeningAddressPort
+	listen, lerr := net.Listen("tcp", Address)
 	if lerr != nil {
 		fmt.Println("Listen", lerr)
 		return
