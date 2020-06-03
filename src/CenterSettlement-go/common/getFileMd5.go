@@ -11,7 +11,7 @@ import (
 // 获取文件的md5码
 func GetFileMd5(filename string) string {
 	// 文件全路径名
-	path := "../sendzipxml/" + filename
+	path := "../generatexml/" + filename
 	pFile, err := os.Open(path)
 	if err != nil {
 		log.Printf("打开文件失败，filename=%v, err=%v", filename, err)

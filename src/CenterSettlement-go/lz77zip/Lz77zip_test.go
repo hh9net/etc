@@ -1,4 +1,4 @@
-package receive
+package lz77zip
 
 import "testing"
 

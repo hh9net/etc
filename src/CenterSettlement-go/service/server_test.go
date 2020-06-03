@@ -15,7 +15,7 @@ func TestAnalyzeDataPakage(t *testing.T) {
 	AnalyzeDataPakage()
 }
 
-//发送
+//测试 xml 发送
 func TestHandleSendXml(t *testing.T) {
 	HandleSendXml()
 }

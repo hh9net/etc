@@ -3,10 +3,14 @@ package service
 import (
 	"CenterSettlement-go/client"
 	"CenterSettlement-go/common"
+	"CenterSettlement-go/lz77zip"
+	storage "CenterSettlement-go/storages"
 	"CenterSettlement-go/types"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -15,7 +19,7 @@ import (
 func HandleSendXml() {
 	//从文件夹sendzipxml中扫描打包文件（判断这个文件夹下面有没有文件）
 	log.Println("执行线程2")
-	tiker := time.NewTicker(time.Second * 3)
+	tiker := time.NewTicker(time.Second * 5)
 	for {
 		log.Println("执行线程2", <-tiker.C)
 
@@ -25,7 +29,6 @@ func HandleSendXml() {
 		//pwd := "../sendzipxml/"
 
 		pwd := "../generatexml/"
-
 		fileInfoList, err := ioutil.ReadDir(pwd)
 		if err != nil {
 			log.Fatal(err)
@@ -35,6 +38,13 @@ func HandleSendXml() {
 			//判断文件的结尾名
 			if strings.HasSuffix(fileInfoList[i].Name(), ".xml") {
 				log.Println("打印当前文件或目录下的文件名", fileInfoList[i].Name())
+				//压缩文件
+				lz77zip.Lz77zip(fileInfoList[i].Name())
+				////移动压缩文件
+				//s:="../generatexml/"+fileInfoList[i].Name()+".lz77"
+				//des:="../sendzipxml/"+fileInfoList[i].Name()+".lz77"
+				//client.MoveFile(s,des)
+
 				//解析文件
 				//		解析文件  获取数据
 				sendStru := ParsingXMLFiles(fileInfoList[i].Name())
@@ -58,7 +68,7 @@ func HandleSendXml() {
 				}
 				//str := string(buf[:n])
 				//对联网中心的接收应答处理
-				ImmediateResponseProcessing(string(buf[:n]), fileInfoList[i].Name())
+				ImmediateResponseProcessing(string(buf[:n]), fileInfoList[i].Name()+".lz77")
 
 				conn.Close()
 			}
@@ -70,19 +80,40 @@ func HandleSendXml() {
 func ParsingXMLFiles(fname string) types.SendStru {
 	var sendStru types.SendStru
 	//1、获取消息包序号Massageid
-	fstr := strings.Split(fname, "_")
-	sendStru.Massageid = fstr[2]
+	fnstr := strings.Split(fname, "_")
+	idstr := strings.Split(fnstr[2], ".")
+	sendStru.Massageid = idstr[0]
 
 	//2、获取文件大小
-	lengthstr := common.ToHexFormat(GetFileSize(fname), 6)
+	lengthstr := fmt.Sprintf("%06d", GetFileSize(fname))
+
 	sendStru.Xml_length = lengthstr
+	log.Println("发送文件大小", lengthstr)
 
 	//3、获取文件md5  "JZ_3301_00000000000000100094.xml.lz77"
 	sendStru.Md5_str = common.GetFileMd5(fname)
+	if sendStru.Md5_str != "" {
+		log.Println("文件md5：", sendStru.Md5_str)
+	} else {
+		log.Println("获取文件md5 error ")
+	}
 
 	//4、获得文件名
 	sendStru.Xml_msgName = fname
+	log.Println("报文信息：", sendStru)
 
+	//5、更新数据    根据 包号 更新原始交易消息包的【发送状态   发送中】
+	Mid, _ := strconv.Atoi(sendStru.Massageid)
+	err := storage.UpdateYuansjyxx(int64(Mid))
+	if err != nil {
+		log.Println("根据 包号 更新原始交易消息包的发送状态  error: ", err)
+
+	}
+
+	//移动已压缩的xml文件
+	xmls := "../generatexml/" + fname
+	xmldes := "../compressed_xml/" + fname
+	client.MoveFile(xmls, xmldes)
 	return sendStru
 }
 
@@ -106,7 +137,6 @@ func ImmediateResponseProcessing(str string, name string) {
 		log.Println("联网中心的接收失败")
 		log.Println("发送失败")
 		//	发送失败 触发重发机制
-
 	}
 
 }

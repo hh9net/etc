@@ -5,6 +5,7 @@ import (
 	"CenterSettlement-go/types"
 	_ "github.com/go-sql-driver/mysql"
 	"log"
+	"time"
 )
 
 //数据层负责 查询数据、插入数据、准备数据、返回数据、错误处理
@@ -149,6 +150,40 @@ func PackagingMXRecordInsert(mx []types.BJsYuansjymx) error {
 		}
 		log.Println("新增打包明细记录 成功", err)
 	}
+	return nil
+}
+
+//更新数据    根据 包号 更新原始交易消息包的【发送状态   发送中】
+
+func UpdateYuansjyxx(Mid int64) error {
+	database.DBInit()
+	xorm := database.XormClient
+	yuansjyxx := new(types.BJsYuansjyxx)
+	yuansjyxx.FNbFaszt = 1
+	_, err := xorm.Table("b_js_yuansjyxx").Where("F_NB_XIAOXXH=?", Mid).Update(yuansjyxx)
+	if err != nil {
+		log.Println(" 根据 包号 更新原始交易消息包的发送状态 为 ： 发送中 error", err)
+		return err
+	}
+	log.Println(" 根据 包号 更新原始交易消息包的发送状态 为 ： 发送中  成功")
+	return nil
+}
+
+// 原始交易消息包发送成功更新 发送状态 发送时间 发送成功后消息包的文件路径
+func SendedUpdateYuansjyxx(Mid int64, fname string) error {
+	database.DBInit()
+	xorm := database.XormClient
+	log.Println(fname)
+	yuansjyxx := new(types.BJsYuansjyxx)
+	yuansjyxx.FNbFaszt = 2
+	yuansjyxx.FDtFassj = time.Now().Format("2006-01-01 15:04:05")
+	yuansjyxx.FVcXiaoxwjlj = "compressed_xml/" + fname
+	_, err := xorm.Table("b_js_yuansjyxx").Where("F_NB_XIAOXXH=?", Mid).Update(yuansjyxx)
+	if err != nil {
+		log.Println(" 根据 包号 更新 发送状态 发送时间 发送成功后消息包的文件路径 error", err)
+		return err
+	}
+	log.Println(" 根据 包号 更新 发送状态 发送时间 发送成功后消息包的文件路径  成功")
 	return nil
 }
 

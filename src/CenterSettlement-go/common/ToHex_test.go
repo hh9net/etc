@@ -3,6 +3,7 @@ package common
 import (
 	"encoding/binary"
 	"log"
+	"strconv"
 	"testing"
 )
 
@@ -28,4 +29,10 @@ func TestHexToTen(t *testing.T) {
 func TestToHexFormat(t *testing.T) {
 	s := ToHexFormat(int64(49), 8)
 	log.Println(s)
+}
+
+func Test(t *testing.T) {
+	s := "00000000001234"
+	d, _ := strconv.Atoi(s)
+	log.Println(s, d)
 }

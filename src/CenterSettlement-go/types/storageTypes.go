@@ -58,22 +58,22 @@ type BJsJiessj struct {
 
 //   B_JS_YUANSJYXX【原始交易消息包表】
 type BJsYuansjyxx struct {
-	FVcBanbh       string    //F_VC_BANBH	版本号	VARCHAR(32)
-	FNbXiaoxlb     int       //F_NB_XIAOXLB	消息类别	INT
-	FNbXiaoxlx     int       //F_NB_XIAOXLX	消息类型	INT
-	FVcFaszid      string    //F_VC_FASZID	发送者ID	VARCHAR(32)
-	FVcJieszid     string    //F_VC_JIESZID	接收者ID	VARCHAR(32)
-	FNbXiaoxxh     int64     //F_NB_XIAOXXH	消息序号	BIGINT
-	FDtDabsj       string    //F_DT_DABSJ	打包时间	DATETIME
-	FNbFaszt       int       //F_NB_FASZT	发送状态	INT
-	FDtFassj       time.Time //F_DT_FASSJ	发送时间	DATETIME
-	FNbYingdzt     int       //F_NB_YINGDZT	应答状态	INT
-	FVcQingfmbr    string    //F_VC_QINGFMBR	清分目标日	VARCHAR(32)
-	FVcTingccqffid string    //F_VC_TINGCCQFFID	停车场清分方ID	VARCHAR(32)
-	FVcFaxfwjgid   string    //F_VC_FAXFWJGID	发行服务机构ID	VARCHAR(32)
-	FNbJilsl       int       //F_NB_JILSL	记录数量	INT
-	FNbZongje      string    //F_NB_ZONGJE	总金额	INT
-	FVcXiaoxwjlj   string    //F_VC_XIAOXWJLJ	消息文件路径	VARCHAR(512)
+	FVcBanbh       string //F_VC_BANBH	版本号	VARCHAR(32)
+	FNbXiaoxlb     int    //F_NB_XIAOXLB	消息类别	INT
+	FNbXiaoxlx     int    //F_NB_XIAOXLX	消息类型	INT
+	FVcFaszid      string //F_VC_FASZID	发送者ID	VARCHAR(32)
+	FVcJieszid     string //F_VC_JIESZID	接收者ID	VARCHAR(32)
+	FNbXiaoxxh     int64  //F_NB_XIAOXXH	消息序号	BIGINT
+	FDtDabsj       string //F_DT_DABSJ	打包时间	DATETIME
+	FNbFaszt       int    //F_NB_FASZT	发送状态	INT
+	FDtFassj       string //F_DT_FASSJ	发送时间	DATETIME
+	FNbYingdzt     int    //F_NB_YINGDZT	应答状态	INT
+	FVcQingfmbr    string //F_VC_QINGFMBR	清分目标日	VARCHAR(32)
+	FVcTingccqffid string //F_VC_TINGCCQFFID	停车场清分方ID	VARCHAR(32)
+	FVcFaxfwjgid   string //F_VC_FAXFWJGID	发行服务机构ID	VARCHAR(32)
+	FNbJilsl       int    //F_NB_JILSL	记录数量	INT
+	FNbZongje      string //F_NB_ZONGJE	总金额	INT
+	FVcXiaoxwjlj   string //F_VC_XIAOXWJLJ	消息文件路径	VARCHAR(512)
 }
 
 //   B_JS_YUANSJYMX【原始交易明细】

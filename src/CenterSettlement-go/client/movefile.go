@@ -6,14 +6,15 @@ import (
 )
 
 //如果发送成功，把文件移动到指定的文件夹
-func MoveFile(src string, des string) {
+func MoveFile(src string, des string) error {
 	//err := os.Rename("./a", "/tmp/a")
 	err := os.Rename(src, des)
 	if err != nil {
 		log.Fatalln("移动文件错误", err)
-		return
+		return err
 	}
-
+	log.Printf("移动文件%s to %s 成功", src, des)
+	return nil
 }
 
 //删除文件

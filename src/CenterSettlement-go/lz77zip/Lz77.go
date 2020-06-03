@@ -1,4 +1,4 @@
-package receive
+package lz77zip
 
 /*
 #include <stdlib.h>
@@ -14,8 +14,7 @@ import (
 // 静态编译 g++ Lz77.cpp -fPIC -shared -o lz77.so
 func Lz77zip(fname string) {
 	//把CZ_origin.xml  压缩成 "2.xml.lz77"
-	//orilz77file := "../receive/" + fname + ".lz77"
-	orilz77file := "../generatexml/" + fname + ".lz77"
+	orilz77file := "../sendzipxml/" + fname + ".lz77"
 	fn := "../generatexml/" + fname
 	src2 := C.CString(fn)
 	dest2 := C.CString(orilz77file)

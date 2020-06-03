@@ -44,13 +44,13 @@ func ToHexFormat(ten int64, numb int) string {
 		s = fmt.Sprintf("%02x", ten)
 		return s
 	case 6:
-		s = fmt.Sprintf("%02x", ten)
+		s = fmt.Sprintf("%06x", ten)
 		return s
 	case 8:
 		s = fmt.Sprintf("%08x", ten)
 		return s
 	case 12:
-		s = fmt.Sprintf("%08x", ten)
+		s = fmt.Sprintf("%012x", ten)
 		return s
 	default:
 		log.Println("请检查函数参数")
