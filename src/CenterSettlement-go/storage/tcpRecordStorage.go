@@ -26,7 +26,6 @@ type BJsTcpydjl struct {
 
 //表操作
 //1、 发送tcp包，记录tcp数据包
-
 func TcpSendRecordInsert(record BJsTcpqqjl) error {
 	database.DBInit()
 	xorm := database.XormClient
@@ -47,6 +46,39 @@ func TcpSendRecordInsert(record BJsTcpqqjl) error {
 	}
 	log.Println("tcpsend记录 成功")
 	return nil
+}
+
+func TcpSendRecordUpdate(record BJsTcpqqjl) error {
+	database.DBInit()
+	xorm := database.XormClient
+	//session := TransactionBegin(xorm)
+	tcprecord := new(BJsTcpqqjl)
+	//赋值
+
+	//tcprecord.FDtZuixsj = record.FDtZuixsj
+	//tcprecord.FVcXiaoxxh = record.FVcXiaoxxh
+	//tcprecord.FNbFasz = record.FNbFasz
+	//	tcprecord.FNbMd5 = record.FNbMd5
+	//tcprecord.FNbXiaoxcd = record.FNbXiaoxcd
+	tcprecord.FNbChongfcs = record.FNbChongfcs
+	//插入
+	log.Println(record)
+	_, err := xorm.Where("F_VC_XIAOXXH=?", record.FVcXiaoxxh).Update(tcprecord)
+	if err != nil {
+		log.Fatal("发送tcp包，Update tcp数据包 error", err)
+		return err
+	}
+	log.Println("tcpsend记录 Update 成功")
+	return nil
+}
+
+func GetTcpSendRecord(msgid string) (bool, error, int) {
+	database.DBInit()
+	xorm := database.XormClient
+	tcprecord := &BJsTcpqqjl{FVcXiaoxxh: msgid}
+	has, err := xorm.Get(tcprecord)
+	log.Println("获取数据：", has, err, tcprecord.FNbChongfcs)
+	return has, err, tcprecord.FNbChongfcs
 }
 
 //2、即使应答包记录存储

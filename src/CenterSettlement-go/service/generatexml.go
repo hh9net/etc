@@ -28,20 +28,20 @@ func HandleGeneratexml() {
 	tiker := time.NewTicker(time.Second * 3)
 	for {
 		log.Println("执行线程1", <-tiker.C)
-
-		//储值卡 cz xml文件生成
-		czfname := Genaratexml(types.PRECARD, types.JS_NETWORK)
-		if czfname != "" {
-			//没有本省的储值卡原始数据
-			log.Println("没有本省的储值卡原始数据")
-		}
-
-		//记账卡 jz xml文件生成
-		jzfname := Genaratexml(types.CREDITCARD, types.JS_NETWORK)
-		if jzfname != "" {
-			//没有本省的记账卡原始数据
-			log.Println("没有本省的记账卡原始数据")
-		}
+		//
+		////储值卡 cz xml文件生成
+		//czfname := Genaratexml(types.PRECARD, types.JS_NETWORK)
+		//if czfname != "" {
+		//	//没有本省的储值卡原始数据
+		//	log.Println("没有本省的储值卡原始数据")
+		//}
+		//
+		////记账卡 jz xml文件生成
+		//jzfname := Genaratexml(types.CREDITCARD, types.JS_NETWORK)
+		//if jzfname != "" {
+		//	//没有本省的记账卡原始数据
+		//	log.Println("没有本省的记账卡原始数据")
+		//}
 
 		//其他省市地区    xml文件生成
 		for _, Diqu := range types.Gl_network {
@@ -119,13 +119,13 @@ func Genaratexml(Kalx int, Diqu string) string {
 		mx := YuanshiMsgMXAssignment(jiaoyisj)
 		err2 := storage.PackagingMXRecordInsert(mx)
 		if err2 != nil {
-			log.Println("新增消息包打包记录 error ", err2)
+			log.Println("新增打包明细记录 error ", err2)
 		}
 		//        新增打包应答记录
 		//        更新结算数据打包结果【打包状态：已打包、原始交易包号、包内序号】
 		err3 := storage.UpdateDataPackagingResults(sjid, Messageid)
 		if err3 != nil {
-			log.Println("新增消息包打包记录 error ", err3)
+			log.Println("更新结算数据打包结果 error ", err3)
 		}
 	}
 	return fname

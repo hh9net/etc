@@ -124,7 +124,9 @@ func ImmediateResponseProcessing(str string, name string) {
 	if string(b[len(str)-1:]) == "1" {
 
 		log.Println("收到联网中心的接收成功的即时应答")
-		log.Println("发送成功")
+		log.Println("原始交易数据 发送成功")
+		//TCP 记录联网中心的即时应答
+
 		//成功后 mv文件夹到另一个文件中
 
 		s := "../sendzipxml/" + name
