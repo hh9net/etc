@@ -9,7 +9,6 @@ import (
 	"encoding/hex"
 	"encoding/xml"
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"strconv"
@@ -364,9 +363,9 @@ func GetMD5Encode(data []byte) string {
 
 //
 func GetMD5code() {
-	md5 := md5.New()
-	io.Copy(md5, file)
-	MD5Str := hex.EncodeToString(md5.Sum(nil))
+	//md5 := md5.New()
+	//io.Copy(md5, file)
+	//MD5Str := hex.EncodeToString(md5.Sum(nil))
 }
 
 //封装一个函数，处理xml数据的准备

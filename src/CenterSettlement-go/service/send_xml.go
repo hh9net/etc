@@ -2,6 +2,7 @@ package service
 
 import (
 	"CenterSettlement-go/client"
+	"CenterSettlement-go/common"
 	"CenterSettlement-go/types"
 	"io/ioutil"
 	"log"
@@ -13,10 +14,10 @@ import (
 //线程2 发送数据包
 func HandleSendXml() {
 	//从文件夹sendzipxml中扫描打包文件（判断这个文件夹下面有没有文件）
+	log.Println("执行线程2")
 	tiker := time.NewTicker(time.Second * 3)
 	for {
-		log.Println(<-tiker.C)
-		log.Println("执行线程2")
+		log.Println("执行线程2", <-tiker.C)
 
 		//扫描receive 文件夹 读取文件
 		//获取文件或目录相关信息
@@ -35,14 +36,8 @@ func HandleSendXml() {
 			if strings.HasSuffix(fileInfoList[i].Name(), ".xml") {
 				log.Println("打印当前文件或目录下的文件名", fileInfoList[i].Name())
 				//解析文件
-
 				//		解析文件  获取数据
-				var sendStru types.SendStru
-				sendStru.Massageid = "00000000000000100025"
-				sendStru.Md5_str = "@234567812345678123456781234567@"
-				sendStru.Xml_length = "#1122#"
-				sendStru.Xml_msgName = fileInfoList[i].Name()
-
+				sendStru := ParsingXMLFiles(fileInfoList[i].Name())
 				//连接联网中心服务器
 				conn, derr := net.Dial("tcp", "127.0.0.1:8808")
 				if derr != nil {
@@ -52,7 +47,9 @@ func HandleSendXml() {
 				if conn != nil {
 					log.Println("Dial 成功")
 				}
+				//发送
 				client.Sendxml(&sendStru, conn)
+
 				buf := make([]byte, 1024)
 				n, err2 := conn.Read(buf)
 				if err2 != nil {
@@ -63,14 +60,30 @@ func HandleSendXml() {
 				//对联网中心的接收应答处理
 				ImmediateResponseProcessing(string(buf[:n]), fileInfoList[i].Name())
 
-				if "no" == string(buf[:n]) {
-					log.Println("发送失败")
-
-				}
 				conn.Close()
 			}
 		}
 	}
+}
+
+//解析xml文件
+func ParsingXMLFiles(fname string) types.SendStru {
+	var sendStru types.SendStru
+	//1、获取消息包序号Massageid
+	fstr := strings.Split(fname, "_")
+	sendStru.Massageid = fstr[2]
+
+	//2、获取文件大小
+	lengthstr := common.ToHexFormat(GetFileSize(fname), 6)
+	sendStru.Xml_length = lengthstr
+
+	//3、获取文件md5  "JZ_3301_00000000000000100094.xml.lz77"
+	sendStru.Md5_str = common.GetFileMd5(fname)
+
+	//4、获得文件名
+	sendStru.Xml_msgName = fname
+
+	return sendStru
 }
 
 //即使应答处理
@@ -93,6 +106,7 @@ func ImmediateResponseProcessing(str string, name string) {
 		log.Println("联网中心的接收失败")
 		log.Println("发送失败")
 		//	发送失败 触发重发机制
+
 	}
 
 }
