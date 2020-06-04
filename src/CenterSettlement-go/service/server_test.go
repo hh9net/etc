@@ -20,6 +20,7 @@ func TestHandleSendXml(t *testing.T) {
 	HandleSendXml()
 }
 
+//测试原始交易数据打包  xml生成
 func TestHandleGeneratexml(t *testing.T) {
 	HandleGeneratexml()
 }

@@ -47,15 +47,23 @@ func HandleGeneratexml() {
 		for _, Diqu := range types.Gl_network {
 
 			//储值卡 cz xml文件生成
-			czfn := Genaratexml(types.PRECARD, Diqu)
-			if czfn != "" {
+			czerr, czfn := Genaratexml(types.PRECARD, Diqu)
+			if czerr != nil {
+				log.Println("此地区储值卡原始交易数据打包错误", Diqu, czerr)
+				//return
+			}
+			if czerr == nil && czfn != "" {
 				//没有储值卡原始数据
 				log.Println("没有此地区储值卡原始数据", Diqu)
 			}
 
 			//记账卡 jz xml文件生成
-			jzfn := Genaratexml(types.CREDITCARD, Diqu)
-			if jzfn != "" {
+			jzerr, jzfn := Genaratexml(types.CREDITCARD, Diqu)
+			if czerr != nil {
+				log.Println("此地区记账卡原始交易数据打包错误", Diqu, jzerr)
+				//return
+			}
+			if jzerr == nil && jzfn != "" {
 				//没有记账卡原始数据
 				log.Println("没有此地区记账卡原始数据", Diqu)
 			}
@@ -64,17 +72,17 @@ func HandleGeneratexml() {
 }
 
 //
-func Genaratexml(Kalx int, Diqu string) string {
+func Genaratexml(Kalx int, Diqu string) (error, string) {
 	//从数据层获取准备的数据
 	//获取数据
 	jiesuansj := *storage.QueryQitaJiessj(Kalx, Diqu)
 	if Kalx == types.PRECARD && len(jiesuansj) == 0 {
 		log.Println("数据库没有此地区要打包的储值卡的数据", Diqu)
-		return ""
+		return nil, ""
 	}
 	if Kalx == types.CREDITCARD && len(jiesuansj) == 0 {
 		log.Println("数据库没有此地区要打包的记账卡的数据", Diqu)
-		return ""
+		return nil, ""
 	}
 	//消息包序号
 	Messageid := conf.GenerateMessageId()
@@ -88,6 +96,7 @@ func Genaratexml(Kalx int, Diqu string) string {
 	//outputxml,err:=xml.Marshal(v)
 	if err != nil {
 		log.Printf("error: %v\n", err)
+		return err, ""
 	}
 	//更新结算数据为  打包中  jiesuansj
 	sjid := make([]string, 0)
@@ -98,6 +107,7 @@ func Genaratexml(Kalx int, Diqu string) string {
 	err = storage.UpdatePackaging(sjid)
 	if err != nil {
 		log.Println("更新包号错误")
+		return err, ""
 	}
 
 	var fname string
@@ -106,29 +116,36 @@ func Genaratexml(Kalx int, Diqu string) string {
 	fname = createxml(Diqu, Kalx, outputxml)
 	if fname != "" {
 		//打包成功
-
 		//原始记录消息包赋值
 		yuansjyxx := YuanshiMsgAssignment(jiaoyisj, fname)
-		//  新增打包记录【插入原始交易消息表】
+		//  新增原始交易数据打包记录【插入原始交易消息表】
 		err1 := storage.PackagingRecordInsert(yuansjyxx)
 		if err1 != nil {
 			log.Println("新增消息包打包记录 error ", err1)
+			return err1, ""
 		}
 
-		//   新增打包明细记录
+		//   新增原始交易数据打包明细记录
 		mx := YuanshiMsgMXAssignment(jiaoyisj)
 		err2 := storage.PackagingMXRecordInsert(mx)
 		if err2 != nil {
 			log.Println("新增打包明细记录 error ", err2)
+			return err2, ""
 		}
-		//        新增打包应答记录
+
 		//        更新结算数据打包结果【打包状态：已打包、原始交易包号、包内序号、清分目标日】
 		err3 := storage.UpdateDataPackagingResults(sjid, Messageid, jiaoyisj)
 		if err3 != nil {
 			log.Println("更新结算数据打包结果 error ", err3)
 		}
+
+		//        新增打包应答记录
+
+		return nil, fname
+
 	}
-	return fname
+	return nil, fname
+
 }
 
 //赋值
@@ -242,13 +259,14 @@ func YuanshiMsgAssignment(jiaoyisj *types.Message, fname string) types.BJsYuansj
 	yuansjyxx.FVcJieszid = "0000000000000020"       //接受者ID
 	yuansjyxx.FNbXiaoxxh = jiaoyisj.Body.MessageId  //消息序号【消息包号】
 	yuansjyxx.FDtDabsj = common.DateTimeNowFormat() // 打包时间
-	log.Println("打包时间", yuansjyxx.FDtDabsj)
+	log.Println("xml文件打包时间", yuansjyxx.FDtDabsj)
 	yuansjyxx.FVcQingfmbr = jiaoyisj.Body.ClearTargetDate //清分目标日
 	yuansjyxx.FVcTingccqffid = "00000000000000FD"         //停车场清分方ID
 	yuansjyxx.FVcFaxfwjgid = "0000000000000020"           //发行服务机构ID 0000000000000020
 	yuansjyxx.FNbJilsl = jiaoyisj.Body.Count              //记录数量
 	yuansjyxx.FNbZongje = jiaoyisj.Body.Amount            //总金额
 	yuansjyxx.FVcXiaoxwjlj = "generatexml/" + fname       //消息文件路径
+	log.Println("原始记录消息包赋值的数据：", yuansjyxx)
 	return yuansjyxx
 }
 
@@ -287,11 +305,13 @@ func YuanshiMsgMXAssignment(jiaoyisj *types.Message) []types.BJsYuansjymx {
 		yuansjymx.FVcObuwlbh = T.OBU.NetNo                    //obu物理编号
 		yuansjymx.FVcObuzt = T.OBU.OBEState                   //obu状态
 		yuansjymx.FVcObuncph = T.OBU.License                  //obu内车牌号
+		mx = append(mx, yuansjymx)
 	}
-	mx = append(mx, yuansjymx)
+
 	return mx
 }
 
+//创建xml文件
 func createxml(Kawlh string, Kalx int, outputxml []byte) string {
 	var kalxstr string
 	if Kalx == 22 {
@@ -304,6 +324,7 @@ func createxml(Kawlh string, Kalx int, outputxml []byte) string {
 	fw, f_werr := os.Create("../generatexml/" + kalxstr + "_" + Kawlh + "_" + Filenameid + ".xml")
 	if f_werr != nil {
 		log.Fatal("Read:", f_werr)
+		return ""
 	}
 	//加入XML头
 	//headerBytes := []byte(xml.Header)
@@ -316,6 +337,7 @@ func createxml(Kawlh string, Kalx int, outputxml []byte) string {
 	_, ferr := fw.Write((outputxml))
 	if ferr != nil {
 		log.Printf("Write xml file error: %v\n", ferr)
+		return ""
 	}
 	//更新消息包信息
 	fw.Close()

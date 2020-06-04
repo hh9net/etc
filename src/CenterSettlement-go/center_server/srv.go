@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net"
-	"os"
 )
 
 type DataPacket struct {
@@ -49,11 +48,48 @@ func ReceiveHandler(conn net.Conn) {
 	if err != nil {
 		return
 	}
+	//获取数据
+	GetData(buf[:n])
 
-	data := string(buf[:n])
-	log.Println("接收数据")
+	//保存为文件
+	rerr := RevFile(string(buf[:20]), buf[58:])
+	if rerr != nil {
+		log.Println("文件保存失败")
+	}
+
+	//即时应答
+	var replyStru types.ReplyStru
+	replyStru.Massageid = string(buf[:20])
+	replyStru.Result = "1"
+	m := []byte(replyStru.Massageid)
+	r := []byte(replyStru.Result)
+	d := append(m, r...)
+	InstantResponse(d, conn)
+
+	//如果文件比较大要循环读取
+	//把读取的内容保存成文件 存放在center中
+	//判断是否接收完， 如果接收完毕，则回复应答
+	//准备应答报文
+	// 封装函数，去到服务器指定目录中找寻文件，存在打开写会给浏览器， 不存在报错
+	//openSendFile(fileName, w)
+}
+
+//应答
+func InstantResponse(d []byte, conn net.Conn) {
+	// 返回接收成功
+	_, err := conn.Write(d)
+	if err != nil {
+		log.Println("联网中心 conn.Write 错误")
+	}
+
+	conn.Close()
+}
+
+//获取数据
+func GetData(buf []byte) {
+	data := string(buf)
+	log.Println("接收数据:")
 	log.Println(data)
-
 	msgid := string(buf[:20])
 	log.Println("消息包Massageid", msgid)
 
@@ -66,41 +102,18 @@ func ReceiveHandler(conn net.Conn) {
 	msg := string(buf[58:])
 	log.Println("消息包msg：")
 	log.Println(msg)
-
-	//保存为文件
-	RevFile(msgid, buf[58:])
-
-	//即时应答
-	var replyStru types.ReplyStru
-	replyStru.Massageid = "00000000000000100025"
-	replyStru.Result = "1"
-	m := []byte(replyStru.Massageid)
-	r := []byte(replyStru.Result)
-	d := append(m, r...)
-	log.Println(string(d))
-	// 返回ok
-	conn.Write(d)
-
-	//如果文件比较大要循环读取
-
-	//把读取的内容保存成文件 存放在center中
-
-	//判断是否接收完， 如果接收完毕，则回复应答
-	//准备应答报文
-
-	// 封装函数，去到服务器指定目录中找寻文件，存在打开写会给浏览器， 不存在报错
-	//openSendFile(fileName, w)
 }
 
-func RevFile(fileName string, data []byte) {
-
+//保存为文件
+func RevFile(fileName string, data []byte) error {
 	//err := ioutil.WriteFile("test.txt",data, 0644)
-	err := ioutil.WriteFile("../receive/"+fileName+".xml.lz77", data, os.ModeAppend)
+	err := ioutil.WriteFile("../center_server/"+fileName+".xml.lz77", data, 0644)
 	if err != nil {
 		log.Println("联网中心保存文件失败  ioutil.WriteFile  err =", err)
-		return
+		return err
 	}
-
+	log.Println("联网中心保存文件成功")
+	return nil
 	//fs,err := os.Create("../receice/"+fileName)
 	//defer fs.Close()
 	//if err != nil {

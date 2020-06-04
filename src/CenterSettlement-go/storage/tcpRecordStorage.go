@@ -97,7 +97,7 @@ func TcpResponseRecordInsert(resRecord BJsTcpydjl) error {
 	//插入
 	_, err := xorm.Insert(tcpResRecord)
 	if err != nil {
-		log.Fatal("即使应答包记录存储error")
+		log.Fatal("即使应答包记录存储error", err)
 		return err
 	}
 	log.Println("tcpsend记录 即使应答包记录存储 成功")

@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"CenterSettlement-go/common"
 	"CenterSettlement-go/database"
 	"CenterSettlement-go/types"
 	_ "github.com/go-sql-driver/mysql"
@@ -97,10 +98,10 @@ func PackagingRecordInsert(data types.BJsYuansjyxx) error {
 
 	_, err := xorm.Table("b_js_yuansjyxx").Insert(yuansjyxx)
 	if err != nil {
-		log.Println("新增打包记录 error", err)
+		log.Println("新增原始交易数据消息包打包记录 error", err)
 		return err
 	}
-	log.Println("新增打包记录 成功")
+	log.Println("新增原始交易数据消息包打包记录 成功")
 	return nil
 }
 
@@ -111,7 +112,6 @@ func PackagingMXRecordInsert(mx []types.BJsYuansjymx) error {
 
 	Yuansjymx := new(types.BJsYuansjymx)
 	//赋值
-
 	for _, v := range mx {
 		Yuansjymx.FVcXiaoxxh = v.FVcXiaoxxh
 		Yuansjymx.FNbBaonxh = v.FNbBaonxh
@@ -142,14 +142,16 @@ func PackagingMXRecordInsert(mx []types.BJsYuansjymx) error {
 		Yuansjymx.FVcObuwlbh = v.FVcObuwlbh
 		Yuansjymx.FVcObuzt = v.FVcObuzt
 		Yuansjymx.FVcObuncph = v.FVcObuncph
-		log.Println("明细：", Yuansjymx)
+
+		log.Println("原始交易消息明细数据：", Yuansjymx)
 		_, err := xorm.Table("b_js_yuansjymx").Insert(Yuansjymx)
 		if err != nil {
 			log.Println("新增打包明细记录 error", err)
 			return err
 		}
-		log.Println("新增打包明细记录 成功", err)
 	}
+	log.Printf("原始交易消息包%d中 明细数据有：%d 条 数据 ", Yuansjymx.FVcXiaoxxh, len(mx))
+	log.Println("新增打包明细记录 成功")
 	return nil
 }
 
@@ -176,7 +178,7 @@ func SendedUpdateYuansjyxx(Mid int64, fname string) (error, string) {
 	log.Println(fname)
 	yuansjyxx := new(types.BJsYuansjyxx)
 	yuansjyxx.FNbFaszt = 2
-	yuansjyxx.FDtFassj = time.Now().Format("2006-01-01 15:04:05")
+	yuansjyxx.FDtFassj = time.Now()
 	yuansjyxx.FVcXiaoxwjlj = "compressed_xml/" + fname
 	_, err := xorm.Table("b_js_yuansjyxx").Where("F_NB_XIAOXXH=?", Mid).Update(yuansjyxx)
 	if err != nil {
@@ -184,22 +186,9 @@ func SendedUpdateYuansjyxx(Mid int64, fname string) (error, string) {
 		return err, ""
 	}
 	log.Println(" 根据 包号 更新 发送状态 发送时间 发送成功后消息包的文件路径  成功")
-	return nil, yuansjyxx.FDtFassj
-}
 
-//   新增打包应答记录
-func PackagingResRecordInsert(data types.BJsYuansjyydxx) error {
-	database.DBInit()
-	xorm := database.XormClient
-
-	Yuansjyydxx := new(types.BJsYuansjyydxx)
-	//赋值
-	_, err := xorm.Table("b_js_jiessj").Insert(Yuansjyydxx)
-	if err != nil {
-		log.Println("新增打包明细记录 error")
-		return err
-	}
-	return nil
+	sj := common.DateTimeFormat(yuansjyxx.FDtFassj)
+	return nil, sj
 }
 
 //   更新结算数据打包结果【打包状态：已打包、原始交易包号、包内序号、清分目标日】
@@ -222,5 +211,20 @@ func UpdateDataPackagingResults(Jiaoyjlid []string, Msgid int64, jiaoyisj *types
 	}
 	log.Println("更新打包状态为：已达包、原始交易包号、包内序号 成功")
 
+	return nil
+}
+
+//   新增打包应答记录
+func PackagingResRecordInsert(data types.BJsYuansjyydxx) error {
+	database.DBInit()
+	xorm := database.XormClient
+
+	Yuansjyydxx := new(types.BJsYuansjyydxx)
+	//赋值
+	_, err := xorm.Table("b_js_jiessj").Insert(Yuansjyydxx)
+	if err != nil {
+		log.Println("新增打包明细记录 error")
+		return err
+	}
 	return nil
 }

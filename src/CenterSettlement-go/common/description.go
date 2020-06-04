@@ -60,7 +60,7 @@ func Name(data string) string {
 }
 func GetLiush(FVcChedjyxh string) string {
 	Liush := []byte(FVcChedjyxh)
-	log.Println(len(FVcChedjyxh))
+	//log.Println(len(FVcChedjyxh))
 	return string(Liush[len(FVcChedjyxh)-2:])
 }
 
