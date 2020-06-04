@@ -27,9 +27,10 @@ func Lz77zip(fname string) {
 func Lz77Unzipxml(fname string) {
 	//2.xml.lz77 解压为 1.xml "00000000000000100025.xml.lz77"
 	fstr := strings.Split(fname, ".lz77")
-
-	originfile := "../generatexml/" + fstr[0]
-	orilz77file := "../generatexml/" + fname
+	originfile := "../center_server/" + fstr[0] //.xml
+	orilz77file := "../center_server/" + fname  //.xml.lz77
+	//originfile := "../sendxmlsucceed/" + fstr[0]//.xml
+	//orilz77file := "../sendxmlsucceed/" + fname//.xml.lz77
 
 	src1 := C.CString(orilz77file)
 	dest1 := C.CString(originfile)

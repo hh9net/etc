@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Message>
+    <Header>
+        <Version>00010000</Version>
+        <MessageClass>5</MessageClass>
+        <MessageType>7</MessageType>
+        <SenderId>0000000000000020</SenderId>
+        <ReceiverId>00000000000000FD</ReceiverId>
+        <MessageId>114464</MessageId>
+    </Header>
+    <Body ContentType="2">
+        <ClearingOperatorId>0000000000000020</ClearingOperatorId>
+        <ServiceProviderId>0000000000000020</ServiceProviderId>
+        <IssuerId>00000000000000FD</IssuerId>
+        <FileId>20180702</FileId>
+        <ProcessTime>2018-07-03T09:06:04</ProcessTime>
+        <Count>2</Count>
+        <MessageList>
+            <MessageId>6410</MessageId>
+            <Count>1</Count>
+            <Amount>3.00</Amount>
+            <Transaction>
+                <TransId>1</TransId>
+                <Result>1</Result>
+            </Transaction>
+        </MessageList>
+        <MessageList>
+            <MessageId>6462</MessageId>
+            <Count>1</Count>
+            <Amount>2.00</Amount>
+            <Transaction>
+                <TransId>1</TransId>
+                <Result>1</Result>
+            </Transaction>
+        </MessageList>
+    </Body>
+</Message>

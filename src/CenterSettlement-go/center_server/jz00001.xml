@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Message>
+    <Header>
+        <Version>00020000</Version>
+        <MessageClass>5</MessageClass>
+        <MessageType>5</MessageType>
+        <SenderId>0000000000000020</SenderId>
+        <ReceiverId>00000000000000FD</ReceiverId>
+        <MessageId>114509</MessageId>
+    </Header>
+    <Body ContentType="1">
+        <ServiceProviderId>00000000000000FD</ServiceProviderId>
+        <IssuerId>0000000000000020</IssuerId>
+        <MessageId>6474</MessageId>
+        <ProcessTime>2018-07-03T10:15:36</ProcessTime>
+        <Count>29</Count>
+        <Amount>119.00</Amount>
+        <DisputedCount>2</DisputedCount>
+        <DisputedRecord>
+            <TransId>7</TransId>
+            <Result>3</Result>
+        </DisputedRecord>
+        <DisputedRecord>
+            <TransId>9</TransId>
+            <Result>3</Result>
+        </DisputedRecord>
+    </Body>
+</Message>

@@ -11,7 +11,7 @@ import (
 	"os"
 )
 
-//保存联网中心的数据
+//保存联网中心发来的数据
 func SaveFile(connect net.Conn) string {
 	var fileName string
 
@@ -54,7 +54,7 @@ func SaveFile(connect net.Conn) string {
 	headerBytes := []byte(xml.Header)
 	//拼接XML头和实际XML内容
 	xmlOutPutData := append(headerBytes, buf[58:]...)
-	//这里可以不写，直接使用channel发送给线程2
+
 	//写入文件
 	_, fwerr := file.Write((xmlOutPutData))
 	if fwerr != nil {
@@ -111,7 +111,6 @@ func HandleTask(conn net.Conn) {
 //线程3  接收数据包
 func HandleMessage(conn net.Conn) {
 
-	//fileName := ""
 	//把读到的数据 以文件记录
 	Filename := SaveFile(conn)
 	//接收数据即时应答

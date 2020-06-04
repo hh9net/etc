@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Message>
+    <Header>
+        <Version>00010000</Version>
+        <MessageClass>5</MessageClass>
+        <MessageType>5</MessageType>
+        <SenderId>0000000000000020</SenderId>
+        <ReceiverId>00000000000000FD</ReceiverId>
+        <MessageId>114462</MessageId>
+    </Header>
+    <Body ContentType="2">
+        <ClearTargetDate>2018-06-30</ClearTargetDate>
+        <Amount>0.00</Amount>
+        <Count>0</Count>
+        <ProcessTime>2018-07-02T09:18:05</ProcessTime>
+        <List MessageCount="0" FileCount="0">
+            <ServiceProviderId>00000000000000FD</ServiceProviderId>
+            <MessageId/>
+        </List>
+    </Body>
+</Message>

@@ -10,6 +10,8 @@ func TestLz77zip(t *testing.T) {
 	Lz77zip(f)
 }
 func TestLz77Unzip(t *testing.T) {
-	f := "JZ_3301_00000000000000100094.xml.lz77"
+	f := "00000000000000100111.xml.lz77"
+	//f := "CZ_3101_00000000000000100111.xml.lz77"
+
 	Lz77Unzipxml(f)
 }
