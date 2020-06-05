@@ -3,7 +3,6 @@ package service
 import (
 	"CenterSettlement-go/conf"
 	"CenterSettlement-go/types"
-	"encoding/xml"
 	"fmt"
 	"io"
 	"log"
@@ -50,13 +49,13 @@ func SaveFile(connect net.Conn) string {
 		return ""
 	}
 
-	//加入XML头
-	headerBytes := []byte(xml.Header)
-	//拼接XML头和实际XML内容
-	xmlOutPutData := append(headerBytes, buf[58:]...)
+	////加入XML头
+	//headerBytes := []byte(xml.Header)
+	////拼接XML头和实际XML内容
+	//xmlOutPutData := append(headerBytes, buf[58:]...)
 
 	//写入文件
-	_, fwerr := file.Write((xmlOutPutData))
+	_, fwerr := file.Write(buf[58:])
 	if fwerr != nil {
 		log.Printf("Write xml file error: %v\n", ferr)
 	}

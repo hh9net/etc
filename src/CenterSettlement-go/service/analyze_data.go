@@ -16,9 +16,9 @@ func AnalyzeDataPakage() {
 	//定期检查文件夹receive    解压后
 	tiker := time.NewTicker(time.Second * 3)
 	for {
-		log.Println("执行线程4")
+		log.Println("执行线程4", <-tiker.C)
 		log.Println("现在", common.DateTimeNowFormat())
-		<-tiker.C
+
 		//扫描receive 文件夹 读取文件x信息
 		//获取文件或目录相关信息
 		//pwd := "CenterSettlement-go/receive/"

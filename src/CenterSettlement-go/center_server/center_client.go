@@ -6,13 +6,11 @@ import (
 	"CenterSettlement-go/conf"
 	"CenterSettlement-go/lz77zip"
 	"CenterSettlement-go/service"
-	"CenterSettlement-go/storage"
 	"CenterSettlement-go/types"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net"
-	"strconv"
 	"strings"
 )
 
@@ -31,7 +29,7 @@ func CenterClient() {
 		log.Println("Dial 成功")
 	}
 
-	pwd := "../generatexml/"
+	pwd := "CenterSettlement-go/generatexml/"
 	fileInfoList, err := ioutil.ReadDir(pwd)
 	if err != nil {
 		log.Fatal(err)
@@ -56,6 +54,7 @@ func CenterClient() {
 				log.Println("conn.Read err = ", err2)
 				return
 			}
+			log.Println(string(buf[:n]))
 		}
 	}
 }
@@ -84,19 +83,20 @@ func ParsingXMLFiles(fname string) types.SendStru {
 
 	//4、获得文件名
 	sendStru.Xml_msgName = fname
+	//
 	log.Println("报文信息：", sendStru)
 
-	//5、更新数据    根据 包号 更新原始交易消息包的【发送状态   发送中】
-	Mid, _ := strconv.Atoi(sendStru.Massageid)
-	err := storage.UpdateYuansjyxx(int64(Mid))
-	if err != nil {
-		log.Println("根据 包号 更新原始交易消息包的发送状态  error: ", err)
+	////5、更新数据    根据 包号 更新原始交易消息包的【发送状态   发送中】
+	//Mid, _ := strconv.Atoi(sendStru.Massageid)
+	//err := storage.UpdateYuansjyxx(int64(Mid))
+	//if err != nil {
+	//	log.Println("根据 包号 更新原始交易消息包的发送状态  error: ", err)
+	//
+	//}
 
-	}
-
-	//移动已压缩的xml文件
-	xmls := "../generatexml/" + fname
-	xmldes := "../compressed_xml/" + fname
-	client.MoveFile(xmls, xmldes)
+	////移动已压缩的xml文件
+	//xmls := "../generatexml/" + fname
+	//xmldes := "../compressed_xml/" + fname
+	//client.MoveFile(xmls, xmldes)
 	return sendStru
 }
