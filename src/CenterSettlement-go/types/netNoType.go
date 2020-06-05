@@ -62,11 +62,11 @@ const (
 
 	NETWORK_CODE_CNT = 40 // 联网省份数量（发行商）
 
-	PRECARD            = 22   //储值卡
-	CREDITCARD         = 23   //记账卡
-	TRANSTYPE   string = "09" //交易标识
-	SERVICETYPE int    = 2    //原始交易服务类型
-	ALGORITHMIDENTIFIER  int=1//algorithmIdentifier"` //算法标识 1-3DEX  2-SM4
+	PRECARD                    = 22   //储值卡
+	CREDITCARD                 = 23   //记账卡
+	TRANSTYPE           string = "09" //交易标识
+	SERVICETYPE         int    = 2    //原始交易服务类型
+	ALGORITHMIDENTIFIER int    = 1    //algorithmIdentifier"` //算法标识 1-3DEX  2-SM4
 
 )
 
