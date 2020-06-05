@@ -41,3 +41,15 @@ func Lz77Unzipxml(fname string) {
 	defer C.free(unsafe.Pointer(dest1))
 
 }
+
+func Zip(fname string) {
+	//把CZ_origin.xml  压缩成 "2.xml.lz77"  CenterSettlement-go
+	orilz77file := "../center_server/" + fname + ".lz77"
+	fn := "../center_server/" + fname
+	src2 := C.CString(fn)
+	dest2 := C.CString(orilz77file)
+	// 压缩
+	C.Compressfile(src2, dest2)
+	defer C.free(unsafe.Pointer(src2))
+	defer C.free(unsafe.Pointer(dest2))
+}

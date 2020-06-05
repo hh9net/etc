@@ -26,10 +26,10 @@ func CenterClient() {
 		//return ""
 	}
 	if conn != nil {
-		log.Println("Dial 成功")
+		log.Println("Dial 通行宝 成功")
 	}
 
-	pwd := "CenterSettlement-go/generatexml/"
+	pwd := "CenterSettlement-go/center_server/"
 	fileInfoList, err := ioutil.ReadDir(pwd)
 	if err != nil {
 		log.Fatal(err)
@@ -37,7 +37,7 @@ func CenterClient() {
 	log.Println("该文件夹下有文件的数量 ：", len(fileInfoList))
 	for i := range fileInfoList {
 		//判断文件的结尾名
-		if strings.HasSuffix(fileInfoList[i].Name(), ".xml") {
+		if strings.HasSuffix(fileInfoList[i].Name(), "jz00001.xml") {
 			log.Println("打印当前文件或目录下的文件名", fileInfoList[i].Name())
 			//压缩文件
 			lz77zip.Lz77zip(fileInfoList[i].Name())
