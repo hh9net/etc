@@ -5,7 +5,6 @@ import (
 	"CenterSettlement-go/common"
 	"CenterSettlement-go/conf"
 	"CenterSettlement-go/lz77zip"
-	"CenterSettlement-go/service"
 	"CenterSettlement-go/types"
 	"fmt"
 	"io/ioutil"
@@ -68,7 +67,7 @@ func ParsingXMLFiles(fname string) types.SendStru {
 	sendStru.Massageid = idstr[0]
 
 	//2、获取文件大小
-	lengthstr := fmt.Sprintf("%06d", service.GetFileSize(fname))
+	lengthstr := fmt.Sprintf("%06d", common.GetFileSize(fname))
 
 	sendStru.Xml_length = lengthstr
 	log.Println("发送文件大小", lengthstr)

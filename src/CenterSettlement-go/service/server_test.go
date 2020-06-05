@@ -23,3 +23,8 @@ func TestAnalyzeDataPakage(t *testing.T) {
 	//线程4   解析文件
 	AnalyzeDataPakage()
 }
+
+//测试xml文件解析
+func TestParseFile(t *testing.T) {
+	ParseFile()
+}

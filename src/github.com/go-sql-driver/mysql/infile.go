@@ -53,7 +53,7 @@ func DeregisterLocalFile(filePath string) {
 }
 
 // RegisterReaderHandler registers a handler function which is used
-// to receive a io.Reader.
+// to receivexml a io.Reader.
 // The Reader can be used by "LOAD DATA LOCAL INFILE Reader::<name>".
 // If the handler returns a io.ReadCloser Close() is called when the
 // request is finished.

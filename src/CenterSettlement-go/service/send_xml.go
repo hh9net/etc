@@ -88,7 +88,7 @@ func ParsingXMLFiles(fname string) types.SendStru {
 	sendStru.Massageid = idstr[0]
 
 	//2、获取压缩文件大小
-	lengthstr := fmt.Sprintf("%06d", GetFileSize(fname))
+	lengthstr := fmt.Sprintf("%06d", common.GetFileSize(fname))
 	sendStru.Xml_length = lengthstr
 	log.Println("发送压缩文件大小", lengthstr)
 
