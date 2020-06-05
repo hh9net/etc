@@ -34,9 +34,9 @@ func main() {
 	//goroutine2
 	go service.HandleSendXml()
 	//goroutine4
-	go service.AnalyzeDataPakage()
+	//go service.AnalyzeDataPakage()
 	//goroutine3
-	service.Receive()
+	//service.Receive()
 	//主线程处理压缩与解压缩
 
 	//for true {
@@ -44,9 +44,9 @@ func main() {
 	//	time.Sleep(time.Second * 3)
 	//}
 	for {
-		tiker := time.NewTicker(time.Second * 2)
+		tiker := time.NewTicker(time.Second * 3)
 		for {
-			log.Println(<-tiker.C)
+			log.Println("运行 主go程", <-tiker.C)
 		}
 	}
 }

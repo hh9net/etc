@@ -21,7 +21,7 @@ type DB struct {
 
 func QueryQitaJiessj(KaLx int, Diqu string) *[]types.BJsJiessj {
 
-	database.DBInit()
+	//database.DBInit()
 	xorm := database.XormClient
 	//查询多条数据
 	tests := make([]types.BJsJiessj, 0)
@@ -57,7 +57,7 @@ func QueryJiessj(KaLx int) *[]types.BJsJiessj {
 
 //通过交易记录id 更新打包状态为打包中
 func UpdatePackaging(Jiaoyjlid []string) error {
-	database.DBInit()
+	//database.DBInit()
 	xorm := database.XormClient
 
 	for _, id := range Jiaoyjlid {
@@ -78,7 +78,7 @@ func UpdatePackaging(Jiaoyjlid []string) error {
 //打包成功
 //   新增打包记录【插入表b_js_yuansjyxx】
 func PackagingRecordInsert(data types.BJsYuansjyxx) error {
-	database.DBInit()
+	//database.DBInit()
 	xorm := database.XormClient
 	yuansjyxx := new(types.BJsYuansjyxx)
 	log.Println("PackagingRecordInsert data : ", data)
@@ -107,7 +107,7 @@ func PackagingRecordInsert(data types.BJsYuansjyxx) error {
 
 //   新增打包明细记录
 func PackagingMXRecordInsert(mx []types.BJsYuansjymx) error {
-	database.DBInit()
+	//database.DBInit()
 	xorm := database.XormClient
 
 	Yuansjymx := new(types.BJsYuansjymx)
@@ -158,7 +158,7 @@ func PackagingMXRecordInsert(mx []types.BJsYuansjymx) error {
 //更新数据    根据 包号 更新原始交易消息包的【发送状态   发送中】
 
 func UpdateYuansjyxx(Mid int64) error {
-	database.DBInit()
+	//database.DBInit()
 	xorm := database.XormClient
 	yuansjyxx := new(types.BJsYuansjyxx)
 	yuansjyxx.FNbFaszt = 1
@@ -173,7 +173,7 @@ func UpdateYuansjyxx(Mid int64) error {
 
 // 原始交易消息包发送成功更新 发送状态 发送时间 发送成功后消息包的文件路径
 func SendedUpdateYuansjyxx(Mid int64, fname string) (error, string) {
-	database.DBInit()
+	//database.DBInit()
 	xorm := database.XormClient
 	log.Println(fname)
 	yuansjyxx := new(types.BJsYuansjyxx)
@@ -193,7 +193,7 @@ func SendedUpdateYuansjyxx(Mid int64, fname string) (error, string) {
 
 //   更新结算数据打包结果【打包状态：已打包、原始交易包号、包内序号、清分目标日】
 func UpdateDataPackagingResults(Jiaoyjlid []string, Msgid int64, jiaoyisj *types.Message) error {
-	database.DBInit()
+	//database.DBInit()
 	xorm := database.XormClient
 	for i, idstr := range Jiaoyjlid {
 		Jiessj := new(types.BJsJiessj)
@@ -216,7 +216,7 @@ func UpdateDataPackagingResults(Jiaoyjlid []string, Msgid int64, jiaoyisj *types
 
 //   新增打包应答记录
 func PackagingResRecordInsert(data types.BJsYuansjyydxx) error {
-	database.DBInit()
+	//database.DBInit()
 	xorm := database.XormClient
 
 	Yuansjyydxx := new(types.BJsYuansjyydxx)

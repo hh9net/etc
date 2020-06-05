@@ -321,7 +321,7 @@ func createxml(Kawlh string, Kalx int, outputxml []byte) string {
 		kalxstr = "JZ"
 	}
 	//CenterSettlement-go
-	fw, f_werr := os.Create("../generatexml/" + kalxstr + "_" + Kawlh + "_" + Filenameid + ".xml")
+	fw, f_werr := os.Create("CenterSettlement-go/generatexml/" + kalxstr + "_" + Kawlh + "_" + Filenameid + ".xml")
 	if f_werr != nil {
 		log.Fatal("Read:", f_werr)
 		return ""

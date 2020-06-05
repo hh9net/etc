@@ -27,7 +27,7 @@ type BJsTcpydjl struct {
 //表操作
 //1、 发送tcp包，记录tcp数据包
 func TcpSendRecordInsert(record BJsTcpqqjl) error {
-	database.DBInit()
+	//database.DBInit()
 	xorm := database.XormClient
 	//session := TransactionBegin(xorm)
 	tcprecord := new(BJsTcpqqjl)
@@ -49,7 +49,7 @@ func TcpSendRecordInsert(record BJsTcpqqjl) error {
 }
 
 func TcpSendRecordUpdate(record BJsTcpqqjl) error {
-	database.DBInit()
+	//database.DBInit()
 	xorm := database.XormClient
 	//session := TransactionBegin(xorm)
 	tcprecord := new(BJsTcpqqjl)
@@ -73,7 +73,7 @@ func TcpSendRecordUpdate(record BJsTcpqqjl) error {
 }
 
 func GetTcpSendRecord(msgid string) (bool, error, int) {
-	database.DBInit()
+	//database.DBInit()
 	xorm := database.XormClient
 	tcprecord := &BJsTcpqqjl{FVcXiaoxxh: msgid}
 	has, err := xorm.Get(tcprecord)
@@ -83,7 +83,7 @@ func GetTcpSendRecord(msgid string) (bool, error, int) {
 
 //2、即使应答包记录存储
 func TcpResponseRecordInsert(resRecord BJsTcpydjl) error {
-	database.DBInit()
+	//database.DBInit()
 	xorm := database.XormClient
 	//session := TransactionBegin(xorm)
 	tcpResRecord := new(BJsTcpydjl)

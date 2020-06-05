@@ -44,7 +44,7 @@ func SaveFile(connect net.Conn) string {
 	log.Println(msg)
 	//包号作为文件的名字 ，后面再修改名字在解析文件之后，修改文件名
 	fileName = msgid
-	file, ferr := os.Create(fileName)
+	file, ferr := os.Create("CenterSettlement-go/receive/" + fileName)
 	if ferr != nil {
 		fmt.Println("Create", ferr)
 		return ""

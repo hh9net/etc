@@ -22,7 +22,7 @@ func AnalyzeDataPakage() {
 		//扫描receive 文件夹 读取文件x信息
 		//获取文件或目录相关信息
 		//pwd := "CenterSettlement-go/receive/"
-		pwd := "../receive/"
+		pwd := "CenterSettlement-go/receive/"
 		fileInfoList, err := ioutil.ReadDir(pwd)
 		if err != nil {
 			log.Fatal(err)
@@ -36,7 +36,7 @@ func AnalyzeDataPakage() {
 
 				//		解析xml文件
 				//获取xml文件位置
-				content, err := ioutil.ReadFile("../receive/" + fileInfoList[i].Name())
+				content, err := ioutil.ReadFile("CenterSettlement-go/receive/" + fileInfoList[i].Name())
 				if err != nil {
 					log.Println("读文件位置错误信息：", err)
 				}

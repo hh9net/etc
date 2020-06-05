@@ -29,7 +29,7 @@ func HandleSendXml() {
 		//pwd := "CenterSettlement-go/sendzipxml/"
 		//pwd := "../sendzipxml/"
 
-		pwd := "../generatexml/"
+		pwd := "CenterSettlement-go/generatexml/"
 		fileInfoList, err := ioutil.ReadDir(pwd)
 		if err != nil {
 			log.Fatal(err)
@@ -114,8 +114,8 @@ func ParsingXMLFiles(fname string) types.SendStru {
 	}
 
 	//移动已压缩的xml文件
-	xmls := "../generatexml/" + fname
-	xmldes := "../compressed_xml/" + fname
+	xmls := "CenterSettlement-go/generatexml/" + fname
+	xmldes := "CenterSettlement-go/compressed_xml/" + fname
 	client.MoveFile(xmls, xmldes)
 	return sendStru
 }
@@ -141,8 +141,8 @@ func ImmediateResponseProcessing(str string, name string) {
 		}
 		//成功后 mv文件夹到另一个文件中
 
-		s := "../sendzipxml/" + name
-		des := "../sendxmlsucceed/" + name
+		s := "CenterSettlement-go/sendzipxml/" + name
+		des := "CenterSettlement-go/sendxmlsucceed/" + name
 		client.MoveFile(s, des)
 
 	}
