@@ -9,7 +9,7 @@ import (
 //记账处理数据层
 
 //1、新增记账处理的消息记录
-func InsertMessageData(data types.BJsJizclxx) error {
+func InsertMessageData(data *types.BJsJizclxx) error {
 	xorm := database.XormClient
 	//session := TransactionBegin(xorm)
 	jizclxx := new(types.BJsJizclxx)
@@ -28,7 +28,7 @@ func InsertMessageData(data types.BJsJizclxx) error {
 }
 
 //2、新增记账处理消息明细记录
-func InsertMessageMXData(data types.BJsJizclmx) error {
+func InsertMessageMXData(data *types.BJsJizclmx) error {
 
 	xorm := database.XormClient
 	//session := TransactionBegin(xorm)

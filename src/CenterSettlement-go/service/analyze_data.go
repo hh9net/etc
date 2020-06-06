@@ -2,6 +2,7 @@ package service
 
 import (
 	"CenterSettlement-go/common"
+	"CenterSettlement-go/storage"
 	"CenterSettlement-go/types"
 	"encoding/xml"
 	"fmt"
@@ -143,6 +144,7 @@ func Parsexml(filepath string, fname string) {
 			}
 			f := strings.Split(fname, "_")
 			switch f[0] {
+			//
 			case "JZB":
 				//将文件转换为对象
 				var result types.KeepAccountMessage
@@ -153,6 +155,24 @@ func Parsexml(filepath string, fname string) {
 				log.Println("", result)
 
 				//将数据存储数据库
+				//新增记账包消息
+				jzshuju := new(types.BJsJizclxx)
+				//赋值
+				jzshuju.FNbXiaoxxh = 123
+				jzerr := storage.InsertMessageData(jzshuju)
+				if jzerr != nil {
+					log.Println("新增记账包消息错误 ：", jzerr)
+				}
+
+				//新增记账包明细
+				jzshujuMX := new(types.BJsJizclmx)
+				//赋值  调用函数
+				jzshujuMX.FNbYuansjyxxxh = 12
+				jzmxerr := storage.InsertMessageMXData(jzshujuMX)
+				if jzmxerr != nil {
+					log.Println("新增记账包明细 error ：", jzmxerr)
+				}
+				//更新结算数据为已记账
 
 			case "ZYB":
 				var result types.DisputeProcessMessage
@@ -164,6 +184,27 @@ func Parsexml(filepath string, fname string) {
 
 				//将数据存储数据库
 
+				//新增争议包消息
+				zyshuju := new(types.BJsZhengyclxx)
+				//赋值
+				zyshuju.FNbXiaoxxh = 123
+				jzerr := storage.DisputeProcessXXInsert(zyshuju)
+				if jzerr != nil {
+					log.Println("新增争议包消息错误 ：", jzerr)
+				}
+
+				//新增争议包明细
+				//新增争议包消息
+				zyshujuMX := new(types.BJsZhengyjyclmx)
+				//赋值
+				zyshujuMX.FNbZhengyjyclxxxh = 123
+				zyerr := storage.DisputeProcessMxInsert(zyshujuMX)
+				if zyerr != nil {
+					log.Println("新增争议包消息错误 ：", zyerr)
+				}
+
+				//更新结算数据
+
 			case "QFB":
 				var result types.ClearingMessage
 				err = xml.Unmarshal(content, &result)
@@ -174,10 +215,29 @@ func Parsexml(filepath string, fname string) {
 
 				//将数据存储数据库
 
+				//新增清分包消息
+				qfshuju := new(types.BJsQingftjxx)
+				//赋值
+				qfshuju.FNbXiaoxxh = 123
+				qferr := storage.ClearingInsert(qfshuju)
+				if qferr != nil {
+					log.Println("新增清分包消息错误 ：", qferr)
+				}
+
+				//新增清分包明细
+				qfshujumx := new(types.BJsQingftongjimx)
+				//赋值
+				qfshujumx.FNbQingftjxxxh = 123
+				qfmxerr := storage.ClearingInsert(qfshuju)
+				if qfmxerr != nil {
+					log.Println("新增清分包消息错误 ：", qfmxerr)
+				}
+
+				//更新结算数据
+
 			}
 
-			////
-
 		}
+
 	}
 }

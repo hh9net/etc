@@ -8,7 +8,7 @@ import (
 
 //争议处理
 //新增争议处理结果消息包记录
-func DisputeProcessXXInsert(data types.BJsZhengyclxx) error {
+func DisputeProcessXXInsert(data *types.BJsZhengyclxx) error {
 	xorm := database.XormClient
 	//session := TransactionBegin(xorm)
 	zhengyclxx := new(types.BJsZhengyclxx)
@@ -26,7 +26,7 @@ func DisputeProcessXXInsert(data types.BJsZhengyclxx) error {
 }
 
 //新增争议处理结果消息包明细记录
-func DisputeProcessMxInsert(data types.BJsZhengyjyclmx) error {
+func DisputeProcessMxInsert(data *types.BJsZhengyjyclmx) error {
 	xorm := database.XormClient
 	//session := TransactionBegin(xorm)
 	zhengyjyclmx := new(types.BJsZhengyjyclmx)

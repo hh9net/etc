@@ -9,7 +9,7 @@ import (
 //清分统计
 
 //新增清分包记录
-func ClearingInsert(data types.BJsQingftjxx) error {
+func ClearingInsert(data *types.BJsQingftjxx) error {
 
 	xorm := database.XormClient
 	//session := TransactionBegin(xorm)
@@ -29,7 +29,7 @@ func ClearingInsert(data types.BJsQingftjxx) error {
 }
 
 //新增清分统计消息明细包记录
-func ClearingMXInsert(data types.BJsQingftongjimx) error {
+func ClearingMXInsert(data *types.BJsQingftongjimx) error {
 
 	xorm := database.XormClient
 	//session := TransactionBegin(xorm)
@@ -49,7 +49,7 @@ func ClearingMXInsert(data types.BJsQingftongjimx) error {
 }
 
 //新增清分应答消息包记录
-func ClearingYDInsert(data types.BJsQingftjxxyd) error {
+func ClearingYDInsert(data *types.BJsQingftjxxyd) error {
 
 	xorm := database.XormClient
 	//session := TransactionBegin(xorm)
