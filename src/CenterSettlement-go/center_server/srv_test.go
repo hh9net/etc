@@ -17,3 +17,12 @@ func TestCenterClient(t *testing.T) {
 	//模拟联网中心，发送数据
 	CenterClient()
 }
+
+func TestNewDatabase(t *testing.T) {
+	NewDatabase()
+}
+func TestDB_NewTable(t *testing.T) {
+	db := new(DB)
+
+	db.NewTable()
+}
