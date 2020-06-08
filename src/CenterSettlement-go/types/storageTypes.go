@@ -215,7 +215,7 @@ type BJsZhengyclydxx struct {
 
 }
 
-//    B_JS_QINGFTJXX【清分统计消息】
+//    B_JS_QINGFTJXX【清分统计消息】b_js_qingftjmx
 type BJsQingftjxx struct {
 	FVcBanbh         string    //F_VC_BANBH	版本号	VARCHAR(32)
 	FNbXiaoxlb       int       //F_NB_XIAOXLB	消息类别	INT
@@ -224,18 +224,19 @@ type BJsQingftjxx struct {
 	FVcJieszid       string    //F_VC_JIESZID	接收者ID	VARCHAR(32)
 	FNbXiaoxxh       int64     //F_NB_XIAOXXH	消息序号	BIGINT
 	FDtJiessj        time.Time //F_DT_JIESSJ	接收时间	DATETIME
-	FVcQingfmbr      time.Time //F_VC_QINGFMBR	清分目标日	DATE
+	FVcQingfmbr      string    //F_VC_QINGFMBR	清分目标日	DATE
 	FNbQingfzje      int       //F_NB_QINGFZJE	清分总金额	INT
 	FNbQingfsl       int       //F_NB_QINGFSL	清分数量	INT
 	FDtQingftjclsj   time.Time //F_DT_QINGFTJCLSJ	清分统计处理时间	DATETIME
 	FNbYuansjysl     int       //F_NB_YUANSJYSL	原始包交易数量	INT
 	FNbZhengycljgbsl int       //F_NB_ZHENGYCLJGBSL	争议处理结果包数量	INT
 	FVcXiaoxwjlj     string    //F_VC_XIAOXWJLJ	消息文件路径	VARCHAR(512)
+	FDtChulsj        time.Time //`F_DT_CHULSJ` datetime DEFAULT NULL COMMENT '处理时间',
 	FNbWeiyid        int       //`F_NB_WEIYID` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
 }
 
-//    B_JS_QINGFTONGJIMX【清分统计明细】
-type BJsQingftongjimx struct {
+//    B_JS_QINGFTONGJIMX【清分统计明细】b_js_qingftjmx
+type BJsQingftjmx struct {
 	FNbQingftjxxxh    int64  //F_NB_QINGFTJXXXH	清分统计消息序号	BIGINT
 	FNbFenzxh         int    //F_NB_FENZXH	分组序号	INT
 	FVcTongxbzxxtid   string //F_VC_TONGXBZXXTID	通行宝中心系统ID	VARCHAR(32)

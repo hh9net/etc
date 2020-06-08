@@ -39,3 +39,14 @@ func DataTimeFormatHandle(datetime string) string {
 	log.Println(datetime, "to", string(b))
 	return string(b)
 }
+
+//处理时间字符串转时间
+func StrTimeTotime(strTime string) time.Time {
+
+	const Layout = "2006-01-02 15:04:05" //时间常量
+	loc, _ := time.LoadLocation("Asia/Shanghai")
+	t, _ := time.ParseInLocation(Layout, strTime /*需要转换的时间类型字符串*/, loc)
+
+	return t
+
+}

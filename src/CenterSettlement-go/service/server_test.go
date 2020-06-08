@@ -28,3 +28,11 @@ func TestAnalyzeDataPakage(t *testing.T) {
 func TestParseFile(t *testing.T) {
 	ParseFile()
 }
+
+//测试清分包xml文件解析
+func TestParsexml(t *testing.T) {
+	path := "../clearling/"
+	fname := "QFB_00000000000000114462.xml"
+	Parsexml(path, fname)
+
+}
