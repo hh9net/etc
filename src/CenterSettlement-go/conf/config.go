@@ -8,7 +8,7 @@ import (
 
 ///Users/nicker/go/etc/src/CenterSettlement-go/conf
 //var conffilepath = "CenterSettlement-go/conf/app.conf"
-var conffilepath = "../conf/app.conf"
+var conffilepath = "CenterSettlement-go/conf/app.conf"
 
 type Config struct { //配置文件要通过tag来指定配置文件中的名称
 	MHostname     string `ini:"mysql_hostname"`

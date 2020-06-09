@@ -19,9 +19,10 @@ type DB struct {
 	//Db database.XormClient
 }
 
+//查询其他省的结算数据
 func QueryQitaJiessj(KaLx int, Diqu string) *[]types.BJsJiessj {
 
-	//database.DBInit()
+	database.DBInit()
 	xorm := database.XormClient
 	//查询多条数据
 	tests := make([]types.BJsJiessj, 0)
@@ -60,15 +61,23 @@ func UpdatePackaging(Jiaoyjlid []string) error {
 	//database.DBInit()
 	xorm := database.XormClient
 
+	session := TransactionBegin(xorm)
+
 	for _, id := range Jiaoyjlid {
 		Jiessj := new(types.BJsJiessj)
 		Jiessj.FNbDabzt = 1
 		log.Printf("交易记录id:%s 打包状态更新为：1", id)
-		_, err := xorm.Table("b_js_jiessj").Where("F_VC_JIAOYJLID=?", id).Update(Jiessj)
+		_, err := session.Table("b_js_jiessj").Where("F_VC_JIAOYJLID=?", id).Update(Jiessj)
 		if err != nil {
 			log.Println("更新打包状态失败", err)
 			return err
 		}
+	}
+
+	serr := TransactionCommit(session)
+	if serr != nil {
+		log.Println("更新打包状态为：打包中 时，事务错误")
+
 	}
 	log.Println("更新打包状态为：打包中 成功")
 
@@ -80,6 +89,7 @@ func UpdatePackaging(Jiaoyjlid []string) error {
 func PackagingRecordInsert(data types.BJsYuansjyxx) error {
 	//database.DBInit()
 	xorm := database.XormClient
+	session := TransactionBegin(xorm)
 	yuansjyxx := new(types.BJsYuansjyxx)
 	log.Println("PackagingRecordInsert data : ", data)
 	yuansjyxx.FVcBanbh = data.FVcBanbh             //版本号
@@ -96,10 +106,16 @@ func PackagingRecordInsert(data types.BJsYuansjyxx) error {
 	yuansjyxx.FNbZongje = data.FNbZongje           //总金额
 	yuansjyxx.FVcXiaoxwjlj = data.FVcXiaoxwjlj     //消息文件路径
 
-	_, err := xorm.Table("b_js_yuansjyxx").Insert(yuansjyxx)
+	_, err := session.Table("b_js_yuansjyxx").Insert(yuansjyxx)
 	if err != nil {
 		log.Println("新增原始交易数据消息包打包记录 error", err)
 		return err
+	}
+
+	serr := TransactionCommit(session)
+	if serr != nil {
+		log.Println("新增原始交易数据消息包打包记录 时，事务错误")
+
 	}
 	log.Println("新增原始交易数据消息包打包记录 成功")
 	return nil
@@ -109,6 +125,7 @@ func PackagingRecordInsert(data types.BJsYuansjyxx) error {
 func PackagingMXRecordInsert(mx []types.BJsYuansjymx) error {
 	//database.DBInit()
 	xorm := database.XormClient
+	session := TransactionBegin(xorm)
 
 	Yuansjymx := new(types.BJsYuansjymx)
 	//赋值
@@ -144,13 +161,19 @@ func PackagingMXRecordInsert(mx []types.BJsYuansjymx) error {
 		Yuansjymx.FVcObuncph = v.FVcObuncph
 
 		log.Println("原始交易消息明细数据：", Yuansjymx)
-		_, err := xorm.Table("b_js_yuansjymx").Insert(Yuansjymx)
+		_, err := session.Table("b_js_yuansjymx").Insert(Yuansjymx)
 		if err != nil {
 			log.Println("新增打包明细记录 error", err)
 			return err
 		}
 	}
+	serr := TransactionCommit(session)
+	if serr != nil {
+		log.Println("新增打包明细记录 时，事务错误")
+
+	}
 	log.Printf("原始交易消息包%d中 明细数据有：%d 条 数据 ", Yuansjymx.FVcXiaoxxh, len(mx))
+
 	log.Println("新增打包明细记录 成功")
 	return nil
 }
@@ -160,12 +183,19 @@ func PackagingMXRecordInsert(mx []types.BJsYuansjymx) error {
 func UpdateYuansjyxx(Mid int64) error {
 	//database.DBInit()
 	xorm := database.XormClient
+	session := TransactionBegin(xorm)
+
 	yuansjyxx := new(types.BJsYuansjyxx)
 	yuansjyxx.FNbFaszt = 1
-	_, err := xorm.Table("b_js_yuansjyxx").Where("F_NB_XIAOXXH=?", Mid).Update(yuansjyxx)
+	_, err := session.Table("b_js_yuansjyxx").Where("F_NB_XIAOXXH=?", Mid).Update(yuansjyxx)
 	if err != nil {
 		log.Println(" 根据 包号 更新原始交易消息包的发送状态 为 ： 发送中 error", err)
 		return err
+	}
+	serr := TransactionCommit(session)
+	if serr != nil {
+		log.Println("根据 包号 更新原始交易消息包的发送状态 为 ： 发送中 时，事务错误")
+
 	}
 	log.Println(" 根据 包号 更新原始交易消息包的发送状态 为 ： 发送中  成功")
 	return nil
@@ -175,15 +205,21 @@ func UpdateYuansjyxx(Mid int64) error {
 func SendedUpdateYuansjyxx(Mid int64, fname string) (error, string) {
 	//database.DBInit()
 	xorm := database.XormClient
-	log.Println(fname)
+	session := TransactionBegin(xorm)
+
 	yuansjyxx := new(types.BJsYuansjyxx)
 	yuansjyxx.FNbFaszt = 2
 	yuansjyxx.FDtFassj = time.Now()
 	yuansjyxx.FVcXiaoxwjlj = "compressed_xml/" + fname
-	_, err := xorm.Table("b_js_yuansjyxx").Where("F_NB_XIAOXXH=?", Mid).Update(yuansjyxx)
+	_, err := session.Table("b_js_yuansjyxx").Where("F_NB_XIAOXXH=?", Mid).Update(yuansjyxx)
 	if err != nil {
 		log.Println(" 根据 包号 更新 发送状态 发送时间 发送成功后消息包的文件路径 error", err)
 		return err, ""
+	}
+	serr := TransactionCommit(session)
+	if serr != nil {
+		log.Println("根据 包号 更新 发送状态、发送时间、发送成功后的消息包的文件路径 时，事务错误")
+
 	}
 	log.Println(" 根据 包号 更新 发送状态 发送时间 发送成功后消息包的文件路径  成功")
 
@@ -195,6 +231,7 @@ func SendedUpdateYuansjyxx(Mid int64, fname string) (error, string) {
 func UpdateDataPackagingResults(Jiaoyjlid []string, Msgid int64, jiaoyisj *types.Message) error {
 	//database.DBInit()
 	xorm := database.XormClient
+	session := TransactionBegin(xorm)
 	for i, idstr := range Jiaoyjlid {
 		Jiessj := new(types.BJsJiessj)
 		Jiessj.FNbDabzt = 2
@@ -203,12 +240,18 @@ func UpdateDataPackagingResults(Jiaoyjlid []string, Msgid int64, jiaoyisj *types
 		Jiessj.FNbJiaoybnxh = i + 1
 		Jiessj.FVcQingfmbr = jiaoyisj.Body.ClearTargetDate //打包当天日期
 
-		_, err := xorm.Table("b_js_jiessj").Where("F_VC_JIAOYJLID=?", idstr).Update(Jiessj)
+		_, err := session.Table("b_js_jiessj").Where("F_VC_JIAOYJLID=?", idstr).Update(Jiessj)
 		if err != nil {
 			log.Println("更新打包状态失败", err)
 			return err
 		}
 	}
+	serr := TransactionCommit(session)
+	if serr != nil {
+		log.Println("更新打包状态为：已达包、原始交易包号、包内序号 时，事务错误")
+
+	}
+
 	log.Println("更新打包状态为：已达包、原始交易包号、包内序号 成功")
 
 	return nil
