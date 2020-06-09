@@ -26,18 +26,21 @@ func NewDatabase() *DB {
 //创建数据库
 func (db *DB) NewTable() {
 	db = NewDatabase()
-	is, err := db.orm.IsTableEmpty(
+
+	is, err := db.orm.IsTableExist(
 		new(SJsJiessj),
 	)
 	if err != nil {
-
+		log.Println("创建数据库判断数据库表是否存在时 error  ", err)
 	}
 
 	if is == false {
-		//err := engine.Sync2(new(User), new(Group))
-		err = db.orm.CreateTables(new(SJsJiessj))
+		err := db.orm.Sync2(new(SJsJiessj))
+		//err = db.orm.CreateTables(new(SJsJiessj))
 		if err != nil {
+			log.Println("创建数据库 映射表 error ", err)
 
 		}
 	}
+	log.Println("创建数据库 映射表 表已存在")
 }
