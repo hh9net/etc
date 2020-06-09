@@ -137,11 +137,18 @@ func Genaratexml(Kalx int, Diqu string) (error, string) {
 		err3 := storage.UpdateDataPackagingResults(sjid, Messageid, jiaoyisj)
 		if err3 != nil {
 			log.Println("更新结算数据打包结果 error ", err3)
+
+			//把打包状态该为0【初始化为未打包】
 		}
 
 		//        新增打包应答记录
 
 		return nil, fname
+
+	}
+
+	if fname == "" {
+		//把打包中的状态更新为未打包
 
 	}
 	return nil, fname
@@ -259,14 +266,14 @@ func YuanshiMsgAssignment(jiaoyisj *types.Message, fname string) types.BJsYuansj
 	yuansjyxx.FVcJieszid = "0000000000000020"       //接受者ID
 	yuansjyxx.FNbXiaoxxh = jiaoyisj.Body.MessageId  //消息序号【消息包号】
 	yuansjyxx.FDtDabsj = common.DateTimeNowFormat() // 打包时间
-	log.Println("xml文件打包时间", yuansjyxx.FDtDabsj)
+	//log.Println("xml文件打包时间", yuansjyxx.FDtDabsj)
 	yuansjyxx.FVcQingfmbr = jiaoyisj.Body.ClearTargetDate //清分目标日
 	yuansjyxx.FVcTingccqffid = "00000000000000FD"         //停车场清分方ID
 	yuansjyxx.FVcFaxfwjgid = "0000000000000020"           //发行服务机构ID 0000000000000020
 	yuansjyxx.FNbJilsl = jiaoyisj.Body.Count              //记录数量
 	yuansjyxx.FNbZongje = jiaoyisj.Body.Amount            //总金额
 	yuansjyxx.FVcXiaoxwjlj = "generatexml/" + fname       //消息文件路径
-	log.Println("原始记录消息包赋值的数据：", yuansjyxx)
+	//log.Println("原始记录消息包赋值的数据：", yuansjyxx)
 	return yuansjyxx
 }
 
