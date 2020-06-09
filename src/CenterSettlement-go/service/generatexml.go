@@ -106,7 +106,7 @@ func Genaratexml(Kalx int, Diqu string) (error, string) {
 	//更新打包状态  打包中
 	err = storage.UpdatePackaging(sjid)
 	if err != nil {
-		log.Println("更新包号错误")
+		log.Println("更新包号失败")
 		return err, ""
 	}
 

@@ -21,7 +21,6 @@ type DB struct {
 
 //查询其他省的结算数据
 func QueryQitaJiessj(KaLx int, Diqu string) *[]types.BJsJiessj {
-
 	database.DBInit()
 	xorm := database.XormClient
 	//查询多条数据
