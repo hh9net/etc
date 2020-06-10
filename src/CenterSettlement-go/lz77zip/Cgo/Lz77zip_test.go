@@ -1,4 +1,4 @@
-package lz77zip
+package Cgo
 
 import "testing"
 

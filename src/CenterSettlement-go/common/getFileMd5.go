@@ -11,7 +11,7 @@ import (
 // 获取xml文件msg的md5码
 func GetFileMd5(filename string) string {
 	// 文件全路径名
-	path := "CenterSettlement-go/generatexml/" + filename
+	path := "CenterSettlement-go/compressed_xml/" + filename
 	pFile, err := os.Open(path)
 	if err != nil {
 		log.Printf("打开文件失败，filename=%v, err=%v", filename, err)

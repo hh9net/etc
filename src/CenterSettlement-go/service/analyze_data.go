@@ -16,10 +16,11 @@ import (
 func AnalyzeDataPakage() {
 
 	//定期检查文件夹receive    解压后
-	//tiker := time.NewTicker(time.Second * 3)
+
+	//tiker := time.NewTicker(time.Second * 9)
 	for {
 		//log.Println("执行线程4", <-tiker.C)
-		//log.Println("现在执行线程4", common.DateTimeNowFormat())
+		log.Println("现在执行线程4", common.DateTimeNowFormat())
 
 		//1、处理文件解压，解压至receivexml文件夹
 
@@ -33,30 +34,29 @@ func ParseFile() {
 	//扫描receivexml 文件夹 读取文件信息
 	//获取文件或目录相关信息  /Users/nicker/Desktop/Xmlfilebak(2)
 	//pwd := "../receivexml/"
-	pwd := "/Users/nicker/Desktop/Xmlfilebak(2)"
+	pwd := "/Users/nicker/Desktop/Xmlfilebak(3)/"
 
 	//pwd := "CenterSettlement-go/receivexml/"
-	fileInfoList, err := ioutil.ReadDir(pwd)
+	fileList, err := ioutil.ReadDir(pwd)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
-	log.Println("该文件夹下有文件的数量 ：", len(fileInfoList))
-	if len(fileInfoList) == 0 {
+	log.Println("该文件夹下有文件的数量 ：", len(fileList))
+	if len(fileList) == 0 {
 		log.Println("该receivexml 文件夹下没有需要解析的文件")
 		return
 	}
-	for i := range fileInfoList {
-
+	for i := range fileList {
+		log.Println("xml name:", fileList[i].Name()) //打印当前文件或目录下的文件或目录名
 		//判断文件的结尾名
-		if strings.HasSuffix(fileInfoList[i].Name(), ".xml") {
-			log.Println("xml name:", fileInfoList[i].Name()) //打印当前文件或目录下的文件或目录名
+		if strings.HasSuffix(fileList[i].Name(), ".xml") {
 
 			//解析xml文件
-			//获取xml文件位置   /Users/nicker/Desktop/Xmlfilebak(2)
+			//获取xml文件位置   /Users/nicker/Desktop/Xmlfilebak(3)
 			//content, err := ioutil.ReadFile("../receivexml/" + fileInfoList[i].Name())
 			//
-			content, err := ioutil.ReadFile("/Users/nicker/Desktop/Xmlfilebak(2)/" + fileInfoList[i].Name())
+			content, err := ioutil.ReadFile("/Users/nicker/Desktop/Xmlfilebak(3)/" + fileList[i].Name())
 			if err != nil {
 				log.Println("读文件位置错误信息：", err)
 				return
@@ -69,7 +69,7 @@ func ParseFile() {
 				log.Println("解析 receive文件夹中xml文件内容的错误信息：", err)
 			}
 
-			//log.Println("result:", result.Header.MessageClass, result.Header.MessageType, result.Body.ContentType, result.Header.MessageId)
+			log.Println("result:", result.Header.MessageClass, result.Header.MessageType, result.Body.ContentType, result.Header.MessageId)
 			////原始交易数据
 			//if result.Header.MessageClass == 5 && result.Header.MessageType == 7 &&result.Body.ContentType==1{
 			//	//
@@ -78,7 +78,7 @@ func ParseFile() {
 			if result.Header.MessageClass == 5 && result.Header.MessageType == 5 && result.Body.ContentType == 1 {
 				//记账数据包
 				//1、修改文件名字  2、移动文件
-				src := "/Users/nicker/Desktop/Xmlfilebak(2)/" + fileInfoList[i].Name()
+				src := "/Users/nicker/Desktop/Xmlfilebak(3)/" + fileList[i].Name()
 				des := "../keepAccountFile/" + "JZB_" + fmt.Sprintf("%020d", result.Header.MessageId) + ".xml"
 				frerr := common.FileRename(src, des)
 				if frerr != nil {
@@ -92,7 +92,7 @@ func ParseFile() {
 			if result.Header.MessageClass == 5 && result.Header.MessageType == 7 && result.Body.ContentType == 2 {
 				//争议数据包
 				//1、修改文件名字  2、移动文件
-				src := "/Users/nicker/Desktop/Xmlfilebak(2)/" + fileInfoList[i].Name()
+				src := "/Users/nicker/Desktop/Xmlfilebak(3)/" + fileList[i].Name()
 				des := "../disputeProcessFile/" + "ZYB_" + fmt.Sprintf("%020d", result.Header.MessageId) + ".xml"
 				frerr := common.FileRename(src, des)
 				if frerr != nil {
@@ -105,7 +105,7 @@ func ParseFile() {
 			//清分数据包
 			if result.Header.MessageClass == 5 && result.Header.MessageType == 5 && result.Body.ContentType == 2 {
 				//1、修改文件名字  2、移动文件
-				src := "/Users/nicker/Desktop/Xmlfilebak(2)/" + fileInfoList[i].Name()
+				src := "/Users/nicker/Desktop/Xmlfilebak(3)/" + fileList[i].Name()
 				des := "../clearling/" + "QFB_" + fmt.Sprintf("%020d", result.Header.MessageId) + ".xml"
 				frerr := common.FileRename(src, des)
 				if frerr != nil {
@@ -115,6 +115,20 @@ func ParseFile() {
 				//解析xml数据 把数据导入数据库
 				//	Parsexml("../clearling/", "QFB_"+fmt.Sprintf("%020d", result.Header.MessageId)+".xml")
 			}
+
+			//原始数据应答包
+			if result.Header.MessageClass == 6 && result.Header.MessageType == 7 && result.Body.ContentType == 1 {
+				//1、修改文件名字  2、移动文件
+				src := "/Users/nicker/Desktop/Xmlfilebak(3)/" + fileList[i].Name()
+				des := "../reqfile/" + "REQ_" + fmt.Sprintf("%020d", result.Header.MessageId) + ".xml"
+				frerr := common.FileRename(src, des)
+				if frerr != nil {
+					log.Println("清分数据包 修改文件名字错误：", frerr)
+					return
+				}
+				//解析xml数据 把数据导入数据库
+			}
+
 			//		退费数据包【不做】
 			//if result.Header.MessageClass == 5 && result.Header.MessageType == 7 &&result.Body.ContentType==3{
 			//

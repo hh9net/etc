@@ -4,6 +4,7 @@ import (
 	"CenterSettlement-go/client"
 	"CenterSettlement-go/common"
 	"CenterSettlement-go/conf"
+	"CenterSettlement-go/lz77zip"
 	storage "CenterSettlement-go/storage"
 	"CenterSettlement-go/types"
 	"fmt"
@@ -28,8 +29,9 @@ func HandleSendXml() {
 
 		//pwd := "../sendzipxml/"
 
-		//pwd := "CenterSettlement-go/generatexml/"  //先压缩后发送
-		pwd := "CenterSettlement-go/sendzipxml/" //直接发送  压缩在主go做
+		pwd := "CenterSettlement-go/generatexml/" //先压缩后发送
+
+		//pwd := "CenterSettlement-go/sendzipxml/" //直接发送  压缩在主go做
 		fileInfoList, err := ioutil.ReadDir(pwd)
 		if err != nil {
 			log.Fatal(err)
@@ -37,18 +39,28 @@ func HandleSendXml() {
 		log.Println("该文件夹下有文件的数量 ：", len(fileInfoList))
 		for i := range fileInfoList {
 			//判断文件的结尾名
-			if strings.HasSuffix(fileInfoList[i].Name(), ".xml.lz77") {
+			if strings.HasSuffix(fileInfoList[i].Name(), ".xml") {
 				log.Println("打印当前文件或目录下的文件名", fileInfoList[i].Name())
 				//压缩文件
-				//lz77zip.Lz77zip(fileInfoList[i].Name())
-				////移动压缩文件
-				//s:="../generatexml/"+fileInfoList[i].Name()+".lz77"
-				//des:="../sendzipxml/"+fileInfoList[i].Name()+".lz77"
-				//client.MoveFile(s,des)
+				zerr := lz77zip.ZipLz77(fileInfoList[i].Name())
+				if zerr != nil {
+					log.Println("发送文件时 压缩xml文件失败")
+				}
+				if zerr == nil {
+					//移动xml文件
+					s := "CenterSettlement-go/generatexml/" + fileInfoList[i].Name()
+					des := "CenterSettlement-go/compressed_xml/" + fileInfoList[i].Name()
+					merr := client.MoveFile(s, des)
+					if merr != nil {
+						log.Println("client.MoveFile err : ", merr)
+						return
+					}
+				}
 
 				//解析文件
 				//		解析文件  获取数据
 				sendStru := ParsingXMLFiles(fileInfoList[i].Name())
+
 				//连接联网中心服务器
 				address := conf.AddressConfigInit()
 				Address := address.AddressIp + ":" + address.AddressPort
@@ -90,14 +102,12 @@ func ParsingXMLFiles(fname string) types.SendStru {
 	//2、获取压缩文件大小
 	lengthstr := fmt.Sprintf("%06d", common.GetFileSize(fname))
 	sendStru.Xml_length = lengthstr
-	log.Println("发送压缩文件大小", lengthstr)
+	log.Println("要发送压缩文件的大小", lengthstr)
 
 	//3、获取xml文件md5  "JZ_3301_00000000000000100094.xml.lz77"
-
-	//获取消息包序号 xmlname
-	xmlnamestr := strings.Split(fname, ".lz77")
-	xmlname := xmlnamestr[0]
-	sendStru.Md5_str = common.GetFileMd5(xmlname)
+	//xmlnamestr := strings.Split(fname, ".lz77")
+	//xmlname := xmlnamestr[0]
+	sendStru.Md5_str = common.GetFileMd5(fname)
 	if sendStru.Md5_str != "" {
 		log.Println("文件md5为 ：", sendStru.Md5_str)
 	} else {
@@ -105,7 +115,7 @@ func ParsingXMLFiles(fname string) types.SendStru {
 	}
 
 	//4、获得xml文件名
-	sendStru.Xml_msgName = xmlname
+	sendStru.Xml_msgName = fname
 
 	log.Println("报文信息：", sendStru)
 
@@ -116,10 +126,10 @@ func ParsingXMLFiles(fname string) types.SendStru {
 		log.Println("根据 包号 更新原始交易消息包的发送状态  error: ", err)
 	}
 
-	//移动已压缩的xml文件
-	xmls := "CenterSettlement-go/generatexml/" + xmlname
-	xmldes := "CenterSettlement-go/compressed_xml/" + xmlname
-	client.MoveFile(xmls, xmldes)
+	////移动已压缩的xml文件
+	//xmls := "CenterSettlement-go/generatexml/" + xmlname
+	//xmldes := "CenterSettlement-go/compressed_xml/" + xmlname
+	//client.MoveFile(xmls, xmldes)
 	return sendStru
 }
 
@@ -130,22 +140,40 @@ func ImmediateResponseProcessing(str string, name string) {
 	if string(b[len(str)-1:]) == "1" {
 
 		log.Println("收到联网中心的接收成功的即时应答")
-		log.Println("原始交易数据 发送成功")
 		//TCP 记录联网中心的即时应答
+		//TCP接收记录
+		//Mid, _ := strconv.Atoi(string(b[:len(str)-1]))
+		has, serr, reqcount := storage.GetTcpReqRecord(string(b[:len(str)-1]))
+		if serr != nil {
+			log.Println("查询TCP接收记录错误")
+		}
 		var resRecord storage.BJsTcpydjl
-		resRecord.FVcXiaoxxh = string(b[:len(str)-1])
-		resRecord.FNbFasz = 2
-		resRecord.FNbChongfcs = 0
-		resRecord.FDtZuixsj = common.DateTimeNowFormat()
-		err := storage.TcpResponseRecordInsert(resRecord)
-		if err != nil {
-			log.Println(" TCP应答记录插入 error: ", err)
 
+		if has == false {
+			log.Println("此msgid属于第一次接收")
+			resRecord.FVcXiaoxxh = string(b[:len(str)-1])
+			resRecord.FNbFasz = 2
+			resRecord.FNbChongfcs = 0
+			resRecord.FDtZuixsj = time.Now()
+			err2 := storage.TcpResponseRecordInsert(resRecord)
+			if err2 != nil {
+				log.Println("storage.TcpReqRecordInsert error:", err2)
+			}
+		}
+		if has == true {
+			log.Println("此msgid 已经接收")
+			resRecord.FVcXiaoxxh = string(b[:len(str)-1])
+			resRecord.FDtZuixsj = time.Now()
+			resRecord.FNbChongfcs = reqcount + 1
+			err3 := storage.TcpReqRecordUpdate(resRecord)
+			if err3 != nil {
+				log.Println("storage.TcpReqRecordUpdate error:", err3)
+			}
 		}
 		//成功后 mv文件夹到另一个文件中
 
-		s := "CenterSettlement-go/sendzipxml/" + name
-		des := "CenterSettlement-go/sendxmlsucceed/" + name
+		s := "CenterSettlement-go/sendzipxml/" + name + ".lz77"
+		des := "CenterSettlement-go/sendxmlsucceed/" + name + ".lz77"
 		client.MoveFile(s, des)
 
 	}

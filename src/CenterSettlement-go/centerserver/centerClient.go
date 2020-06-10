@@ -1,10 +1,10 @@
-package server
+package centerserver
 
 import (
 	"CenterSettlement-go/client"
 	"CenterSettlement-go/common"
 	"CenterSettlement-go/conf"
-	"CenterSettlement-go/lz77zip"
+	"CenterSettlement-go/lz77zip/Cgo"
 	"CenterSettlement-go/types"
 	"fmt"
 	"io/ioutil"
@@ -28,7 +28,7 @@ func CenterClient() {
 		log.Println("Dial 通行宝 成功")
 	}
 
-	pwd := "CenterSettlement-go/center_server/"
+	pwd := "CenterSettlement-go/centerserver/"
 	fileInfoList, err := ioutil.ReadDir(pwd)
 	if err != nil {
 		log.Fatal(err)
@@ -39,7 +39,7 @@ func CenterClient() {
 		if strings.HasSuffix(fileInfoList[i].Name(), "jz00001.xml") {
 			log.Println("打印当前文件或目录下的文件名", fileInfoList[i].Name())
 			//压缩文件
-			lz77zip.Lz77zip(fileInfoList[i].Name())
+			Cgo.Lz77zip(fileInfoList[i].Name())
 			//解析文件
 			//		解析文件  获取数据
 			sendStru := ParsingXMLFiles(fileInfoList[i].Name())

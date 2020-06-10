@@ -8,41 +8,51 @@ import (
 	"net"
 	"os"
 	"strconv"
+	"time"
 )
 
 func connsendFile(data []byte, fname string, connect net.Conn) error {
 
-	path := "../sendzipxml/" + fname + ".lz77"
+	connect.Write(data)
+	//暂时通过客户端sleep 100毫秒解决粘包问题，还可以通过tcp重连解决，以后再用（包头+数据）封装数据包的方式解决
+	time.Sleep(time.Millisecond * 100)
+
+	path := "CenterSettlement-go/sendzipxml/" + fname + ".lz77"
 	log.Println("path:=", path)
 	file, oserr := os.Open(path)
 	if oserr != nil {
 		log.Println("os.Open error", oserr)
 		return oserr
 	}
-	log.Println("文件conn发送")
+	log.Println("文件conn发送开始")
 	defer file.Close()
-
+	total := 0
 	buff := make([]byte, 1024*10)
 	for {
 		size, rerr := file.Read(buff)
-		if rerr == io.EOF {
-			log.Println("文件读取完毕")
-			return rerr
-		}
+		log.Println(size, rerr)
 		if rerr != nil {
 			log.Println("file.Read err:", rerr)
-			return rerr
+			break
 		}
-		data = append(data, buff[:size]...)
-		log.Println(string(data))
-		_, werr := connect.Write(data)
+		if rerr == io.EOF {
+			log.Println("文件读取完毕")
+			log.Println(total)
+			break
+		}
+
+		//data = append(data, buff[:size]...)
+		//log.Println(string(data))
+		_, werr := connect.Write(buff[:size])
 		if werr != nil {
 			log.Println("err", werr)
 			return werr
 		}
-		log.Println("发送报文到联网中心成功")
-		return nil
+		total += size
+
 	}
+	log.Println("发送报文到联网中心成功")
+	return nil
 }
 
 //发送

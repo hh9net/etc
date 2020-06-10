@@ -1,4 +1,4 @@
-package server
+package centerserver
 
 import (
 	"encoding/xml"

@@ -1,4 +1,4 @@
-package lz77zip
+package Cgo
 
 /*
 #include <stdlib.h>
@@ -7,6 +7,7 @@ package lz77zip
 import "C"
 
 import (
+	log "github.com/sirupsen/logrus"
 	"strings"
 	"unsafe"
 )
@@ -27,10 +28,12 @@ func Lz77zip(fname string) {
 func Lz77Unzipxml(fname string) {
 	//2.xml.lz77 解压为 1.xml "00000000000000100025.xml.lz77"
 	fstr := strings.Split(fname, ".lz77")
-	originfile := "CenterSettlement-go/center_server/" + fstr[0] //.xml
-	orilz77file := "CenterSettlement-go/center_server/" + fname  //.xml.lz77
+	originfile := "./centerserver/" + fstr[0] //.xml
+	orilz77file := "./centerserver/" + fname  //.xml.lz77
 	//originfile := "../sendxmlsucceed/" + fstr[0]//.xml
 	//orilz77file := "../sendxmlsucceed/" + fname//.xml.lz77
+	log.Println("7zfile:", orilz77file)
+	log.Println("xmlfile:", originfile)
 
 	src1 := C.CString(orilz77file)
 	dest1 := C.CString(originfile)
@@ -44,8 +47,8 @@ func Lz77Unzipxml(fname string) {
 
 func Zip(fname string) {
 	//把CZ_origin.xml  压缩成 "2.xml.lz77"  CenterSettlement-go
-	orilz77file := "../center_server/" + fname + ".lz77"
-	fn := "../center_server/" + fname
+	orilz77file := "../centerserver/" + fname + ".lz77"
+	fn := "../centerserver/" + fname
 	src2 := C.CString(fn)
 	dest2 := C.CString(orilz77file)
 	// 压缩

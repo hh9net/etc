@@ -68,7 +68,7 @@ func UpdatePackaging(Jiaoyjlid []string) error {
 		log.Printf("交易记录id:%s 打包状态更新为：1", id)
 		_, err := session.Table("b_js_jiessj").Where("F_VC_JIAOYJLID=?", id).Update(Jiessj)
 		if err != nil {
-			log.Println("更新打包状态失败", err)
+			log.Println("更新打包状态 失败", err)
 			return err
 		}
 	}
@@ -79,6 +79,34 @@ func UpdatePackaging(Jiaoyjlid []string) error {
 
 	}
 	log.Println("更新打包状态为：打包中 成功")
+
+	return nil
+}
+
+//通过交易记录id 更新打包状态为打包中
+func UpdatePackagingInit(Jiaoyjlid []string) error {
+	//database.DBInit()
+	xorm := database.XormClient
+
+	session := TransactionBegin(xorm)
+
+	for _, id := range Jiaoyjlid {
+		Jiessj := new(types.BJsJiessj)
+		Jiessj.FNbDabzt = 0
+		log.Printf("交易记录id:%s 打包状态更新为：1", id)
+		_, err := session.Table("b_js_jiessj").Where("F_VC_JIAOYJLID=?", id).Update(Jiessj)
+		if err != nil {
+			log.Println("更新打包状态失败", err)
+			return err
+		}
+	}
+
+	serr := TransactionCommit(session)
+	if serr != nil {
+		log.Println("更新打包状态为：初始未打包 时，事务错误")
+
+	}
+	log.Println("更新打包状态为：初始未打包 成功")
 
 	return nil
 }

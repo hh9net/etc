@@ -106,14 +106,30 @@ func Genaratexml(Kalx int, Diqu string) (error, string) {
 	//更新打包状态  打包中
 	err = storage.UpdatePackaging(sjid)
 	if err != nil {
-		log.Println("更新包号失败")
+		log.Println("打包状态 为打包中 失败")
 		return err, ""
 	}
 
 	var fname string
 	//创建xml文件 cz 储值卡
-
 	fname = createxml(Diqu, Kalx, outputxml)
+	if fname == "" {
+		//把打包中的状态更新为未打包
+
+		//更新结算数据为  未打包  jiesuansj
+		sjid := make([]string, 0)
+		for _, v := range jiesuansj {
+			sjid = append(sjid, v.FVcJiaoyjlid)
+		}
+		//更新打包状态  打包中
+		err = storage.UpdatePackagingInit(sjid)
+		if err != nil {
+			log.Println("更新打包状态 为 初始未打包状态 失败")
+			return err, ""
+		}
+
+	}
+
 	if fname != "" {
 		//打包成功
 		//原始记录消息包赋值
@@ -144,15 +160,9 @@ func Genaratexml(Kalx int, Diqu string) (error, string) {
 		//        新增打包应答记录
 
 		return nil, fname
-
 	}
 
-	if fname == "" {
-		//把打包中的状态更新为未打包
-
-	}
 	return nil, fname
-
 }
 
 //赋值
