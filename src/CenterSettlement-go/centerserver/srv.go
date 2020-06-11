@@ -1,11 +1,13 @@
 package centerserver
 
 import (
-	"CenterSettlement-go/centerYuanshi"
 	"CenterSettlement-go/client"
 	"CenterSettlement-go/types"
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/xml"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net"
@@ -50,9 +52,9 @@ func Server() {
 func ReceiveHandler(conn net.Conn) {
 	defer conn.Close()
 	//接受客户端发来的要传文件的文件信息data
-	buffer := make([]byte, 100)
+	buffer := make([]byte, 58)
 	d, e := conn.Read(buffer)
-	log.Println("文件数据data：", string(buffer[:d]), e)
+	log.Println("描述文件的数据data：", string(buffer[:d]), e)
 	fileNameid := string(buffer[:20])
 
 	msglength := string(buffer[20:26])
@@ -63,63 +65,21 @@ func ReceiveHandler(conn net.Conn) {
 
 	//msgid := string(buffer[:20])
 	//log.Println("消息包Massageid", msgid)
-	//创建文件
-	fs, err := os.Create("../centerserver/" + fileNameid + ".xml.lz77")
-	defer fs.Close()
-	if err != nil {
-		log.Println("os.Create err =", err)
-		return
+	//接收文件，保存文件，即使应答
+	rferr := RevFile(fileNameid, conn, msglength)
+	if rferr != nil {
+		log.Println("文件保存失败", rferr)
 	}
 
-	j, _ := strconv.Atoi(msglength)
-	total := 0
-	i := 0
-	//每次读取数据长度
-	buf := make([]byte, 100)
-	for {
-		n, err := conn.Read(buf)
-		if err != nil {
-			return
-		}
-		total += n
-		i += 1
+	//处理文件
+	HandleFile(msgmd5, fileNameid)
 
-		if n == 0 {
-			log.Println("文件读取完毕")
-			break
-		}
-		if err != nil {
-			log.Println("conn.Read err:", err)
-			return
-		}
-		fs.Write(buf[:n])
-
-		//如果实际总接受字节数与客户端给的要传输字节数相等，说明传输完毕
-		if total == j {
-			fmt.Println("文件接受成功,共", total, "字节")
-			//回复客户端已收到文件
-			//conn.Write([]byte("文件接受成功"))
-
-			//即时应答
-			var replyStru types.ReplyStru
-			//replyStru.Massageid = string(buf[:20])
-			replyStru.Massageid = fileNameid
-
-			replyStru.Result = "1"
-			m := []byte(replyStru.Massageid)
-			r := []byte(replyStru.Result)
-			d := append(m, r...)
-			InstantResponse(d, conn)
-			break
-		}
-		rerr := RevFile(string(buf[:20]), buf[58:])
-		if rerr != nil {
-			log.Println("文件保存失败")
-		}
-	}
-	log.Println("循环写文件次数", i)
 	//获取数据
 	//GetData(buffer[:n])
+}
+
+func CheckFile() {
+
 }
 
 //应答
@@ -152,46 +112,63 @@ func GetData(buf []byte) {
 	log.Println(msg)
 }
 
-//保存为文件
-func RevFile(fileName string, data []byte) error {
-	//err := ioutil.WriteFile("test.txt",data, 0644)
-	//保存为文件
-	//iowerr := ioutil.WriteFile("../centerserver/"+fileNameid+".xml.lz77", buf[:n], 0644)
-	//if iowerr != nil {
-	//	log.Println("联网中心保存文件失败  ioutil.WriteFile  err =", iowerr)
-	//	return
-	//}
-	log.Println("联网中心保存文件成功")
+//接收文件 保存为文件
+func RevFile(fileNameid string, conn net.Conn, msglength string) error {
+	//创建文件
+	fs, err := os.Create("../centerserver/" + fileNameid + ".xml.lz77")
+	defer fs.Close()
+	if err != nil {
+		log.Println("os.Create err =", err)
+		return err
+	}
+
+	j, _ := strconv.Atoi(msglength) //压缩文件长度
+	total := 0
+	i := 0 //循环次数
+	//每次读取数据长度
+	buf := make([]byte, 100)
+	for {
+		//读取内容
+		n, rerr := conn.Read(buf)
+		if rerr != nil {
+			log.Println("conn.Read err:", rerr)
+			return rerr
+		}
+		total += n
+		i += 1
+
+		if n == 0 {
+			log.Println("文件读取完毕")
+			break
+		}
+		//写入文件
+		fs.Write(buf[:n])
+
+		//如果实际总接受字节数与客户端给的要传输字节数相等，说明传输完毕
+		if total == j {
+			log.Println("文件接受成功,共", total, "字节")
+			//回复客户端已收到文件
+			//conn.Write([]byte("文件接受成功"))
+
+			//即时应答
+			var replyStru types.ReplyStru
+			//replyStru.Massageid = string(buf[:20])
+			replyStru.Massageid = fileNameid
+
+			replyStru.Result = "1"
+			m := []byte(replyStru.Massageid)
+			r := []byte(replyStru.Result)
+			d := append(m, r...)
+			InstantResponse(d, conn)
+			break
+		}
+
+	}
+	log.Println("循环写文件次数", i)
 	return nil
-	//fs,err := os.Create("../receice/"+fileName)
-	//defer fs.Close()
-	//if err != nil {
-	//	log.Println("os.Create err =",err)
-	//	return
-	//}
-	//// 拿到数据
-	////buf := make([]byte ,1024*10)
-	//for {
-	//	n,err := fs.Read(buf)
-	//	if err != nil {
-	//		log.Println("fs.Read error =",err)
-	//		if err == io.EOF {
-	//			log.Println("文件结束了",err)
-	//		}
-	//		return
-	//	}
-	//	if n == 0 {
-	//		log.Println("文件结束了",err)
-	//		return
-	//	}
-	//	n,werr :=fs.Write(buf[:n])
-	//	if werr != nil {
-	//		log.Println("联网中心保存文件失败",err)
-	//	}
-	//}
 }
 
-func HandleFile() {
+func HandleFile(msgmd5, fileNameid string) {
 	//扫描文件夹  解压缩文件
 	//从文件夹center_server中扫描打包文件（判断这个文件夹下面有没有文件）
 
@@ -208,22 +185,36 @@ func HandleFile() {
 		log.Println("该文件夹下有文件的数量 ：", len(fileInfoList))
 		for i := range fileInfoList {
 			//判断文件的结尾名
-			if strings.HasSuffix(fileInfoList[i].Name(), ".xml.lz77") {
+			if strings.HasSuffix(fileInfoList[i].Name(), ".lz77") {
 				log.Println("打印当前文件或目录下的文件名", fileInfoList[i].Name())
+
 				//解压缩
 				//zerr:= UnZipLz77(fileInfoList[i].Name())//新版bug
-				zerr := centerYuanshi.UnZipLz77(fileInfoList[i].Name())
+				zerr := UnZipLz77(fileInfoList[i].Name())
 				if zerr != nil {
-					log.Println("发送文件时 压缩xml文件失败")
+					log.Println(" 解压缩文件失败")
 				}
 				if zerr == nil {
 					//移动xml文件
 					s := "./" + fileInfoList[i].Name()
 					des := "../centerYuanshi/zip/" + fileInfoList[i].Name()
 					merr := client.MoveFile(s, des)
+
 					if merr != nil {
 						log.Println("client.MoveFile err : ", merr)
 						return
+					}
+
+				}
+
+				fstr := strings.Split(fileInfoList[i].Name(), ".lz77")
+				if fileNameid == fstr[0] {
+					//校验文件 校验其md5
+					fmd5 := GetFileMd5(fileNameid)
+					if fmd5 == msgmd5 {
+						log.Println("文件md5一致")
+					} else {
+						log.Println("文件md5 不一致")
 					}
 				}
 
@@ -258,10 +249,11 @@ func HandleFile() {
 				//ImmediateResponseProcessing(string(buf[:n]), fileInfoList[i].Name())
 				//
 				//conn.Close()
-			} else {
-				log.Println("该联网中心没有需要解析原始交易消息xml")
-				break
 			}
+			//else {
+			//	log.Println("该联网中心没有需要解析原始交易消息xml")
+			//	log.Println("fileInfoList[i].Name():",fileInfoList[i].Name())
+			//}
 		}
 	}
 }
@@ -338,4 +330,20 @@ func Parsexml(pwd string, fname string) {
 	log.Println("把原始数据xml插入数据库", pwd, fname)
 
 	//把解析过的原始交易消息xml移动文件夹
+}
+
+// 获取xml文件msg的md5码
+func GetFileMd5(filename string) string {
+	// 文件全路径名
+	path := "../centerYuanshi/" + filename
+	pFile, err := os.Open(path)
+	if err != nil {
+		log.Printf("打开文件失败，filename=%v, err=%v", filename, err)
+		return ""
+	}
+	defer pFile.Close()
+	md5h := md5.New()
+	io.Copy(md5h, pFile)
+	log.Println("成功获取md5")
+	return hex.EncodeToString(md5h.Sum(nil))
 }

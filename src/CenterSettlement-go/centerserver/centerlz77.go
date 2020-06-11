@@ -234,30 +234,32 @@ func (d *decoder) readWord(bits int) (uint16, int) {
 	return result, bits
 }
 
-func (d *decoder) Decode(dest []byte) error {
+func (d *decoder) Decode(dest []byte) (err error) {
 	b := bytes.NewBuffer(dest)
 	b.Reset()
 
-	for b.Len() < len(dest) {
+	for {
 		flag, n := d.readBit()
-		if n < 1 {
-			return errors.New("incomplete: flag")
+		if n == 0 {
+			err = errors.New("incomplete: flag")
+			break
 		}
 
 		if flag == 0 {
 			w, n := d.readWord(8)
 			if n < 8 {
-				return errors.New("incomplete: normal")
+				break
 			}
 			b.WriteByte(byte(w))
 		} else {
 			var q int
 			for {
-				val, n := d.readBit()
-				if n < 1 {
-					return errors.New("incomplete: q")
+				bit, n := d.readBit()
+				if n == 0 {
+					err = errors.New("incomplete: q")
+					break
 				}
-				if val == 0 {
+				if bit == 0 {
 					break
 				}
 				q++
@@ -267,24 +269,32 @@ func (d *decoder) Decode(dest []byte) error {
 			if q > 0 {
 				w, n := d.readWord(q)
 				if n < q {
-					return errors.New("incomplete: length")
+					err = errors.New("incomplete: length")
+					break
 				}
-				length = 1 << q
+
+				length = 1
+				length <<= q
 				length += int(w)
-				length += 1
+				length++
 			}
 
 			// offset
 			bits := int(math.Ceil(math.Log2(float64(b.Len()))))
 			w, n := d.readWord(bits)
 			if n < bits {
-				return errors.New("incomplete: offset")
+				err = errors.New("incomplete: offset")
+				break
 			}
 			offset := int(w)
 			b.Write(dest[offset : offset+length])
 		}
 	}
-	return nil
+
+	if b.Len() == len(dest) {
+		return nil
+	}
+	return
 }
 
 func Decompress(input io.Reader, output io.Writer) error {
@@ -341,7 +351,7 @@ func UnZipLz77(fname string) error {
 
 	fn := strings.Split(fname, ".lz77")
 
-	outpwd := "../centerYuanshi/" + fn[0]
+	outpwd := "../centeryuanshi/" + fn[0]
 	out, cerr := os.Create(outpwd)
 	if cerr != nil {
 		log.Fatalln(cerr)
@@ -353,6 +363,7 @@ func UnZipLz77(fname string) error {
 		log.Fatalln(unzerr)
 		return err
 	}
+	log.Println("原始交易消息解压成功")
 	return nil
 	//log.Println(Decompress(origin, os.Stdout))
 }

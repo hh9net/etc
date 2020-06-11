@@ -8,14 +8,13 @@ import (
 	"net"
 	"os"
 	"strconv"
-	"time"
 )
 
 func connsendFile(data []byte, fname string, connect net.Conn) error {
 
 	connect.Write(data)
 	//暂时通过客户端sleep 100毫秒解决粘包问题，还可以通过tcp重连解决，以后再用（包头+数据）封装数据包的方式解决
-	time.Sleep(time.Millisecond * 100)
+	//time.Sleep(time.Millisecond * 100)
 
 	path := "CenterSettlement-go/sendzipxml/" + fname + ".lz77"
 	log.Println("path:=", path)
@@ -37,7 +36,7 @@ func connsendFile(data []byte, fname string, connect net.Conn) error {
 		}
 		if rerr == io.EOF {
 			log.Println("文件读取完毕")
-			log.Println(total)
+			log.Println("文件长度", total)
 			break
 		}
 
