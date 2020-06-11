@@ -6,9 +6,8 @@ import (
 )
 
 ///Users/nicker/go/etc/src/CenterSettlement-go/conf
+//var logconffilepath = "./conf/app.conf"
 var logconffilepath = "CenterSettlement-go/conf/app.conf"
-
-//var logconffilepath = "CenterSettlement-go/conf/app.conf"
 
 type LogConfig struct { //配置文件要通过tag来指定配置文件中的名称
 	LogmaxAge       int    `ini:"log_maxAge"`
