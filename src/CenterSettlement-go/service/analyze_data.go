@@ -106,14 +106,14 @@ func ParseFile() {
 			if result.Header.MessageClass == 5 && result.Header.MessageType == 5 && result.Body.ContentType == 2 {
 				//1、修改文件名字  2、移动文件
 				src := "/Users/nicker/Desktop/Xmlfilebak(3)/" + fileList[i].Name()
-				des := "../clearling/" + "QFB_" + fmt.Sprintf("%020d", result.Header.MessageId) + ".xml"
+				des := "../clearlings/" + "QFB_" + fmt.Sprintf("%020d", result.Header.MessageId) + ".xml"
 				frerr := common.FileRename(src, des)
 				if frerr != nil {
 					log.Println("清分数据包 修改文件名字错误：", frerr)
 					return
 				}
 				//解析xml数据 把数据导入数据库
-				//	Parsexml("../clearling/", "QFB_"+fmt.Sprintf("%020d", result.Header.MessageId)+".xml")
+				//	Parsexml("../clearlings/", "QFB_"+fmt.Sprintf("%020d", result.Header.MessageId)+".xml")
 			}
 
 			//原始数据应答包

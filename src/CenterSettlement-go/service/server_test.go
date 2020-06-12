@@ -31,7 +31,7 @@ func TestParseFile(t *testing.T) {
 
 //测试清分包xml文件解析
 func TestParsexml(t *testing.T) {
-	path := "../clearling/"
+	path := "../clearlings/"
 	fname := "QFB_00000000000000114462.xml"
 	Parsexml(path, fname)
 

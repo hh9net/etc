@@ -1,4 +1,4 @@
-package centerserver
+package centerServer
 
 import (
 	"CenterSettlement-go/client"
@@ -21,14 +21,14 @@ func CenterClient() {
 	//Dial
 	conn, derr := net.Dial("tcp", Address)
 	if derr != nil {
-		log.Println("Dial", derr)
-		//return ""
+		log.Println("Dial 通行宝 error ", derr)
+		return
 	}
 	if conn != nil {
 		log.Println("Dial 通行宝 成功")
 	}
 
-	pwd := "CenterSettlement-go/centerserver/"
+	pwd := "../centerserver/"
 	fileInfoList, err := ioutil.ReadDir(pwd)
 	if err != nil {
 		log.Fatal(err)
@@ -45,7 +45,7 @@ func CenterClient() {
 			sendStru := ParsingXMLFiles(fileInfoList[i].Name())
 
 			//发送
-			client.Sendxml(&sendStru, conn)
+			client.Sendxml(&sendStru, &conn)
 
 			buf := make([]byte, 1024)
 			n, err2 := conn.Read(buf)
@@ -56,6 +56,75 @@ func CenterClient() {
 			log.Println(string(buf[:n]))
 		}
 	}
+}
+
+//发送记账包
+func SendKeepAccount() {
+	//1、扫描文件夹获取数据
+
+	pwd := "../centerkeepaccount/"
+	fileInfoList, err := ioutil.ReadDir(pwd)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("该文件夹下有文件的数量 ：", len(fileInfoList))
+	for i := range fileInfoList {
+		//判断文件的	前缀名
+
+		if strings.HasPrefix(fileInfoList[i].Name(), "JZB") {
+			log.Println("打印当前文件或目录下的文件名", fileInfoList[i].Name())
+
+		}
+	}
+
+	//2、准备报文
+
+	//3、发送数据
+
+}
+
+//发送争议包
+func SendDispute() {
+	//1、扫描文件夹获取数据
+	pwd := "../centerdispute/"
+	fileInfoList, err := ioutil.ReadDir(pwd)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("该文件夹下有文件的数量 ：", len(fileInfoList))
+	for i := range fileInfoList {
+		//判断文件的	前缀名
+
+		if strings.HasPrefix(fileInfoList[i].Name(), "ZYB") {
+			log.Println("打印当前文件或目录下的文件名", fileInfoList[i].Name())
+
+		}
+	}
+	//2、准备报文
+
+	//3、发送数据
+}
+
+//发送清分包
+func SendClearling() {
+	//1、扫描文件夹获取数据
+	pwd := "../centerclearling/"
+	fileInfoList, err := ioutil.ReadDir(pwd)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("该文件夹下有文件的数量 ：", len(fileInfoList))
+	for i := range fileInfoList {
+		//判断文件的	前缀名
+
+		if strings.HasPrefix(fileInfoList[i].Name(), "QFB") {
+			log.Println("打印当前文件或目录下的文件名", fileInfoList[i].Name())
+
+		}
+	}
+	//2、准备报文
+
+	//3、发送数据
 }
 
 //解析xml文件

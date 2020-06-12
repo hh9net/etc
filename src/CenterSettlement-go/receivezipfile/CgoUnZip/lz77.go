@@ -1,4 +1,4 @@
-package Cgo
+package CgoUnZip
 
 /*
 #include <stdio.h>

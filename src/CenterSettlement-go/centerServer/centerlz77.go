@@ -1,4 +1,4 @@
-package centerserver
+package centerServer
 
 import (
 	"bytes"
@@ -48,11 +48,12 @@ func (e *encoder) bytes() []byte {
 }
 
 func (e *encoder) Encode(source []byte) []byte {
+	total := len(source)
+	last := total - 1
 	indexed := newHeap()
-	last := len(source) - 1
-	var prev string
 
-	for i := 0; i < last; i++ {
+	var prev string
+	for i := 0; i < last && e.offset/8 <= total; i++ {
 		a := source[i]
 		b := source[i+1]
 		k := fmt.Sprintf("%c%c", a, b)
@@ -62,11 +63,6 @@ func (e *encoder) Encode(source []byte) []byte {
 			// 输出单个非匹配字符 0(1bit) + char(8bit)
 			e.appendBit(0)
 			e.appendWord(uint16(a), 8)
-			// 输出最后一个字符
-			if i+1 == last {
-				e.appendBit(0)
-				e.appendWord(uint16(b), 8)
-			}
 		} else {
 			// 输出匹配术语 flag(1bit) + len(γ编码) + offset(最大16bit)
 			e.appendBit(1)
@@ -107,7 +103,20 @@ func (e *encoder) Encode(source []byte) []byte {
 		}
 		prev = k
 	}
+	// 输出最后一个字符
+	if indexed.Size() < total {
+		e.appendBit(0)
+		e.appendWord(uint16(source[last]), 8)
+	}
+
 	return e.bytes()
+}
+
+func (e *encoder) Reset() {
+	for i := range e.data {
+		e.data[i] = 0
+	}
+	e.offset = 0
 }
 
 type heap struct {
@@ -118,7 +127,7 @@ type heap struct {
 
 func newHeap() *heap {
 	return &heap{
-		data: make(map[string][]int, BLOCKSIZE),
+		data: make(map[string][]int),
 		size: 1,
 	}
 }
@@ -166,6 +175,7 @@ func (h *heap) Store(k string, offset int) {
 func Compress(input io.Reader, output io.Writer) error {
 	block := make([]byte, BLOCKSIZE)
 	data := make([]byte, 2)
+	enc := newEncoder()
 
 	for {
 		n, err := input.Read(block)
@@ -178,7 +188,7 @@ func Compress(input io.Reader, output io.Writer) error {
 		binary.BigEndian.PutUint16(data, uint16(n))
 		output.Write(data)
 
-		enc := newEncoder()
+		enc.Reset()
 		result := enc.Encode(block[:n])
 
 		if len(result) < n {
@@ -234,32 +244,30 @@ func (d *decoder) readWord(bits int) (uint16, int) {
 	return result, bits
 }
 
-func (d *decoder) Decode(dest []byte) (err error) {
+func (d *decoder) Decode(dest []byte) error {
 	b := bytes.NewBuffer(dest)
 	b.Reset()
 
-	for {
+	for b.Len() < len(dest) {
 		flag, n := d.readBit()
-		if n == 0 {
-			err = errors.New("incomplete: flag")
-			break
+		if n < 1 {
+			return errors.New("incomplete: flag")
 		}
 
 		if flag == 0 {
 			w, n := d.readWord(8)
 			if n < 8 {
-				break
+				return errors.New("incomplete: normal")
 			}
 			b.WriteByte(byte(w))
 		} else {
 			var q int
 			for {
-				bit, n := d.readBit()
-				if n == 0 {
-					err = errors.New("incomplete: q")
-					break
+				val, n := d.readBit()
+				if n < 1 {
+					return errors.New("incomplete: q")
 				}
-				if bit == 0 {
+				if val == 0 {
 					break
 				}
 				q++
@@ -269,42 +277,43 @@ func (d *decoder) Decode(dest []byte) (err error) {
 			if q > 0 {
 				w, n := d.readWord(q)
 				if n < q {
-					err = errors.New("incomplete: length")
-					break
+					return errors.New("incomplete: length")
 				}
-
-				length = 1
-				length <<= q
+				length = 1 << q
 				length += int(w)
-				length++
+				length += 1
 			}
 
 			// offset
 			bits := int(math.Ceil(math.Log2(float64(b.Len()))))
 			w, n := d.readWord(bits)
 			if n < bits {
-				err = errors.New("incomplete: offset")
-				break
+				return errors.New("incomplete: offset")
 			}
 			offset := int(w)
 			b.Write(dest[offset : offset+length])
 		}
 	}
+	return nil
+}
 
-	if b.Len() == len(dest) {
-		return nil
-	}
-	return
+func (d *decoder) Reset(block []byte) {
+	d.data = block
+	d.offset = 0
 }
 
 func Decompress(input io.Reader, output io.Writer) error {
 	data := make([]byte, 2)
+	src := make([]byte, BLOCKSIZE)
+	dst := make([]byte, BLOCKSIZE)
+	dec := newDecoder(nil)
+
 	for {
 		if _, err := input.Read(data); err != nil {
 			if errors.Is(err, io.EOF) {
 				break
 			}
-			return err
+			return fmt.Errorf("a: %w", err)
 		}
 		a := int(binary.BigEndian.Uint16(data))
 		if a == 0 {
@@ -318,14 +327,15 @@ func Decompress(input io.Reader, output io.Writer) error {
 		if b == 0 {
 			b = BLOCKSIZE
 		}
-		block := make([]byte, b)
+
+		block := src[:b]
 		_, err := input.Read(block)
 		if err != nil {
-			return fmt.Errorf("a: %w", err)
+			return fmt.Errorf("block: %w", err)
 		}
 		if b < a {
-			dec := newDecoder(block)
-			block = make([]byte, a)
+			dec.Reset(block)
+			block = dst[:a]
 			if err := dec.Decode(block); err != nil {
 				return fmt.Errorf("decoding: %w", err)
 			}

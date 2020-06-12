@@ -10,8 +10,8 @@ import (
 	"strconv"
 )
 
-func connsendFile(data []byte, fname string, connect net.Conn) error {
-
+func connsendFile(data []byte, fname string, conn *net.Conn) error {
+	connect := *conn
 	connect.Write(data)
 	//暂时通过客户端sleep 100毫秒解决粘包问题，还可以通过tcp重连解决，以后再用（包头+数据）封装数据包的方式解决
 	//time.Sleep(time.Millisecond * 100)
@@ -40,8 +40,6 @@ func connsendFile(data []byte, fname string, connect net.Conn) error {
 			break
 		}
 
-		//data = append(data, buff[:size]...)
-		//log.Println(string(data))
 		_, werr := connect.Write(buff[:size])
 		if werr != nil {
 			log.Println("err", werr)
@@ -55,16 +53,18 @@ func connsendFile(data []byte, fname string, connect net.Conn) error {
 }
 
 //发送
-func Sendxml(sendStru *types.SendStru, conn net.Conn) {
+func Sendxml(sendStru *types.SendStru, conn *net.Conn) {
 	//把报文写给服务端
 	data := []byte(sendStru.Massageid)
 	length := []byte(sendStru.Xml_length)
 	md5 := []byte(sendStru.Md5_str)
 	data = append(data, length...)
 	data = append(data, md5...)
+	//发送
 	err := connsendFile(data, sendStru.Xml_msgName, conn)
 	if err != nil {
 		log.Println("connsendFile error:", err)
+		return
 	}
 	//发送成功
 	Mid, _ := strconv.Atoi(sendStru.Massageid)

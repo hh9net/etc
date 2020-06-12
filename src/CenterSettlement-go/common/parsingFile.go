@@ -30,3 +30,15 @@ func FileRename(src string, des string) error {
 	log.Printf("移动文件%s to %s 成功", src, des)
 	return nil
 }
+
+//移动文件
+func MoveFile(src string, des string) error {
+	//err := os.Rename("./a", "/tmp/a")
+	err := os.Rename(src, des)
+	if err != nil {
+		log.Fatalln("移动文件错误", err)
+		return err
+	}
+	log.Printf("移动文件%s to %s 成功", src, des)
+	return nil
+}

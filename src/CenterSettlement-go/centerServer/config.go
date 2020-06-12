@@ -1,4 +1,4 @@
-package centerserver
+package centerServer
 
 import (
 	"log"

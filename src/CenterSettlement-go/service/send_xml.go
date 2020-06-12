@@ -23,18 +23,12 @@ func HandleSendXml() {
 	tiker := time.NewTicker(time.Second * 5)
 	for {
 		log.Println("执行线程2", <-tiker.C)
-
-		//扫描receive 文件夹 读取文件
-		//获取文件或目录相关信息
-
-		//pwd := "../sendzipxml/"
-
 		pwd := "CenterSettlement-go/generatexml/" //先压缩后发送
 
-		//pwd := "CenterSettlement-go/sendzipxml/" //直接发送  压缩在主go做
 		fileInfoList, err := ioutil.ReadDir(pwd)
 		if err != nil {
 			log.Fatal(err)
+			return
 		}
 		log.Println("该文件夹下有文件的数量 ：", len(fileInfoList))
 		for i := range fileInfoList {
@@ -45,6 +39,7 @@ func HandleSendXml() {
 				zerr := lz77zip.ZipLz77(fileInfoList[i].Name())
 				if zerr != nil {
 					log.Println("发送文件时 压缩xml文件失败")
+					return
 				}
 				if zerr == nil {
 					//移动xml文件
@@ -66,14 +61,14 @@ func HandleSendXml() {
 				Address := address.AddressIp + ":" + address.AddressPort
 				conn, derr := net.Dial("tcp", Address)
 				if derr != nil {
-					log.Println("Dial", derr)
-					//return ""
+					log.Println("Dial 失败", derr)
+					return
 				}
 				if conn != nil {
 					log.Println("Dial 成功")
 				}
 				//发送
-				client.Sendxml(&sendStru, conn)
+				client.Sendxml(sendStru, &conn)
 
 				buf := make([]byte, 1024)
 				n, err2 := conn.Read(buf)
@@ -92,7 +87,7 @@ func HandleSendXml() {
 }
 
 //解析xml文件
-func ParsingXMLFiles(fname string) types.SendStru {
+func ParsingXMLFiles(fname string) *types.SendStru {
 	var sendStru types.SendStru
 	//1、获取消息包序号Massageid
 	fnstr := strings.Split(fname, "_")
@@ -112,6 +107,7 @@ func ParsingXMLFiles(fname string) types.SendStru {
 		log.Println("文件md5为 ：", sendStru.Md5_str)
 	} else {
 		log.Fatal("获取文件md5 error ")
+		return nil
 	}
 
 	//4、获得xml文件名
@@ -130,7 +126,7 @@ func ParsingXMLFiles(fname string) types.SendStru {
 	//xmls := "CenterSettlement-go/generatexml/" + xmlname
 	//xmldes := "CenterSettlement-go/compressed_xml/" + xmlname
 	//client.MoveFile(xmls, xmldes)
-	return sendStru
+	return &sendStru
 }
 
 //即使应答处理
