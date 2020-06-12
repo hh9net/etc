@@ -48,7 +48,6 @@ func Server() {
 			log.Println(err.Error())
 		}
 		go ReceiveHandler(conn)
-
 	}
 }
 

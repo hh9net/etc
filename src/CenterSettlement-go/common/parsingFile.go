@@ -6,6 +6,7 @@ import (
 )
 
 //文件处理
+//获取文件大小
 func GetFileSize(fname string) int64 {
 	//path := "CenterSettlement-go/sendzipxml/" + fname + ".lz77"
 
