@@ -36,8 +36,8 @@ func (db *DB) NewTable() {
 	}
 	if is == false {
 		err := db.orm.Sync2(
-			//new(JieSuanMessage),
-			//new(JieSuanMessageMx),
+			new(JieSuanMessage),
+			new(JieSuanMessageMx),
 			new(Jiessjchuli),
 		)
 		//err = db.orm.CreateTables(new(SJsJiessj))

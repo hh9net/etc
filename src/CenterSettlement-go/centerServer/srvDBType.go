@@ -90,7 +90,7 @@ type OBU struct {
 
 //  B_JS_JIESSJ【结算数据】`b_js_jiessj`
 type SJsJiessj struct {
-	FVcJiaoyjlid  string `xorm:"pk"` //F_VC_JIAOYJLID	交易记录ID	VARCHAR(128)
+	FVcJiaoyjlid  string //`xorm:"pk"` //F_VC_JIAOYJLID	交易记录ID	VARCHAR(128)
 	FVcTingccbh   string //F_VC_TINGCCBH	停车场编号	VARCHAR(32)
 	FVcChedid     string //F_VC_CHEDID	车道ID	VARCHAR(32)
 	FVcGongsjtid  string //F_VC_GONGSJTID	公司/集团ID	VARCHAR(32)
@@ -141,7 +141,8 @@ type SJsJiessj struct {
 }
 
 type Jiessjchuli struct {
-	FVcJiaoyjlid   string    `xorm:"pk"` //F_VC_JIAOYJLID	交易记录ID	VARCHAR(128)
+	Weiyi          int       `xorm:"auto increment"`
+	FVcJiaoyjlid   string    //`xorm:"pk"` //F_VC_JIAOYJLID	交易记录ID	VARCHAR(128)
 	FNbYuansjybxh  int64     //F_NB_YUANSJYBXH	原始交易包序号	BIGINT
 	FNbJiaoybnxh   int       //F_NB_JIAOYBNXH	交易包内序号	INT
 	FNbJizjg       int       //F_NB_JIZJG	记账结果	INT "0：未记账  1：已记账    2：争议数据"
@@ -165,6 +166,7 @@ type Jiessjchuli struct {
 }
 
 type JieSuanMessage struct {
+	Weiyi        int    `xorm:"auto increment"`
 	Version      string //统一 00010000 Hex(8) Header
 	MessageClass int    //消息传输的机制5
 	MessageType  int    //消息的应用类型7
@@ -181,6 +183,7 @@ type JieSuanMessage struct {
 }
 
 type JieSuanMessageMx struct {
+	Weiyi        int    `xorm:"auto increment"`
 	Version      string //统一 00010000 Hex(8) Header
 	MessageClass int    //消息传输的机制5
 	MessageType  int    //消息的应用类型7
