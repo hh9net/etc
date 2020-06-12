@@ -36,7 +36,7 @@ func main() {
 	//goroutine4
 	//go service.AnalyzeDataPakage()
 	//goroutine3
-	//service.Receive()
+	service.Receive()
 	//主线程处理压缩与解压缩
 
 	//for true {

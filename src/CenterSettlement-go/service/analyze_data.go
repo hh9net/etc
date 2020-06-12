@@ -32,10 +32,8 @@ func AnalyzeDataPakage() {
 //2、处理文件解析
 func ParseFile() {
 	//扫描receivexml 文件夹 读取文件信息
-	//获取文件或目录相关信息  /Users/nicker/Desktop/Xmlfilebak(2)
-	//pwd := "../receivexml/"
-	pwd := "/Users/nicker/Desktop/Xmlfilebak(3)/"
-
+	//获取文件或目录相关信息
+	pwd := "CenterSettlement-go/receivexml/"
 	//pwd := "CenterSettlement-go/receivexml/"
 	fileList, err := ioutil.ReadDir(pwd)
 	if err != nil {
@@ -56,7 +54,7 @@ func ParseFile() {
 			//获取xml文件位置   /Users/nicker/Desktop/Xmlfilebak(3)
 			//content, err := ioutil.ReadFile("../receivexml/" + fileInfoList[i].Name())
 			//
-			content, err := ioutil.ReadFile("/Users/nicker/Desktop/Xmlfilebak(3)/" + fileList[i].Name())
+			content, err := ioutil.ReadFile("CenterSettlement-go/receivexml/" + fileList[i].Name())
 			if err != nil {
 				log.Println("读文件位置错误信息：", err)
 				return
@@ -70,15 +68,11 @@ func ParseFile() {
 			}
 
 			log.Println("result:", result.Header.MessageClass, result.Header.MessageType, result.Body.ContentType, result.Header.MessageId)
-			////原始交易数据
-			//if result.Header.MessageClass == 5 && result.Header.MessageType == 7 &&result.Body.ContentType==1{
-			//	//
-			//	return
-			//}
+
 			if result.Header.MessageClass == 5 && result.Header.MessageType == 5 && result.Body.ContentType == 1 {
 				//记账数据包
 				//1、修改文件名字  2、移动文件
-				src := "/Users/nicker/Desktop/Xmlfilebak(3)/" + fileList[i].Name()
+				src := "CenterSettlement-go/receivexml/" + fileList[i].Name()
 				des := "../keepAccountFile/" + "JZB_" + fmt.Sprintf("%020d", result.Header.MessageId) + ".xml"
 				frerr := common.FileRename(src, des)
 				if frerr != nil {
@@ -87,12 +81,12 @@ func ParseFile() {
 				}
 
 				//解析xml数据 把数据导入数据库
-				//	Parsexml("../keepAccountFile/", "JZB"+fmt.Sprintf("%020d", result.Header.MessageId)+".xml")
+				Parsexml("../keepAccountFile/", "JZB"+fmt.Sprintf("%020d", result.Header.MessageId)+".xml")
 			}
 			if result.Header.MessageClass == 5 && result.Header.MessageType == 7 && result.Body.ContentType == 2 {
 				//争议数据包
 				//1、修改文件名字  2、移动文件
-				src := "/Users/nicker/Desktop/Xmlfilebak(3)/" + fileList[i].Name()
+				src := "CenterSettlement-go/receivexml/" + fileList[i].Name()
 				des := "../disputeProcessFile/" + "ZYB_" + fmt.Sprintf("%020d", result.Header.MessageId) + ".xml"
 				frerr := common.FileRename(src, des)
 				if frerr != nil {
@@ -100,12 +94,12 @@ func ParseFile() {
 					return
 				}
 				//解析xml数据 把数据导入数据库
-				//	Parsexml("../disputeProcessFile/", "ZYB_"+fmt.Sprintf("%020d", result.Header.MessageId)+".xml")
+				Parsexml("../disputeProcessFile/", "ZYB_"+fmt.Sprintf("%020d", result.Header.MessageId)+".xml")
 			}
 			//清分数据包
 			if result.Header.MessageClass == 5 && result.Header.MessageType == 5 && result.Body.ContentType == 2 {
 				//1、修改文件名字  2、移动文件
-				src := "/Users/nicker/Desktop/Xmlfilebak(3)/" + fileList[i].Name()
+				src := "CenterSettlement-go/receivexml/" + fileList[i].Name()
 				des := "../clearlings/" + "QFB_" + fmt.Sprintf("%020d", result.Header.MessageId) + ".xml"
 				frerr := common.FileRename(src, des)
 				if frerr != nil {
@@ -113,13 +107,13 @@ func ParseFile() {
 					return
 				}
 				//解析xml数据 把数据导入数据库
-				//	Parsexml("../clearlings/", "QFB_"+fmt.Sprintf("%020d", result.Header.MessageId)+".xml")
+				Parsexml("../clearlings/", "QFB_"+fmt.Sprintf("%020d", result.Header.MessageId)+".xml")
 			}
 
 			//原始数据应答包
 			if result.Header.MessageClass == 6 && result.Header.MessageType == 7 && result.Body.ContentType == 1 {
 				//1、修改文件名字  2、移动文件
-				src := "/Users/nicker/Desktop/Xmlfilebak(3)/" + fileList[i].Name()
+				src := "CenterSettlement-go/receivexml/" + fileList[i].Name()
 				des := "../reqfile/" + "REQ_" + fmt.Sprintf("%020d", result.Header.MessageId) + ".xml"
 				frerr := common.FileRename(src, des)
 				if frerr != nil {
@@ -127,6 +121,7 @@ func ParseFile() {
 					return
 				}
 				//解析xml数据 把数据导入数据库
+
 			}
 
 			//		退费数据包【不做】
