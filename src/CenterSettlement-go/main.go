@@ -30,7 +30,7 @@ func main() {
 		time.Duration(conf.LogrotationTime)*time.Hour)
 	database.DBInit() //连接数据库 初始化为全局变量
 	//goroutine1
-	//go service.HandleGeneratexml()
+	go service.HandleGeneratexml()
 	//goroutine2
 	go service.HandleSendXml()
 	//goroutine4

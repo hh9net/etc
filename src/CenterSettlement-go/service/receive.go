@@ -111,7 +111,7 @@ func Save(conn *net.Conn) (string, error) {
 		xz2 := "../centeryuanshixmlzip/errorxml/" + fileNameid + ".xml.lz77"
 		mxzerr := common.MoveFile(xz1, xz2)
 		if mxzerr != nil {
-			log.Println("移动errorxml 失败")
+			log.Println("移动 xmlzip文件 error 失败")
 			return "", mxzerr
 		}
 	}

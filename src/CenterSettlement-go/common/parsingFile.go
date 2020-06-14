@@ -28,7 +28,7 @@ func FileRename(src string, des string) error {
 		log.Fatalln("移动文件错误", err)
 		return err
 	}
-	log.Printf("移动文件%s to %s 成功", src, des)
+	log.Printf("改文件名字%s to %s 成功", src, des)
 	return nil
 }
 

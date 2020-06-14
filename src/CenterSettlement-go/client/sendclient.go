@@ -30,7 +30,7 @@ func connsendFile(data []byte, fname string, conn *net.Conn) error {
 	for {
 		size, rerr := file.Read(buff)
 		log.Println(size, rerr)
-		if rerr != nil {
+		if rerr != nil && rerr != io.EOF {
 			log.Println("file.Read err:", rerr)
 			break
 		}

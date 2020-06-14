@@ -1,4 +1,4 @@
-package centerServer
+package lz77zip
 
 import (
 	"bytes"
@@ -349,9 +349,8 @@ func Decompress(input io.Reader, output io.Writer) error {
 }
 
 func UnZipLz77(fname string) error {
-
-	//pwd := "./receivezipfile/" + fname
-	pwd := "./" + fname
+	pwd := "../centerServer/" + fname //test 测试解压缩是否重写成功
+	//pwd := "CenterSettlement-go/receivezipfile/" + fname
 	origin, err := os.Open(pwd)
 	if err != nil {
 		log.Fatalln(err)
@@ -360,8 +359,9 @@ func UnZipLz77(fname string) error {
 	defer origin.Close()
 
 	fn := strings.Split(fname, ".lz77")
+	outpwd := "../centerServer/" + "Go" + fn[0] //test
 
-	outpwd := "../centeryuanshi/" + fn[0]
+	//outpwd := "CenterSettlement-go/receivexml/" + fn[0]
 	out, cerr := os.Create(outpwd)
 	if cerr != nil {
 		log.Fatalln(cerr)
@@ -373,20 +373,21 @@ func UnZipLz77(fname string) error {
 		log.Fatalln(unzerr)
 		return err
 	}
-	log.Println("原始交易xml消息解压成功")
 	return nil
 	//log.Println(Decompress(origin, os.Stdout))
 }
 
 func ZipLz77(fname string) error {
-	pwd := "CenterSettlement-go/generatexml/" + fname
+	//pwd := "../generatexml/" + fname//test
+	pwd := "CenterSettlement-go/generatexml/" + fname //goland
 	origin, oerr := os.Open(pwd)
 	if oerr != nil {
 		log.Fatalln(oerr)
 		return oerr
 	}
 	defer origin.Close()
-	outpwd := "CenterSettlement-go/sendzipxml/" + fname + ".lz77"
+	//outpwd := "../sendzipxml/" + fname + ".lz77"
+	outpwd := "CenterSettlement-go/sendzipxml/" + fname + ".lz77" //goland main
 	out, cerr := os.Create(outpwd)
 	if cerr != nil {
 		log.Fatalln(cerr)

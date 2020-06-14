@@ -15,11 +15,13 @@ func NewDatabase() *DB {
 	var db DB
 	xo, err := xorm.NewEngine("mysql", "root:"+pwd+"@tcp(127.0.0.1:3306)/center?charset=utf8")
 	if err != nil {
-		log.Println("lianjie 失败")
+		log.Println("连接联网中心数据库失败")
 		return nil
 	}
 	db.orm = xo
-	log.Println("lianjie成功", db.orm)
+	if db.orm != nil {
+		log.Println("连接联网中心数据库成功")
+	}
 	return &db
 }
 

@@ -27,7 +27,7 @@ func QueryQitaJiessj(KaLx int, Diqu string) *[]types.BJsJiessj {
 	tests := make([]types.BJsJiessj, 0)
 	//qerr := xorm.Where("F_NB_DABZT=?", 0).And("F_VC_KAWLH=?", Diqu).And("F_NB_KALX=?", KaLx).Limit(100, 0).Find(&tests)
 	//测试 每次查两条
-	qerr := xorm.Where("F_NB_DABZT=?", 0).And("F_VC_KAWLH=?", Diqu).And("F_NB_KALX=?", KaLx).Limit(10, 0).Find(&tests)
+	qerr := xorm.Where("F_NB_DABZT=?", 0).And("F_VC_KAWLH=?", Diqu).And("F_NB_KALX=?", KaLx).Limit(1, 0).Find(&tests)
 	if qerr != nil {
 		log.Fatalln("查询结算数据出错", qerr)
 	}

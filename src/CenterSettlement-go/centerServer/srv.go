@@ -75,10 +75,10 @@ func ReceiveHandler(conn net.Conn) {
 		return
 	}
 	//校验文件
-
+	//校验文件md5
+	log.Println("执行 CheckFile校验文件")
 	cerr := CheckFile(msgmd5, fileNameid)
 	if cerr != nil {
-
 		// 1、应答确认
 		log.Println("触发应答确认消息发送")
 
@@ -88,7 +88,7 @@ func ReceiveHandler(conn net.Conn) {
 		x2 := "../centeryuanshixmlparsed/errorxml/" + fileNameid + ".xml"
 		mxerr := common.MoveFile(x1, x2)
 		if mxerr != nil {
-			log.Println("移动errorxml 失败")
+			log.Println("移动CheckFile失败 的xml error")
 			return
 		}
 
@@ -97,13 +97,17 @@ func ReceiveHandler(conn net.Conn) {
 		xz2 := "../centeryuanshixmlzip/errorxmlzip/" + fileNameid + ".xml.lz77"
 		mxzerr := common.MoveFile(xz1, xz2)
 		if mxzerr != nil {
-			log.Println("移动errorxml 失败")
+			log.Println("移动CheckFile失败 的zipxml error\"")
 			return
 		}
 	}
 
 	//处理文件
-	HandleFile()
+	herr := HandleFile()
+	if herr != nil {
+		log.Println("HandleFile失败 ")
+		return
+	}
 
 	//获取数据
 	//GetData(buffer[:n])
@@ -115,12 +119,12 @@ func CheckFile(msgmd5, fileNameid string) error {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("该文件夹下有文件的数量 ：", len(fileInfoList))
+	log.Println("CheckFile 时 该联网文件夹下有文件的数量 ：", len(fileInfoList))
 
 	for i := range fileInfoList {
 		//判断文件的结尾名
 		if strings.HasSuffix(fileInfoList[i].Name(), ".lz77") {
-			log.Println("打印当前文件或目录下的文件名", fileInfoList[i].Name())
+			log.Println("打印当前目录下的压缩文件的名字", fileInfoList[i].Name())
 
 			//解压缩
 			zerr := UnZipLz77(fileInfoList[i].Name())
@@ -129,7 +133,8 @@ func CheckFile(msgmd5, fileNameid string) error {
 				return zerr
 			}
 			if zerr == nil {
-				//移动xml文件
+				//移动zipxml文件
+				log.Println("原始交易xml消息解压成功,移动zipxml文件")
 				s := "./" + fileInfoList[i].Name()
 				des := "../centeryuanshixmlzip/" + fileInfoList[i].Name()
 				merr := client.MoveFile(s, des)
@@ -139,7 +144,7 @@ func CheckFile(msgmd5, fileNameid string) error {
 				}
 
 			}
-			log.Println("校验文件")
+			log.Println("校验文件Md5")
 			fstr := strings.Split(fileInfoList[i].Name(), ".xml.lz77")
 
 			log.Println(fstr[0], fileNameid)
@@ -149,7 +154,7 @@ func CheckFile(msgmd5, fileNameid string) error {
 				fmd5 := GetFileMd5(fileNameid + ".xml")
 				if fmd5 == msgmd5 {
 					log.Println("文件md5一致")
-					log.Println("解析原始交易消息文件，  获取数据")
+					log.Println("此文件可以进行 解析原始交易消息文件")
 					//解析文件 导入数据库
 					//ParsingYSXMLFile()
 					return nil
@@ -230,28 +235,26 @@ func RevFile(fileNameid string, conn net.Conn, msglength string) error {
 	for {
 		//读取内容
 		n, rerr := (conn).Read(buff)
-		if rerr != nil && rerr != io.EOF {
+		if rerr != io.EOF && rerr != nil {
 			log.Println("conn.Read 读文件出错:", rerr)
 			return rerr
 		}
 		if rerr == io.EOF {
 			log.Println("文件读结束了", rerr)
-			break
 		}
 		if n == 0 {
 			log.Println("n=0,文件读结束了")
 		}
-
 		size, werr := fs.Write(buff[:n])
-		log.Println("写入文件的大小", size, werr)
+		i = i + size
+		log.Printf("本次写入文件的大小 %d 总写过了%d 错误为：%s", size, i, werr)
 		if werr != nil {
 			log.Println("写入文件时的错误为：", werr)
 			return werr
 		}
-		i = i + size
 		//如果实际总接受字节数与客户端给的要传输字节数相等，说明传输完毕
 		if i == DataLen {
-			log.Println("文件消息包 接受成功,共：", size, "个字节")
+			log.Println("文件消息包 接受成功,共：", i, "个字节")
 			//即时应答
 			var replyStru types.ReplyStru
 			//replyStru.Massageid = string(buf[:20])
@@ -261,89 +264,65 @@ func RevFile(fileNameid string, conn net.Conn, msglength string) error {
 			r := []byte(replyStru.Result)
 			d := append(m, r...)
 			InstantResponse(d, conn)
-			break
+			return nil
 		}
 	}
-	return nil
+	//return nil
 }
 
-func HandleFile( /*msgmd5, fileNameid string*/ ) {
-	//扫描文件夹  解压缩文件
-	//从文件夹center_server中扫描打包文件（判断这个文件夹下面有没有文件）
+func HandleFile() error {
 
 	tiker := time.NewTicker(time.Second * 5)
-
 	for {
-		log.Println("扫描联网中心文件夹", <-tiker.C)
+		log.Println("扫描centerYuanshi文件夹,解析文件、数据入库", <-tiker.C)
 
 		//扫描原始数据包
 		pwd := "../centerYuanshi/"
 		fileList, err := ioutil.ReadDir(pwd)
 		if err != nil {
 			log.Fatal(err)
-			return
+			return err
 		}
-		log.Println("该文件夹下有文件的数量 ：", len(fileList))
+		log.Println("该centerYuanshi文件夹下有xml文件的数量 ：", len(fileList))
 		if len(fileList) == 0 {
 			log.Println("该centerYuanshi 文件夹下没有需要解析的文件")
-			return
+			return nil
 		}
 		for i := range fileList {
-			log.Println("xml name:", fileList[i].Name()) //打印当前文件或目录下的文件或目录名
+			log.Println("该centerYuanshi文件夹需要数据入库的 xml 名字为:", fileList[i].Name()) //打印当前文件或目录下的文件或目录名
 			//判断文件的结尾名
 			if strings.HasSuffix(fileList[i].Name(), ".xml") {
 
 				//解析xml文件
-				//
-				content, err := ioutil.ReadFile("../centerYuanshi/" + fileList[i].Name())
-				if err != nil {
-					log.Println("读文件位置错误信息：", err)
-					return
+				content, rderr := ioutil.ReadFile("../centerYuanshi/" + fileList[i].Name())
+				if rderr != nil {
+					log.Println("读文件位置错误信息：", rderr)
+					return rderr
 				}
 
 				//将xml文件转换为对象
 				var msg Message
-				err = xml.Unmarshal(content, &msg)
-				if err != nil {
-					log.Println("解析 receive文件夹中xml文件内容的错误信息：", err)
+				unzerr := xml.Unmarshal(content, &msg)
+				if unzerr != nil {
+					log.Println("解析 receive文件夹中xml文件内容的错误信息：", unzerr)
+					return unzerr
 				}
 
 				log.Println("msg:", msg.Header.MessageClass, msg.Header.MessageType, msg.Body.ContentType, msg.Header.MessageId, msg.Body.Transaction[0].ICCard.CardType)
 				//原始交易数据
 
-				//解析文件 导入数据库
-				ParsingYSXMLFile(msg, fileList[i].Name())
-
-				////连接联网中心服务器
-				//address := conf.AddressConfigInit()
-				//Address := address.AddressIp + ":" + address.AddressPort
-				//conn, derr := net.Dial("tcp", Address)
-				//if derr != nil {
-				//	log.Println("Dial", derr)
-				//	//return ""
-				//}
-				//if conn != nil {
-				//	log.Println("Dial 成功")
-				//}
-				////发送
-				//client.Sendxml(&sendStru, conn)
-				//
-				//buf := make([]byte, 1024)
-				//n, err2 := conn.Read(buf)
-				//if err2 != nil {
-				//	log.Println("conn.Read err = ", err2)
-				//	return
-				//}
-				////str := string(buf[:n])
-				////对联网中心的接收应答处理
-				//ImmediateResponseProcessing(string(buf[:n]), fileInfoList[i].Name())
-				//
-				//conn.Close()
+				// 数据导入数据库
+				perr := ParsingYSXMLFile(msg, fileList[i].Name())
+				if perr != nil {
+					log.Println("数据导入数据库失败", perr)
+					return perr
+				}
+				return nil
+			} else {
+				log.Println(fileList[i].Name()) //不是xml文件
+				return nil
 			}
-			//else {
-			//	log.Println("该联网中心没有需要解析原始交易消息xml")
-			//	log.Println("fileInfoList[i].Name():",fileInfoList[i].Name())
-			//}
+
 		}
 	}
 }
@@ -357,12 +336,31 @@ func ParsingYSXMLFile(msg Message, fname string) error {
 		Diqu := msg.Body.Transaction[0].ICCard.NetNo
 		s1 := "../centerYuanshi/" + fname
 		des := "../centerYuanshi/" + "CZ_" + Diqu + "_" + fname
-		mverr := common.MoveFile(s1, des)
-		if mverr != nil {
-			return mverr
+		rnerr := common.FileRename(s1, des)
+		if rnerr != nil {
+			log.Println("储值卡改文件名 error")
+			return rnerr
 		}
+		log.Println("储值卡改文件名成功，数据插入数据库")
 		//2、解析xml数据 把数据导入数据库
-		perr := Parsexml(des, "CZ_"+Diqu+"_"+fname, msg)
+		perr, filename, errlx := Parsexml(des, "CZ_"+Diqu+"_"+fname, msg)
+		switch errlx {
+		case 0:
+			log.Println(filename)
+			log.Println("解析xml数据 把数据导入数据库 成功")
+		case 1:
+			log.Println(filename)
+			log.Println("联网中心 新增结算数据 时 错误")
+		case 2:
+			log.Println(filename)
+			log.Println("联网中心 新增结算数据明细 时 错误")
+		case 3:
+			log.Println(filename)
+			log.Println("联网中心 新增结算处理数据 时 错误")
+		case 4:
+			log.Println(filename)
+			log.Println("xml文件移到解析过的文件里 时 错误")
+		}
 		if perr != nil {
 			return perr
 		}
@@ -375,40 +373,60 @@ func ParsingYSXMLFile(msg Message, fname string) error {
 		Diqu := msg.Body.Transaction[0].ICCard.NetNo
 		s1 := "../centerYuanshi/" + fname
 		des := "../centerYuanshi/" + "JZ_" + Diqu + "_" + fname
-		common.MoveFile(s1, des)
+		rnzerr := common.FileRename(s1, des)
+		if rnzerr != nil {
+			log.Println("记账卡改文件名 error")
+			return rnzerr
+		}
 
 		//2、解析xml数据 把数据导入数据库
-		perr1 := Parsexml(des, "JZ_"+Diqu+"_"+fname, msg)
+		perr1, filename, errlx := Parsexml(des, "JZ_"+Diqu+"_"+fname, msg)
+		switch errlx {
+		case 0:
+			log.Println(filename)
+			log.Println("解析xml数据 把数据导入数据库 成功")
+		case 1:
+			log.Println(filename)
+			log.Println("联网中心 新增结算数据 时 错误")
+		case 2:
+			log.Println(filename)
+			log.Println("联网中心 新增结算数据明细 时 错误")
+		case 3:
+			log.Println(filename)
+			log.Println("联网中心 新增结算处理数据 时 错误")
+		case 4:
+			log.Println(filename)
+			log.Println("xml文件移到解析过的文件里 时 错误")
+		}
 		if perr1 != nil {
 			return perr1
 		}
-
+		return nil
 	}
 
 	return nil
 }
 
-func Parsexml(pwdfname string, fname string, msg Message) error {
-	log.Println("把原始数据xml插入数据库", pwdfname)
-
+func Parsexml(pwdfname string, fname string, msg Message) (error, string, int) {
+	log.Println("把原始数据xml插入数据库，文件的路径以及名称为：", pwdfname)
 	//新增结算数据消息包
 	err := JieSuanMessageInset(msg)
 	if err != nil {
-		log.Println("新增结算数据消息包 error")
-		return err
+		log.Println("新增结算数据消息包 error", err)
+		return err, fname, 1
 	}
 
 	//新增结算数据明细
 	mxerr := JieSuanMessageMxInset(msg)
 	if mxerr != nil {
-		log.Println("新增结算数据明细 error")
-		return mxerr
+		log.Println("新增结算数据明细 error", mxerr)
+		return mxerr, fname, 2
 	}
 	//新增结算处理
 	clerr := JieSuanMessageChuliInset(msg)
 	if clerr != nil {
-		log.Println("新增结算处理记录 error ")
-		return clerr
+		log.Println("新增结算处理记录 error ", clerr)
+		return clerr, fname, 3
 	}
 
 	//把解析过的原始交易消息xml移动文件夹
@@ -416,9 +434,11 @@ func Parsexml(pwdfname string, fname string, msg Message) error {
 	x2 := "../centeryuanshixmlparsed/" + fname
 	mverr := common.MoveFile(x1, x2)
 	if mverr != nil {
-		return errors.New("移动解析过的原始交易消息xml 失败")
+		log.Println("移动解析过的原始交易消息xml  error ", mverr)
+		return errors.New("移动解析过的原始交易消息xml 失败"), fname, 4
 	}
-	return nil
+	log.Printf("此%s消息文件数据入库成功,xml文件移到解析过的文件里成功", fname)
+	return nil, fname, 0
 }
 
 // 获取xml文件msg的md5码
