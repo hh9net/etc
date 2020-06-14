@@ -22,7 +22,7 @@ import (
 //接收联网中心发来数据包
 func Receive() {
 	log.Println("执行线程4 接收联网中心发送文件")
-	//监听联网中心数据端口 "127.0.0.1:8809"
+	//监听联网中心数据端口 "192.168.150.164:8809"
 	address := conf.ListeningAddressConfigInit()
 	Address := address.ListeningAddressIp + ":" + address.ListeningAddressPort
 	listen, lerr := net.Listen("tcp", Address)
@@ -94,7 +94,7 @@ func Save(conn *net.Conn) (string, error) {
 	if cerr != nil {
 
 		// 1、应答确认
-		log.Println("触发应答确认消息发送")
+		log.Println("触发 应答确认消息发送")
 
 		//2、移动文件
 		//移动xml
@@ -130,61 +130,57 @@ func RevFile(fileNameid string, conn *net.Conn, msglength string) (error, string
 	}
 	//获取文件大小
 	DataLen, _ := strconv.Atoi(msglength) //压缩文件长度
-	//动态分配切片大小
-	//一次性读取文件
-	//一次性写完
-	//if DataLen > 0 {
-	//	data = make([]byte, DataLen)
-	//	if _, err := io.ReadFull(*conn, data); err != nil {
-	//		log.Println("read msg data error ", err)
-	//		return err
-	//	}
-	//}
 	var buff []byte
 	if DataLen > 0 {
 		buff = make([]byte, DataLen)
 	}
-	log.Println("要接收的文件的长度：", DataLen)
-	//读取内容
-	n, rerr := (*conn).Read(buff)
-	if rerr != nil {
-		log.Println("conn.Read err:", rerr)
-		return rerr, ""
+	log.Println("要接收的文件的长度：", DataLen, len(buff))
+	i := 0
+	for {
+		//读取内容
+		n, rerr := (*conn).Read(buff)
+		if rerr != io.EOF && rerr != nil {
+			log.Println("conn.Read 读文件出错:", rerr)
+			return rerr, ""
+		}
+		if rerr == io.EOF {
+			log.Println("文件读结束了", rerr)
+		}
+		if n == 0 {
+			log.Println("n=0,文件读结束了")
+		}
+		size, werr := fs.Write(buff[:n])
+		i = i + size
+		log.Printf("本次写入文件的大小 %d 总写过了%d 错误为：%s", size, i, werr)
+		if werr != nil {
+			log.Println("写入文件时的错误为：", werr)
+			return werr, ""
+		}
+		//如果实际总接受字节数与客户端给的要传输字节数相等，说明传输完毕
+		if i == DataLen {
+			log.Println("文件消息包 接受成功,共：", i, "个字节")
+			//即时应答
+			var replyStru types.ReplyStru
+			//replyStru.Massageid = string(buf[:20])
+			replyStru.Massageid = fileNameid
+			replyStru.Result = "1"
+			m := []byte(replyStru.Massageid)
+			r := []byte(replyStru.Result)
+			d := append(m, r...)
+			InstantResponse(d, conn)
+			return nil, fileNameid + ".xml.lz77"
+		}
 	}
-
-	size, werr := fs.Write(buff[:n])
-	log.Println("写入文件的大小", size, rerr)
-	if werr != nil {
-		log.Println("写入文件时的错误为：", rerr)
-		return werr, ""
-	}
-	//如果实际总接受字节数与客户端给的要传输字节数相等，说明传输完毕
-	if size == DataLen {
-		log.Println("文件消息包 接受成功,共：", size, "个字节")
-
-		//即时应答
-		var replyStru types.ReplyStru
-		//replyStru.Massageid = string(buf[:20])
-		replyStru.Massageid = fileNameid
-
-		replyStru.Result = "1"
-		m := []byte(replyStru.Massageid)
-		r := []byte(replyStru.Result)
-		d := append(m, r...)
-		InstantResponse(d, conn)
-	}
-
-	return nil, fileNameid + ".xml.lz77"
+	//return nil, fileNameid + ".xml.lz77"
 }
 
-//应答
+//即时应答
 func InstantResponse(d []byte, conn *net.Conn) {
 	// 返回接收成功
 	_, err := (*conn).Write(d)
 	if err != nil {
 		log.Println("联网中心 conn.Write 错误")
 	}
-
 	(*conn).Close()
 }
 

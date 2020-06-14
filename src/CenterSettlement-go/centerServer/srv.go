@@ -215,23 +215,6 @@ func RevFile(fileNameid string, conn net.Conn, msglength string) error {
 	}
 	log.Println("要接收的文件的长度：", DataLen, len(buff))
 	i := 0
-	//buf := make([]byte ,1024*10)
-	//for {
-	//	n,err := conn.Read(buf)
-	//	if err != nil {
-	//		fmt.Println("conn.Read err =",err)
-	//		if err == io.EOF {
-	//			fmt.Println("文件结束了",err)
-	//		}
-	//		return nil
-	//	}
-	//	if n == 0 {
-	//		fmt.Println("文件结束了",err)
-	//		return nil
-	//	}
-	//	fs.Write(buf[:n])
-	//}
-
 	for {
 		//读取内容
 		n, rerr := (conn).Read(buff)
