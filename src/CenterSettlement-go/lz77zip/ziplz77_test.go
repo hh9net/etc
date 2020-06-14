@@ -20,7 +20,7 @@ func TestZipLz77(t *testing.T) {
 
 //go unzip
 func TestUnZipLz77(t *testing.T) {
-	f := "Cgo_CZ_3101_00000000000000100136.xml.lz77"
+	f := "00000000000000000001.xml.lz77"
 	err := UnZipLz77(f)
 	if err != nil {
 		log.Fatalln(err)
@@ -81,4 +81,19 @@ func GetFileMd5Test(filename string, fs int) string {
 	io.Copy(md5h, pFile)
 
 	return hex.EncodeToString(md5h.Sum(nil))
+}
+
+func TestGetFileTest(t *testing.T) {
+	//解压 2
+	f1 := "../centerServer/00000000000000000001.xml.lz77"
+	s1 := GetFileMd5Test(f1, 2)
+	log.Println("s1md5", s1)
+	f2 := "CgoUnZip_CZ_3101_00000000000000100136.xml"
+	s2 := GetFileMd5Test(f2, 2)
+	log.Println("s2md5", s2)
+	if s1 == s2 {
+		log.Println("重写成功")
+	} else {
+		log.Println("重写失败")
+	}
 }

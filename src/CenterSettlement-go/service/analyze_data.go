@@ -17,15 +17,15 @@ func AnalyzeDataPakage() {
 
 	//定期检查文件夹receive    解压后
 
-	//tiker := time.NewTicker(time.Second * 9)
+	tiker := time.NewTicker(time.Second * 5)
 	for {
-		//log.Println("执行线程4", <-tiker.C)
+		log.Println("执行线程4", <-tiker.C)
 		log.Println("现在执行线程4", common.DateTimeNowFormat())
 
 		//1、处理文件解压，解压至receivexml文件夹
 
 		//2、处理文件解析
-		ParseFile()
+		//ParseFile()
 	}
 }
 

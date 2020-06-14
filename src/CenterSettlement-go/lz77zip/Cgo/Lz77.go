@@ -28,8 +28,8 @@ func Lz77zip(fname string) {
 func Lz77Unzipxml(fname string) {
 	//2.xml.lz77 解压为 1.xml "00000000000000100025.xml.lz77"
 	fstr := strings.Split(fname, ".lz77")
-	originfile := "../../receivexml/" + "CgoUnZip_" + fstr[0] //.xml
-	orilz77file := "../../sendzipxml/" + fname                //.xml.lz77
+	originfile := "../../centerServer/" + "CgoUnZip_" + fstr[0] //.xml
+	orilz77file := "../../centerServer/" + fname                //.xml.lz77
 	//originfile := "../sendxmlsucceed/" + fstr[0]//.xml
 	//orilz77file := "../sendxmlsucceed/" + fname//.xml.lz77
 	log.Println("7zfile:", orilz77file)

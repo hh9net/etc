@@ -59,6 +59,7 @@ func HandleSendXml() {
 				//连接联网中心服务器
 				address := conf.AddressConfigInit()
 				Address := address.AddressIp + ":" + address.AddressPort
+				log.Println("Address:", Address)
 				conn, derr := net.Dial("tcp", Address)
 				if derr != nil {
 					log.Println("Dial 失败", derr)

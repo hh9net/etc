@@ -34,7 +34,7 @@ func Server() {
 		log.Println(err.Error())
 	}
 	//监听
-	log.Println("监听客户端 127.0.0.1:8806")
+	log.Println("监听客户端 ", tcpAddr)
 	listener, err := net.ListenTCP("tcp", tcpAddr)
 	if err != nil {
 		log.Println(err.Error())
@@ -75,6 +75,7 @@ func ReceiveHandler(conn net.Conn) {
 		return
 	}
 	//校验文件
+
 	cerr := CheckFile(msgmd5, fileNameid)
 	if cerr != nil {
 
@@ -93,7 +94,7 @@ func ReceiveHandler(conn net.Conn) {
 
 		//移动xmlzip
 		xz1 := "../centeryuanshixmlzip/" + fileNameid + ".xml.lz77"
-		xz2 := "../centeryuanshixmlzip/errorxml/" + fileNameid + ".xml.lz77"
+		xz2 := "../centeryuanshixmlzip/errorxmlzip/" + fileNameid + ".xml.lz77"
 		mxzerr := common.MoveFile(xz1, xz2)
 		if mxzerr != nil {
 			log.Println("移动errorxml 失败")
@@ -194,47 +195,67 @@ func GetData(buf []byte) {
 
 //接收文件 保存为文件 即时应答
 func RevFile(fileNameid string, conn net.Conn, msglength string) error {
-	//创建文件
+
 	fs, err := os.Create("../centerServer/" + fileNameid + ".xml.lz77")
 	defer fs.Close()
 	if err != nil {
 		log.Println("os.Create err =", err)
 		return err
 	}
+	//获取文件大小
+	DataLen, _ := strconv.Atoi(msglength) //压缩文件长度
+	var buff []byte
+	if DataLen > 0 {
+		buff = make([]byte, DataLen)
+	}
+	log.Println("要接收的文件的长度：", DataLen, len(buff))
+	i := 0
+	//buf := make([]byte ,1024*10)
+	//for {
+	//	n,err := conn.Read(buf)
+	//	if err != nil {
+	//		fmt.Println("conn.Read err =",err)
+	//		if err == io.EOF {
+	//			fmt.Println("文件结束了",err)
+	//		}
+	//		return nil
+	//	}
+	//	if n == 0 {
+	//		fmt.Println("文件结束了",err)
+	//		return nil
+	//	}
+	//	fs.Write(buf[:n])
+	//}
 
-	j, _ := strconv.Atoi(msglength) //压缩文件长度
-	total := 0
-	i := 0 //循环次数
-	//每次读取数据长度
-	buf := make([]byte, 100)
 	for {
 		//读取内容
-		n, rerr := conn.Read(buf)
-		if rerr != nil {
-			log.Println("conn.Read err:", rerr)
+		n, rerr := (conn).Read(buff)
+		if rerr != nil && rerr != io.EOF {
+			log.Println("conn.Read 读文件出错:", rerr)
 			return rerr
 		}
-		total += n
-		i += 1
-
-		if n == 0 {
-			log.Println("文件读取完毕")
+		if rerr == io.EOF {
+			log.Println("文件读结束了", rerr)
 			break
 		}
-		//写入文件
-		fs.Write(buf[:n])
+		if n == 0 {
+			log.Println("n=0,文件读结束了")
+		}
 
+		size, werr := fs.Write(buff[:n])
+		log.Println("写入文件的大小", size, werr)
+		if werr != nil {
+			log.Println("写入文件时的错误为：", werr)
+			return werr
+		}
+		i = i + size
 		//如果实际总接受字节数与客户端给的要传输字节数相等，说明传输完毕
-		if total == j {
-			log.Println("文件接受成功,共", total, "字节")
-			//回复客户端已收到文件
-			//conn.Write([]byte("文件接受成功"))
-
+		if i == DataLen {
+			log.Println("文件消息包 接受成功,共：", size, "个字节")
 			//即时应答
 			var replyStru types.ReplyStru
 			//replyStru.Massageid = string(buf[:20])
 			replyStru.Massageid = fileNameid
-
 			replyStru.Result = "1"
 			m := []byte(replyStru.Massageid)
 			r := []byte(replyStru.Result)
@@ -242,9 +263,7 @@ func RevFile(fileNameid string, conn net.Conn, msglength string) error {
 			InstantResponse(d, conn)
 			break
 		}
-
 	}
-	log.Println("循环写文件次数", i)
 	return nil
 }
 
