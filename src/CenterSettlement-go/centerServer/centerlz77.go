@@ -352,9 +352,10 @@ func UnZipLz77(fname string) error {
 
 	//pwd := "./receivezipfile/" + fname
 	pwd := "./" + fname
+	log.Println("CheckFile unzip 文件路径 ", pwd)
 	origin, err := os.Open(pwd)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("unzip 打开文件失败", err)
 		return err
 	}
 	defer origin.Close()
@@ -364,13 +365,13 @@ func UnZipLz77(fname string) error {
 	outpwd := "../centeryuanshi/" + fn[0]
 	out, cerr := os.Create(outpwd)
 	if cerr != nil {
-		log.Fatalln(cerr)
+		log.Fatalln("unzip 创建文件失败", cerr)
 		return err
 	}
 	defer out.Close()
 
 	if unzerr := Decompress(origin, out); unzerr != nil {
-		log.Fatalln(unzerr)
+		log.Fatalln("unzip 解压文件失败", unzerr)
 		return err
 	}
 	log.Println("原始交易xml消息解压成功")

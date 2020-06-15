@@ -124,7 +124,7 @@ func CheckFile(msgmd5, fileNameid string) error {
 	for i := range fileInfoList {
 		//判断文件的结尾名
 		if strings.HasSuffix(fileInfoList[i].Name(), ".lz77") {
-			log.Println("打印当前目录下的压缩文件的名字", fileInfoList[i].Name())
+			log.Println("执行 CheckFile 打印当前目录下的压缩文件的名字", fileInfoList[i].Name())
 
 			//解压缩
 			zerr := UnZipLz77(fileInfoList[i].Name())
@@ -223,9 +223,12 @@ func RevFile(fileNameid string, conn net.Conn, msglength string) error {
 		}
 		if rerr == io.EOF {
 			log.Println("文件读结束了", rerr)
+			return nil
+
 		}
 		if n == 0 {
 			log.Println("n=0,文件读结束了")
+			return nil
 		}
 		size, werr := fs.Write(buff[:n])
 		i = i + size
@@ -248,12 +251,14 @@ func RevFile(fileNameid string, conn net.Conn, msglength string) error {
 			InstantResponse(d, conn)
 			return nil
 		}
+		//else {
+		//	log.Printf("本次写入文件的大小 %d 总写过了%d ", size, i)
+		//	break
 	}
-	//return nil
+	return nil
 }
 
 func HandleFile() error {
-
 	tiker := time.NewTicker(time.Second * 5)
 	for {
 		log.Println("扫描centerYuanshi文件夹,解析文件、数据入库", <-tiker.C)
