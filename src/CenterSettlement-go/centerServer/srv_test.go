@@ -1,7 +1,9 @@
 package centerServer
 
 import (
+	"fmt"
 	log "github.com/sirupsen/logrus"
+	"strings"
 	"testing"
 )
 
@@ -39,7 +41,20 @@ func TestDB_NewTable(t *testing.T) {
 }
 
 func TestGetFileMd5(t *testing.T) {
-	f := "00000000000000109139.xml"
+	f := "00000000000000010612.xml"
 	s := GetFileMd5(f)
 	log.Println(s)
+}
+
+func TestUnzip(t *testing.T) {
+	f := "00000000000000010612.xml"
+	s := UnZipLz77(f)
+	log.Println(s)
+}
+
+func TestToABCD(t *testing.T) {
+	s := "12asd456fdghfsh"
+	fmt.Println("s =", s)
+	str := strings.ToUpper(s)
+	fmt.Println("str =", str)
 }

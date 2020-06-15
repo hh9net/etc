@@ -151,6 +151,7 @@ func CheckFile(msgmd5, fileNameid string) error {
 				//校验文件 校验其md5
 
 				fmd5 := GetFileMd5(fileNameid + ".xml")
+
 				if fmd5 == msgmd5 {
 					log.Println("文件md5一致")
 					log.Println("此文件可以进行 解析原始交易消息文件")
@@ -158,6 +159,8 @@ func CheckFile(msgmd5, fileNameid string) error {
 					//ParsingYSXMLFile()
 					return nil
 				} else {
+					log.Println("new Md5:", fmd5)
+					log.Println("发送过来的md5：", msgmd5)
 					log.Println("文件md5 不一致 ,通行宝 文件发送格式不正确")
 					return errors.New("文件md5 不一致 ,通行宝 文件发送格式不正确")
 				}
@@ -213,36 +216,40 @@ func RevFile(fileNameid string, conn net.Conn, msglength string) error {
 		buff = make([]byte, DataLen)
 	}
 	log.Println("要接收的文件的长度：", DataLen, len(buff))
-	i := 0
+	i := DataLen
+
 	for {
 		//读取内容
 		n, rerr := (conn).Read(buff)
+		i = i - n
 		if rerr != io.EOF && rerr != nil {
 			log.Println("conn.Read 读文件出错:", rerr)
 			return rerr
-		}
+		} //读文件出错
+
+		log.Printf("本次读出文件的大小 %d 还要读出%d 错误为：%s", n, i, rerr)
+
 		if rerr == io.EOF {
 			log.Println("文件读结束了", rerr)
 			return nil
+		} //文件读结束了
 
-		}
 		if n == 0 {
 			log.Println("n=0,文件读结束了")
 			return nil
 		}
-		size, werr := fs.Write(buff[:n])
-		i = i + size
-		log.Printf("本次写入文件的大小 %d 总写过了%d 错误为：%s", size, i, werr)
-		if werr != nil {
-			log.Println("写入文件时的错误为：", werr)
-			return werr
-		}
+
 		//如果实际总接受字节数与客户端给的要传输字节数相等，说明传输完毕
-		if i == DataLen {
-			log.Println("文件消息包 接受成功,共：", i, "个字节")
+		if i <= 0 {
+			//减少最后一个不需要的字节
+			_, werr := fs.Write(buff[:n-1])
+			if werr != nil {
+				log.Println("写入文件时的错误为：", werr)
+				return werr
+			}
+			log.Println("文件消息包 接受成功,共：", DataLen, "个字节")
 			//即时应答
 			var replyStru types.ReplyStru
-			//replyStru.Massageid = string(buf[:20])
 			replyStru.Massageid = fileNameid
 			replyStru.Result = "1"
 			m := []byte(replyStru.Massageid)
@@ -251,11 +258,14 @@ func RevFile(fileNameid string, conn net.Conn, msglength string) error {
 			InstantResponse(d, conn)
 			return nil
 		}
-		//else {
-		//	log.Printf("本次写入文件的大小 %d 总写过了%d ", size, i)
-		//	break
+		size, werr := fs.Write(buff[:n])
+		if werr != nil {
+			log.Println("写入文件时的错误为：", werr, size)
+			return werr
+		}
+
 	}
-	return nil
+	//return nil
 }
 
 func HandleFile() error {
@@ -431,6 +441,7 @@ func Parsexml(pwdfname string, fname string, msg Message) (error, string, int) {
 func GetFileMd5(filename string) string {
 	// 文件全路径名
 	path := "../centerYuanshi/" + filename
+	log.Println("GetFileMd5 path:", path)
 	pFile, err := os.Open(path)
 	if err != nil {
 		log.Printf("打开文件失败，filename=%v, err=%v", filename, err)
@@ -439,6 +450,7 @@ func GetFileMd5(filename string) string {
 	defer pFile.Close()
 	md5h := md5.New()
 	io.Copy(md5h, pFile)
-	log.Println("成功获取md5")
-	return hex.EncodeToString(md5h.Sum(nil))
+	log.Println("成功获取此文件md5", filename)
+	//str :=
+	return strings.ToUpper(hex.EncodeToString(md5h.Sum(nil)))
 }
