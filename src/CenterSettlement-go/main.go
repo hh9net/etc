@@ -34,7 +34,7 @@ func main() {
 	//goroutine2
 	go service.HandleSendXml()
 	//goroutine4
-	//go service.AnalyzeDataPakage()
+	go service.AnalyzeDataPakage()
 	//goroutine3
 	service.Receive()
 	//主线程处理压缩与解压缩

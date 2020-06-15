@@ -18,7 +18,7 @@ type ReceiveHeader struct {
 	MessageId    int64    //消息序号，从1开始，逐1递增 ，8字节  记账包的消息id
 }
 
-//jibody
+//Body
 type ReceiveBody struct {
 	XMLName     xml.Name `xml:"Body"`
 	ContentType int      `xml:",attr"` //争议消息的ContentType始终为2

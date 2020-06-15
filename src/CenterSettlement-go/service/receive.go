@@ -56,10 +56,8 @@ func HandleMessage(conn *net.Conn) {
 		log.Println("记录文件时 Save(conn) 错误", err)
 		return
 	}
-
 	//解析文件
 	ParsingFile(Filename)
-
 	defer (*conn).Close()
 
 }
@@ -90,32 +88,32 @@ func Save(conn *net.Conn) (string, error) {
 	}
 
 	//校验文件
+	//校验文件md5
+	log.Println("执行 CheckFile校验文件")
 	cerr := CheckFile(msgmd5, fileNameid)
 	if cerr != nil {
-
 		// 1、应答确认
-		log.Println("触发 应答确认消息发送")
+		log.Println("触发应答确认消息发送")
 
 		//2、移动文件
 		//移动xml
-		x1 := "../centerYuanshi/" + fileNameid + ".xml"
-		x2 := "../centeryuanshixmlparsed/errorxml/" + fileNameid + ".xml"
+		x1 := "CenterSettlement-go/receivexml/" + fileNameid + ".xml"
+		x2 := "CenterSettlement-go/receivexml/errorxml/" + fileNameid + ".xml"
 		mxerr := common.MoveFile(x1, x2)
 		if mxerr != nil {
-			log.Println("移动errorxml 失败")
-			return "", mxerr
+			log.Println("移动CheckFile失败 的xml error")
+			return fileNameid + ".xml", mxerr
 		}
 
 		//移动xmlzip
-		xz1 := "../centeryuanshixmlzip/" + fileNameid + ".xml.lz77"
-		xz2 := "../centeryuanshixmlzip/errorxml/" + fileNameid + ".xml.lz77"
+		xz1 := "CenterSettlement-go/receivezipfile/" + fileNameid + ".xml.lz77"
+		xz2 := "CenterSettlement-go/receivezipfile/errorxmlzip/" + fileNameid + ".xml.lz77"
 		mxzerr := common.MoveFile(xz1, xz2)
 		if mxzerr != nil {
-			log.Println("移动 xmlzip文件 error 失败")
-			return "", mxzerr
+			log.Println("移动CheckFile失败 的zipxml error\"")
+			return fileNameid + ".xml", mxzerr
 		}
 	}
-
 	return fname, nil
 }
 
@@ -191,7 +189,6 @@ func CheckFile(msgmd5, fileNameid string) error {
 		log.Fatal(err)
 	}
 	log.Println("该文件夹下有文件的数量 ：", len(fileInfoList))
-
 	for i := range fileInfoList {
 		//判断文件的结尾名
 		if strings.HasSuffix(fileInfoList[i].Name(), ".lz77") {
@@ -214,7 +211,7 @@ func CheckFile(msgmd5, fileNameid string) error {
 				}
 			}
 			log.Println("校验文件")
-			fstr := strings.Split(fileInfoList[i].Name(), ".xml.lz77")
+			fstr := strings.Split(fileInfoList[i].Name(), ".xml")
 
 			log.Println(fstr[0], fileNameid)
 			if fileNameid == fstr[0] {
@@ -223,12 +220,11 @@ func CheckFile(msgmd5, fileNameid string) error {
 				fmd5 := GetFileMd5(fileNameid + ".xml")
 				if fmd5 == msgmd5 {
 					log.Println("文件md5一致")
-					log.Println("解析原始交易消息文件，  获取数据")
-
+					log.Println(" 可以进行 解析消息包文件，把获取数据导入数据库")
 					return nil
 				} else {
-					log.Println("文件md5 不一致 ,通行宝 文件发送格式不正确")
-					return errors.New("文件md5 不一致 ,通行宝 文件发送格式不正确")
+					log.Println("文件md5 不一致 ,联网中心文件发送格式不正确")
+					return errors.New("文件md5 不一致 ,联网中心 文件发送格式不正确")
 				}
 			}
 		}

@@ -142,7 +142,6 @@ func CheckFile(msgmd5, fileNameid string) error {
 					log.Println("client.MoveFile err : ", merr)
 					return merr
 				}
-
 			}
 			log.Println("校验文件Md5")
 			fstr := strings.Split(fileInfoList[i].Name(), ".xml.lz77")
@@ -312,7 +311,6 @@ func HandleFile() error {
 
 //解析原始交易数据
 func ParsingYSXMLFile(msg Message, fname string) error {
-
 	if msg.Header.MessageClass == 5 && msg.Header.MessageType == 7 && msg.Body.ContentType == 1 && msg.Body.Transaction[0].ICCard.CardType == 22 {
 		//储值卡 原始交易数据
 		//1、改文件名
