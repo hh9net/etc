@@ -134,7 +134,7 @@ type BJsJizclxx struct {
 	FVcJieszid     string    //F_VC_JIESZID	接收者ID	VARCHAR(32)
 	FNbXiaoxxh     int64     //F_NB_XIAOXXH	消息序号	BIGINT
 	FDtJiessj      string    //F_DT_JIESSJ	接收时间	DATETIME
-	FNbYuansjyxxxx int64     //F_NB_YUANSJYXXXH	原始交易消息序号	BIGINT
+	FNbYuansjyxxxh int64     //F_NB_YUANSJYXXXH	原始交易消息序号	BIGINT
 	FNbJilsl       int       //F_NB_JILSL	记录数量	INT
 	FNbZongje      int       //F_NB_ZONGJE	总金额	INT
 	FNbZhengysl    int       //F_NB_ZHENGYSL	争议数量	INT

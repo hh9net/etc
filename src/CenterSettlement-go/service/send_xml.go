@@ -31,6 +31,7 @@ func HandleSendXml() {
 			return
 		}
 		log.Println("该文件夹下有文件的数量 ：", len(fileInfoList))
+
 		for i := range fileInfoList {
 			//判断文件的结尾名
 			if strings.HasSuffix(fileInfoList[i].Name(), ".xml") {

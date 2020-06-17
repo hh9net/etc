@@ -52,6 +52,7 @@ func TestUnzip(t *testing.T) {
 	log.Println(s)
 }
 
+//bytes.Equa
 func TestToABCD(t *testing.T) {
 	s := "12asd456fdghfsh"
 	fmt.Println("s =", s)

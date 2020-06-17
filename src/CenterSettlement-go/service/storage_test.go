@@ -55,7 +55,7 @@ func TestTcpResponseRecordInsert(t *testing.T) {
 	var resRecord storage.BJsTcpydjl
 	//赋值
 	resRecord.FNbChongfcs = 0
-	resRecord.FDtZuixsj = time.Now().Format("2006-01-02 15:04:05")
+	resRecord.FDtZuixsj = time.Now()
 	resRecord.FVcXiaoxxh = "999999"
 	resRecord.FNbFasz = 2
 	err := storage.TcpResponseRecordInsert(resRecord)
@@ -72,4 +72,10 @@ func TestUpdatePackaging(t *testing.T) {
 }
 func TestGetTingcc(t *testing.T) {
 	storage.GetTingcc("4242420021")
+}
+
+func TestQueryJZMX(t *testing.T) {
+
+	//storage.QueryYuanshiMx(100158)
+	storage.KeepAccountUpdate(100183, 1, 1)
 }

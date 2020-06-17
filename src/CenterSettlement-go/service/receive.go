@@ -21,7 +21,7 @@ import (
 
 //接收联网中心发来数据包
 func Receive() {
-	log.Println("执行线程4 接收联网中心发送文件")
+	log.Println("执行线程 接收联网中心发送文件")
 	//监听联网中心数据端口 "192.168.150.164:8809"
 	address := conf.ListeningAddressConfigInit()
 	Address := address.ListeningAddressIp + ":" + address.ListeningAddressPort
@@ -30,7 +30,7 @@ func Receive() {
 		fmt.Println("Listen", lerr)
 		return
 	}
-	log.Println("等待联网中心发送文件")
+	log.Println("执行线程 等待联网中心发送文件")
 	for {
 		connect, cerr := listen.Accept()
 		if cerr != nil {
@@ -39,12 +39,13 @@ func Receive() {
 		}
 		go HandleTask(&connect)
 	}
-	defer listen.Close()
+
+	//defer listen.Close()
 }
 
 //处理任务
 func HandleTask(conn *net.Conn) {
-	go HandleMessage(conn)
+	//go HandleMessage(conn)
 }
 
 //线程3  接收数据包
@@ -58,11 +59,11 @@ func HandleMessage(conn *net.Conn) {
 	}
 	//解析文件
 	ParsingFile(Filename)
-	defer (*conn).Close()
+	//defer (*conn).Close()
 
 }
 
-//保存联网中心发来的数据
+//保存联网中心发来的数据 ，即使应答
 func Save(conn *net.Conn) (string, error) {
 	//var fileName string
 	//接受客户端发来的要传文件的文件信息data
@@ -77,8 +78,8 @@ func Save(conn *net.Conn) (string, error) {
 	msgmd5 := string(buffer[26:58])
 	log.Println("消息包msgmd5：", msgmd5)
 
-	//msgid := string(buffer[:20])
-	//log.Println("消息包Massageid", msgid)
+	msgid := string(buffer[:20])
+	log.Println("消息包Massageid", msgid)
 
 	//接收文件，保存文件，即使应答
 	rferr, fname := RevFile(fileNameid, conn, msglength)
@@ -114,6 +115,9 @@ func Save(conn *net.Conn) (string, error) {
 			return fileNameid + ".xml", mxzerr
 		}
 	}
+
+	//文件正确、解析文件、数据入库
+
 	return fname, nil
 }
 
@@ -133,33 +137,40 @@ func RevFile(fileNameid string, conn *net.Conn, msglength string) (error, string
 		buff = make([]byte, DataLen)
 	}
 	log.Println("要接收的文件的长度：", DataLen, len(buff))
-	i := 0
+	i := DataLen
+
 	for {
 		//读取内容
 		n, rerr := (*conn).Read(buff)
+		i = i - n
 		if rerr != io.EOF && rerr != nil {
 			log.Println("conn.Read 读文件出错:", rerr)
 			return rerr, ""
-		}
+		} //读文件出错
+
+		log.Printf("本次读出文件的大小 %d 还要读出%d 错误为：%s", n, i, rerr)
+
 		if rerr == io.EOF {
 			log.Println("文件读结束了", rerr)
-		}
+			return nil, ""
+		} //文件读结束了
+
 		if n == 0 {
 			log.Println("n=0,文件读结束了")
+			return nil, ""
 		}
-		size, werr := fs.Write(buff[:n])
-		i = i + size
-		log.Printf("本次写入文件的大小 %d 总写过了%d 错误为：%s", size, i, werr)
-		if werr != nil {
-			log.Println("写入文件时的错误为：", werr)
-			return werr, ""
-		}
+
 		//如果实际总接受字节数与客户端给的要传输字节数相等，说明传输完毕
-		if i == DataLen {
-			log.Println("文件消息包 接受成功,共：", i, "个字节")
+		if i < 0 {
+			//减少最后一个不需要的字节
+			_, werr := fs.Write(buff[:n-1])
+			if werr != nil {
+				log.Println("写入文件时的错误为：", werr)
+				return werr, ""
+			}
+			log.Println("文件消息包 接受成功,共：", DataLen, "个字节")
 			//即时应答
 			var replyStru types.ReplyStru
-			//replyStru.Massageid = string(buf[:20])
 			replyStru.Massageid = fileNameid
 			replyStru.Result = "1"
 			m := []byte(replyStru.Massageid)
@@ -168,8 +179,33 @@ func RevFile(fileNameid string, conn *net.Conn, msglength string) (error, string
 			InstantResponse(d, conn)
 			return nil, fileNameid + ".xml.lz77"
 		}
+
+		//如果实际总接受字节数与客户端给的要传输字节数相等，说明传输完毕
+		if i == 0 {
+			//减少最后一个不需要的字节
+			_, werr := fs.Write(buff[:n])
+			if werr != nil {
+				log.Println("写入文件时的错误为：", werr)
+				return werr, ""
+			}
+			log.Println("文件消息包 接受成功,共：", DataLen, "个字节")
+			//即时应答
+			var replyStru types.ReplyStru
+			replyStru.Massageid = fileNameid
+			replyStru.Result = "1"
+			m := []byte(replyStru.Massageid)
+			r := []byte(replyStru.Result)
+			d := append(m, r...)
+			//
+			InstantResponse(d, conn)
+			return nil, fileNameid + ".xml.lz77"
+		}
+		size, werr := fs.Write(buff[:n])
+		if werr != nil {
+			log.Println("写入文件时的错误为：", werr, size)
+			return werr, ""
+		}
 	}
-	//return nil, fileNameid + ".xml.lz77"
 }
 
 //即时应答
@@ -179,9 +215,11 @@ func InstantResponse(d []byte, conn *net.Conn) {
 	if err != nil {
 		log.Println("联网中心 conn.Write 错误")
 	}
-	(*conn).Close()
+	//关闭连接
+	//(*conn).Close()
 }
 
+//校验文件md5
 func CheckFile(msgmd5, fileNameid string) error {
 	pwd := "CenterSettlement-go/receivezipfile/"
 	fileInfoList, err := ioutil.ReadDir(pwd)
@@ -194,36 +232,37 @@ func CheckFile(msgmd5, fileNameid string) error {
 		if strings.HasSuffix(fileInfoList[i].Name(), ".lz77") {
 			log.Println("打印当前文件或目录下的文件名", fileInfoList[i].Name())
 
-			//解压缩
+			//先解压缩
 			zerr := lz77zip.UnZipLz77(fileInfoList[i].Name())
 			if zerr != nil {
 				log.Println(" 解压缩文件失败", zerr)
 				return zerr //此处解压失败，回头处理
 			}
-			if zerr == nil {
-				//解压缩成功 移动zipxml文件
-				s := "CenterSettlement-go/receivezipfile/" + fileInfoList[i].Name()
-				des := "CenterSettlement-go/receiveUnzipsucceed/" + fileInfoList[i].Name()
-				merr := client.MoveFile(s, des)
-				if merr != nil {
-					log.Println("client.MoveFile err : ", merr)
-					return merr
-				}
+
+			//解压缩成功 移动zipxml文件
+			s := "CenterSettlement-go/receivezipfile/" + fileInfoList[i].Name()
+			des := "CenterSettlement-go/receiveUnzipsucceed/" + fileInfoList[i].Name()
+			merr := client.MoveFile(s, des)
+			if merr != nil {
+				log.Println("client.MoveFile err : ", merr)
+				return merr
 			}
+
 			log.Println("校验文件")
 			fstr := strings.Split(fileInfoList[i].Name(), ".xml")
 
 			log.Println(fstr[0], fileNameid)
 			if fileNameid == fstr[0] {
 				//校验文件 校验其md5
-
 				fmd5 := GetFileMd5(fileNameid + ".xml")
 				if fmd5 == msgmd5 {
-					log.Println("文件md5一致")
+					log.Println("文件md5一致", fmd5, msgmd5)
 					log.Println(" 可以进行 解析消息包文件，把获取数据导入数据库")
+					//
+
 					return nil
 				} else {
-					log.Println("文件md5 不一致 ,联网中心文件发送格式不正确")
+					log.Println("文件md5 不一致 ,联网中心文件发送格式不正确", fmd5, msgmd5)
 					return errors.New("文件md5 不一致 ,联网中心 文件发送格式不正确")
 				}
 			}
@@ -245,7 +284,7 @@ func GetFileMd5(filename string) string {
 	md5h := md5.New()
 	io.Copy(md5h, pFile)
 	log.Println("成功获取md5")
-	return hex.EncodeToString(md5h.Sum(nil))
+	return strings.ToUpper(hex.EncodeToString(md5h.Sum(nil)))
 }
 
 //解析文件

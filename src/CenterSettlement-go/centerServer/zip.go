@@ -20,6 +20,7 @@ func CenterZipxml(fname string, lx string) error {
 	case "qf":
 		pwd = "../centerclearling/" + fname
 	}
+	log.Println("zipxmlpwd:", pwd)
 
 	origin, oerr := os.Open(pwd)
 	if oerr != nil {

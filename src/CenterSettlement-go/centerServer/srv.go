@@ -105,10 +105,10 @@ func ReceiveHandler(conn net.Conn) {
 	//处理文件
 	herr := HandleFile()
 	if herr != nil {
-		log.Println("HandleFile失败 ")
+		log.Println("HandleFile 执行失败 ")
 		return
 	}
-
+	log.Println("HandleFile  ok ")
 	//获取数据
 	//GetData(buffer[:n])
 }
@@ -240,9 +240,29 @@ func RevFile(fileNameid string, conn net.Conn, msglength string) error {
 		}
 
 		//如果实际总接受字节数与客户端给的要传输字节数相等，说明传输完毕
-		if i <= 0 {
+		if i < 0 {
 			//减少最后一个不需要的字节
 			_, werr := fs.Write(buff[:n-1])
+			if werr != nil {
+				log.Println("写入文件时的错误为：", werr)
+				return werr
+			}
+			log.Println("文件消息包 接受成功,共：", DataLen, "个字节")
+			//即时应答
+			var replyStru types.ReplyStru
+			replyStru.Massageid = fileNameid
+			replyStru.Result = "1"
+			m := []byte(replyStru.Massageid)
+			r := []byte(replyStru.Result)
+			d := append(m, r...)
+			InstantResponse(d, conn)
+			return nil
+		}
+
+		//如果实际总接受字节数与客户端给的要传输字节数相等，说明传输完毕
+		if i == 0 {
+			//减少最后一个不需要的字节
+			_, werr := fs.Write(buff[:n])
 			if werr != nil {
 				log.Println("写入文件时的错误为：", werr)
 				return werr
@@ -314,13 +334,11 @@ func HandleFile() error {
 					log.Println("数据导入数据库失败", perr)
 					return perr
 				}
-				return nil
-			} else {
-				log.Println(fileList[i].Name()) //不是xml文件
-				return nil
+
 			}
 
 		}
+		return nil
 	}
 }
 

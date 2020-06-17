@@ -1,29 +1,32 @@
 package main
 
 import (
+	"CenterSettlement-go/common"
 	"CenterSettlement-go/conf"
 	"CenterSettlement-go/database"
 	"CenterSettlement-go/service"
 	commonUtils "CenterSettlement-go/utils"
 	log "github.com/sirupsen/logrus"
+	"os"
 	"time"
 )
 
-//
-//func test(lib *lib7z.Lz77so) {
-//	file := "generatexml/CZ_3201_00000000000000100048.xml"
-//
-//	for i := 0; i <= 5; i++ {
-//		filenew := fmt.Sprintf("%d.xml.lz77", i)
-//		fileextra := fmt.Sprintf("%d.xml", i)
-//		lib.Comresslz77(file, filenew)
-//		lib.Depresslz77(filenew, fileextra)
-//
-//	}
-//}
-
 func main() {
-	//var libtest lib7z.Lz77so
+	// 打开文件锁 处理进程互斥
+	lock, e := common.Create("./LockFile.txt")
+	if e != nil {
+		log.Println("打开文件锁 错误 ", e) // handle error
+	}
+	defer lock.Release()
+
+	// 尝试独占文件锁
+	e = lock.Lock()
+	if e != nil {
+		log.Println("独占文件锁 错误 ", e) // handle error
+		os.Exit(1)
+	}
+	defer lock.Unlock()
+
 	// 日志初始化
 	conf := conf.LogConfigInit() //日志配置
 	commonUtils.InitLogrus(conf.LogPath, conf.LogFileName, time.Duration(24*conf.LogmaxAge)*time.Hour,
@@ -32,21 +35,16 @@ func main() {
 	//goroutine1
 	//go service.HandleGeneratexml()
 	//goroutine2
-	go service.HandleSendXml()
+	//go service.HandleSendXml()
 	//goroutine4
-	go service.AnalyzeDataPakage()
+	//go service.AnalyzeDataPakage()
 	//goroutine3
 	service.Receive()
-	//主线程处理压缩与解压缩
 
-	//for true {
-	//	test(&libtest)
-	//	time.Sleep(time.Second * 3)
-	//}
 	for {
-		tiker := time.NewTicker(time.Second * 2)
+		tiker := time.NewTicker(time.Second * 9)
 		for {
-			log.Println("执行主go程 ", <-tiker.C)
+			log.Println("执行主go程  接收数据", <-tiker.C)
 		}
 	}
 }

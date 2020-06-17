@@ -3,9 +3,9 @@ package types
 import "encoding/xml"
 
 type ReceiveMessage struct {
-	XMLName xml.Name `xml:"Message"`
-	Header  Header   `xml:"Header"`
-	Body    Body     `xml:"Body"`
+	XMLName xml.Name      `xml:"Message"`
+	Header  ReceiveHeader `xml:"Header"`
+	Body    ReceiveBody   `xml:"Body"`
 }
 
 type ReceiveHeader struct {
@@ -20,8 +20,9 @@ type ReceiveHeader struct {
 
 //Body
 type ReceiveBody struct {
-	XMLName     xml.Name `xml:"Body"`
-	ContentType int      `xml:",attr"` //争议消息的ContentType始终为2
+	XMLName       xml.Name `xml:"Body"`
+	ContentType   int      `xml:",attr"` //争议消息的ContentType始终为2
+	DisputedCount int      `xml:"DisputedCount"`
 }
 
 //

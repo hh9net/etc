@@ -8,47 +8,49 @@ import (
 //争议处理消息结构
 //	争议交易处理（可疑帐调整数据）
 type DisputeProcessMessage struct {
-	XMLName xml.Name `xml:"Message"`
-	Header  Header   `xml:"Header"`
-	Body    Body     `xml:"Body"`
+	XMLName xml.Name             `xml:"Message"`
+	Header  DisputeProcessHeader `xml:"Header"`
+	Body    DisputeProcessBody   `xml:"Body"`
 }
 
 type DisputeProcessHeader struct {
 	XMLName      xml.Name `xml:"Header"`
 	Version      string   //统一 00010000 Hex(8) Header
-	MessageClass int32    //消息传输的机制 5
-	MessageType  int32    //消息的应用类型 7
-	SenderId     string   // Hex(16位，不足补零) 发送方Id
-	ReceiverId   string   //Hex(16位，不足补零) 接收方Id
+	MessageClass int      //消息传输的机制 5
+	MessageType  int      //消息的应用类型 7
+	SenderId     string   // Hex(16位，不足补零) 发送方Id 联网中心id
+	ReceiverId   string   //Hex(16位，不足补零) 接收方Id 通行宝
 	MessageId    int64    //消息序号，从1开始，逐1递增 ，8字节  记账包的消息id
 }
 
 //争议body
 type DisputeProcessBody struct {
-	XMLName            xml.Name  `xml:"Body"`
-	ContentType        int       `xml:",attr"` //争议消息的ContentType始终为2
-	ClearingOperatorId string    //清分方ID
-	ServiceProviderId  string    //通行宝中心系统Id，
-	IssuerId           string    //发行服务机构Id，
-	ProcessTime        time.Time //处理时间
-	Count              int       //本消息包含的记录数量，包括经讨论确认付款和记录和坏帐 记录数量
+	XMLName            xml.Name `xml:"Body"`
+	ContentType        int      `xml:",attr"` //争议消息的ContentType始终为2
+	ClearingOperatorId string   //清分方ID
+	ServiceProviderId  string   //发行服务id， 联网中心id
+	IssuerId           string   //发行方服务机构Id，通行宝
+	ProcessTime        string   //处理时间
+	Count              int      //本消息包含的记录数量，包括经讨论确认付款和记录和坏帐 记录数量
 
-	Amount      string      //确认记帐总金额 交易总金额(元) 数据库为分【注意转换的小数问题】浮点数
-	FileId      int         //争议结果文件Id ，使用此栏位确认争议归属清算日期 （现使用OBU中心清算日ClearTargetDate作为唯一标识,YYYYMMDD） 如果争议结果文件每天需要交互多次，建议FileID编码规则改为前8位为争议处理结果归属清算日yyyymmdd,加1位序号
-	MessageList MessageList //包含争议结果 记录的原始交易包
+	Amount      string        //确认记帐总金额 交易总金额(元) 数据库为分【注意转换的小数问题】浮点数
+	FileId      int           //争议结果文件Id ，使用此栏位确认争议归属清算日期 （现使用OBU中心清算日ClearTargetDate作为唯一标识,YYYYMMDD） 如果争议结果文件每天需要交互多次，建议FileID编码规则改为前8位为争议处理结果归属清算日yyyymmdd,加1位序号
+	MessageList []MessageList //包含争议结果 记录的原始交易包
 }
 
 //争议交易记录List的格式
 //表示其包含的争议结果记录来自于收费方某个原始交易包
 type MessageList struct {
-	XMLName     xml.Name    `xml:"MessageList"`
-	MessageId   int         //通行宝中心系统原始交易包ID
-	Count       int         //属于当前交易包的争议结果记录数量
-	Amount      string      //属于当前交易包的争议结果记录金额
-	Transaction Transaction //争议处理结果记录
-	TransId     int         //表示该条交易在原始数据包中的交易记录Id
-	Result      int         //处理结果 为0表示正常支付；为1表示此交易作坏账处理。
+	XMLName     xml.Name                  `xml:"MessageList"`
+	MessageId   int64                     //通行宝中心系统原始交易包ID
+	Count       int                       //属于当前交易包的争议结果记录数量
+	Amount      string                    //属于当前交易包的争议结果记录金额
+	Transaction DisputeProcessTransaction //争议处理结果记录
+}
 
+type DisputeProcessTransaction struct {
+	TransId int //表示该条交易在原始数据包中的交易记录Id
+	Result  int //处理结果 为0表示正常支付；为1表示此交易作坏账处理。
 }
 
 //<?xml version="1.0" encoding="UTF-8"?>
@@ -62,9 +64,9 @@ type MessageList struct {
 //<MessageId>114464</MessageId>
 //</Header>
 //<Body ContentType="2">
-//<ClearingOperatorId>0000000000000020</ClearingOperatorId>
-//<ServiceProviderId>0000000000000020</ServiceProviderId>
-//<IssuerId>00000000000000FD</IssuerId>
+//<ClearingOperatorId>0000000000000020</ClearingOperatorId>//清分方id
+//<ServiceProviderId>0000000000000020</ServiceProviderId>//发行方
+//<IssuerId>00000000000000FD</IssuerId>//通行宝
 //<FileId>20180702</FileId>
 //<ProcessTime>2018-07-03T09:06:04</ProcessTime>
 //<Count>2</Count>
@@ -88,6 +90,7 @@ type MessageList struct {
 //</MessageList>
 //</Body>
 //</Message>
+
 //应答争议处理
 type ResDisputeProcessMessage struct {
 	XMLName xml.Name `xml:"Message"`

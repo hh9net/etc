@@ -45,8 +45,18 @@ func StrTimeTotime(strTime string) time.Time {
 
 	const Layout = "2006-01-02 15:04:05" //时间常量
 	loc, _ := time.LoadLocation("Asia/Shanghai")
+	//log.Println(err)
 	t, _ := time.ParseInLocation(Layout, strTime /*需要转换的时间类型字符串*/, loc)
+	//log.Println(toerr)
 
 	return t
+}
 
+//处理时间2017-07-07T11:33:53 转为 2017-07-07 11:33:53
+func DataTimeFormat(datetime string) string {
+
+	b := []byte(datetime)
+	b[10] = ' '
+	log.Println(datetime, "to", string(b))
+	return string(b)
 }

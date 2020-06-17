@@ -21,6 +21,8 @@ func TestDataTimeFormatHandle(t *testing.T) {
 }
 
 func TestStrTimeTotime(t *testing.T) {
-	T := StrTimeTotime("2017-07-07 11:33:53")
-	log.Println(T)
+	d := "2020-06-08T20:45:40"
+	s := DataTimeFormatHandle(d)
+	Ti := StrTimeTotime(s)
+	log.Println(Ti)
 }

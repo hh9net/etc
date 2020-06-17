@@ -1,7 +1,6 @@
 package centerServer
 
 import (
-	"CenterSettlement-go/conf"
 	"CenterSettlement-go/types"
 	"crypto/md5"
 	"encoding/hex"
@@ -14,205 +13,192 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 //模拟联网中心发送 记账数据、争议数据、清分数据
 func CenterClient() {
-	//连接通行包
-	address := conf.ListeningAddressConfigInit()
-	Address := address.ListeningAddressIp + ":" + address.ListeningAddressPort
-	//Dial
-	conn, derr := net.Dial("tcp", Address)
-	if derr != nil {
-		log.Println("Dial 通行宝 error ", derr)
-		return
-	}
-	if conn != nil {
-		log.Println("Dial 通行宝 成功")
-	}
+	tiker := time.NewTicker(time.Second * 5)
+	for {
+		log.Println("执行 模拟联网中心发送 记账数据、争议数据、清分数据", <-tiker.C)
 
-	//发送记账包数据
-	err1 := SendKeepAccount(&conn)
-	if err1 != nil {
-		log.Println("发送记账包数据 error", err1)
-	}
+		//发送记账包数据
+		err1 := SendKeepAccount()
+		if err1 != nil {
+			log.Println("发送记账包数据 error", err1)
+		}
 
-	//发送争议包数据
-	err2 := SendDispute(&conn)
-	if err2 != nil {
-		log.Println("发送争议包数据 error", err2)
-	}
+		//发送争议包数据
+		err2 := SendDispute()
+		if err2 != nil {
+			log.Println("发送争议包数据 error", err2)
+		}
 
-	//发送清分包数据
-	err3 := SendClearling(&conn)
-	if err3 != nil {
-		log.Println("发送清分包数据 error ", err3)
+		//发送清分包数据
+		err3 := SendClearling()
+		if err3 != nil {
+			log.Println("发送清分包数据 error ", err3)
+		}
+
+		//发送应答包
 	}
 }
 
 //发送记账包
-func SendKeepAccount(conn *net.Conn) error {
+func SendKeepAccount() error {
 	//1、扫描文件夹获取数据
-	pwd := "../centerkeepaccount/"
-	fileInfoList, err := ioutil.ReadDir(pwd)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println("该文件夹下有文件的数量 ：", len(fileInfoList))
-	for i := range fileInfoList {
-		//判断文件的	前缀名
+	log.Println("执行发送记账包")
+	for {
+		pwd := "../centerkeepaccount/"
+		fileInfoList, err := ioutil.ReadDir(pwd)
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Println("该文件夹下有文件的数量 ：", len(fileInfoList))
+		if len(fileInfoList) == 0 {
+			return nil
+		}
 
-		if strings.HasPrefix(fileInfoList[i].Name(), "JZB_") {
-			log.Println("打印当前文件或目录下的文件名", fileInfoList[i].Name())
+		for i := range fileInfoList {
+			//判断文件的	前缀名
+			if strings.HasPrefix(fileInfoList[i].Name(), "JZB_") {
+				log.Println("打印当前文件或目录下的文件名", fileInfoList[i].Name())
 
-			//压缩xml文件
-			zjzerr := CenterZipxml(fileInfoList[i].Name(), "jz")
-			if zjzerr != nil {
-				return errors.New("记账包压缩失败")
-			}
-			log.Println("记账包压缩成功")
-			//MoveFile
-			s1 := "../centerkeepaccount/" + fileInfoList[i].Name()
-			s2 := "../centerCompressed/" + fileInfoList[i].Name()
-			mverr := MoveFile(s1, s2)
-			if mverr != nil {
-				return errors.New("记账包xml 移动失败")
-			}
-			log.Println("记账包xml文件移动成功")
+				//压缩xml文件
+				zjzerr := CenterZipxml(fileInfoList[i].Name(), "jz")
+				if zjzerr != nil {
+					return errors.New("记账包压缩失败")
+				}
+				log.Println("记账包压缩成功，可以移到已压缩文件夹 ：centerCompressed")
+				//移动xml文件
+				s1 := "../centerkeepaccount/" + fileInfoList[i].Name()
+				s2 := "../centerCompressed/" + fileInfoList[i].Name()
+				mverr := MoveFile(s1, s2)
+				if mverr != nil {
+					return errors.New("记账包xml 移动失败")
+				}
+				log.Println("记账包xml文件移动成功，可以进行解析xml，准备好发送报文")
 
-			//		解析xml文件  获取数据
-			sendStru, perr := ParsingXMLFiles(fileInfoList[i].Name())
-			if perr != nil {
-				return perr
-			}
+				//		解析xml文件  获取数据
+				sendStru, perr := ParsingXMLFiles(fileInfoList[i].Name())
+				if perr != nil {
+					return perr
+				}
 
-			//发送
-			jzserr := Sendxml(sendStru, conn)
-			if jzserr != nil {
-				return jzserr
+				//发送
+				jzserr := Sendxml(sendStru)
+				if jzserr != nil {
+					return jzserr
+				}
 			}
-			//读取通行宝的即时应答
-			buf := make([]byte, 1024)
-			n, err2 := (*conn).Read(buf)
-			if err2 != nil {
-				log.Println("conn.Read err = ", err2)
-				return err2
-			}
-			log.Println("发送记账包  通行宝的即时应答为：", string(buf[:n]))
 		}
 	}
-	return nil
 }
 
 //发送争议包
-func SendDispute(conn *net.Conn) error {
+func SendDispute() error {
 	//1、扫描文件夹获取数据
-	pwd := "../centerdispute/"
-	fileInfoList, err := ioutil.ReadDir(pwd)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println("该文件夹下有文件的数量 ：", len(fileInfoList))
-	for i := range fileInfoList {
-		//判断文件的	前缀名
+	log.Println("执行发送争议包")
+	//tiker := time.NewTicker(time.Second * 5)
+	for {
+		//log.Println("执行线程2", <-tiker.C)
+		pwd := "../centerdispute/"
+		fileInfoList, err := ioutil.ReadDir(pwd)
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Println("该文件夹下有文件的数量 ：", len(fileInfoList))
+		if len(fileInfoList) == 0 {
+			return nil
+		}
+		for i := range fileInfoList {
+			//判断文件的	前缀名
 
-		if strings.HasPrefix(fileInfoList[i].Name(), "ZYB") {
-			log.Println("打印当前文件或目录下的文件名", fileInfoList[i].Name())
+			if strings.HasPrefix(fileInfoList[i].Name(), "ZYB") {
+				log.Println("打印当前文件或目录下的文件名", fileInfoList[i].Name())
 
-			//压缩xml文件
-			zipzyerr := CenterZipxml(fileInfoList[i].Name(), "jz")
-			if zipzyerr != nil {
-				return errors.New("争议包xml 压缩失败")
-			}
-			log.Println("争议包压缩成功")
-			//MoveFile
-			s1 := "../centerdispute/" + fileInfoList[i].Name()
-			s2 := "../centerCompressed/" + fileInfoList[i].Name()
+				//压缩xml文件
+				zipzyerr := CenterZipxml(fileInfoList[i].Name(), "zy")
+				if zipzyerr != nil {
+					return errors.New("争议包xml 压缩失败")
+				}
+				log.Println("争议包压缩成功")
+				//MoveFile
+				s1 := "../centerdispute/" + fileInfoList[i].Name()
+				s2 := "../centerCompressed/" + fileInfoList[i].Name()
 
-			mverr := MoveFile(s1, s2)
-			if mverr != nil {
-				return errors.New("争议包xml 移动失败")
-			}
-			log.Println("争议包xml文件移动成功")
+				mverr := MoveFile(s1, s2)
+				if mverr != nil {
+					return errors.New("争议包xml 移动失败")
+				}
+				log.Println("争议包xml文件移动成功")
 
-			//		解析xml文件  获取数据
-			sendStru, perr := ParsingXMLFiles(fileInfoList[i].Name())
-			if perr != nil {
-				return perr
-			}
+				//		解析xml文件  获取数据
+				sendStru, perr := ParsingXMLFiles(fileInfoList[i].Name())
+				if perr != nil {
+					return perr
+				}
 
-			//发送
-			zyserr := Sendxml(sendStru, conn)
-			if zyserr != nil {
-				return zyserr
+				//发送
+				zyserr := Sendxml(sendStru)
+				if zyserr != nil {
+					return zyserr
+				}
 			}
-			//读取通行宝的即时应答
-			buf := make([]byte, 1024)
-			n, err2 := (*conn).Read(buf)
-			if err2 != nil {
-				log.Println("conn.Read err = ", err2)
-				return err2
-			}
-			log.Println("发送争议包  通行宝的即时应答为：", string(buf[:n]))
 		}
 	}
-
-	return nil
 }
 
 //发送清分包
-func SendClearling(conn *net.Conn) error {
+func SendClearling() error {
 	//1、扫描文件夹获取数据
-	pwd := "../centerclearling/"
-	fileInfoList, err := ioutil.ReadDir(pwd)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println("该文件夹下有文件的数量 ：", len(fileInfoList))
-	for i := range fileInfoList {
-		//判断文件的	前缀名
+	log.Println("执行发送争议包")
+	//tiker := time.NewTicker(time.Second * 5)
+	for {
+		pwd := "../centerclearling/"
+		fileInfoList, err := ioutil.ReadDir(pwd)
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Println("该文件夹下有文件的数量 ：", len(fileInfoList))
+		if len(fileInfoList) == 0 {
+			return nil
+		}
+		for i := range fileInfoList {
+			//判断文件的	前缀名
+			if strings.HasPrefix(fileInfoList[i].Name(), "QFB") {
+				log.Println("打印当前文件或目录下的文件名", fileInfoList[i].Name())
 
-		if strings.HasPrefix(fileInfoList[i].Name(), "QFB") {
-			log.Println("打印当前文件或目录下的文件名", fileInfoList[i].Name())
+				//压缩xml文件
+				zipqferr := CenterZipxml(fileInfoList[i].Name(), "qf")
+				if zipqferr != nil {
+					return errors.New("清分包xml 压缩失败")
+				}
+				log.Println("清分包压缩成功")
+				//MoveFile
+				s1 := "../centerclearling/" + fileInfoList[i].Name()
+				s2 := "../centerCompressed/" + fileInfoList[i].Name()
 
-			//压缩xml文件
-			zipqferr := CenterZipxml(fileInfoList[i].Name(), "qf")
-			if zipqferr != nil {
-				return errors.New("清分包xml 压缩失败")
-			}
-			log.Println("清分包压缩成功")
-			//MoveFile
-			s1 := "../centerclearling/" + fileInfoList[i].Name()
-			s2 := "../centerCompressed/" + fileInfoList[i].Name()
+				mverr := MoveFile(s1, s2)
+				if mverr != nil {
+					return errors.New("清分包xml 移动失败")
+				}
+				log.Println("清分包xml文件移动 成功")
 
-			mverr := MoveFile(s1, s2)
-			if mverr != nil {
-				return errors.New("清分包xml 移动失败")
-			}
-			log.Println("清分包xml文件移动 成功")
+				//		解析xml文件  获取数据
+				sendStru, perr := ParsingXMLFiles(fileInfoList[i].Name())
+				if perr != nil {
+					return perr
+				}
 
-			//		解析xml文件  获取数据
-			sendStru, perr := ParsingXMLFiles(fileInfoList[i].Name())
-			if perr != nil {
-				return perr
+				//发送
+				qfserr := Sendxml(sendStru)
+				if qfserr != nil {
+					return qfserr
+				}
 			}
-
-			//发送
-			qfserr := Sendxml(sendStru, conn)
-			if qfserr != nil {
-				return qfserr
-			}
-			//读取通行宝的即时应答
-			buf := make([]byte, 1024)
-			n, err2 := (*conn).Read(buf)
-			if err2 != nil {
-				log.Println("conn.Read err = ", err2)
-				return err2
-			}
-			log.Println("发送清分包  通行宝的即时应答为：", string(buf[:n]))
 		}
 	}
-	return nil
 }
 
 //解析xml文件
@@ -220,7 +206,7 @@ func ParsingXMLFiles(fname string) (*types.SendStru, error) {
 	var sendStru types.SendStru
 	//1、获取消息包序号Massageid
 	fnstr := strings.Split(fname, "_")
-	idstr := strings.Split(fnstr[2], ".")
+	idstr := strings.Split(fnstr[1], ".")
 	sendStru.Massageid = idstr[0] //20位
 
 	//2、获取压缩文件大小
@@ -238,7 +224,7 @@ func ParsingXMLFiles(fname string) (*types.SendStru, error) {
 	}
 
 	//4、获得文件名
-	sendStru.Xml_msgName = fname + ".lz77"
+	sendStru.Xml_msgName = fname + ".lz77" //压缩文件名
 	//
 	log.Println("报文信息：", sendStru)
 
@@ -260,10 +246,8 @@ func connsendFile(data []byte, fname string, conn *net.Conn, sendStru *types.Sen
 		log.Printf("发送字节数%d，错误为：%s", n, err)
 		return err
 	}
-	//暂时通过客户端sleep 100毫秒解决粘包问题，还可以通过tcp重连解决，以后再用（包头+数据）封装数据包的方式解决
-	//time.Sleep(time.Millisecond * 100)
 
-	path := "../centerSendxmlzip/" + fname + ".lz77"
+	path := "../centerSendxmlzip/" + fname
 	log.Println("发送文件 path:=", path)
 	file, oserr := os.Open(path)
 	if oserr != nil {
@@ -274,43 +258,55 @@ func connsendFile(data []byte, fname string, conn *net.Conn, sendStru *types.Sen
 	defer file.Close()
 	//获取文件大小
 	DataLen, _ := strconv.Atoi(sendStru.Xml_length)
-	//动态分配切片大小
-	//一次性读取文件
-	//一次性发送完
-	//if DataLen > 0 {
-	//	data = make([]byte, DataLen)
-	//	if _, err := io.ReadFull(*conn, data); err != nil {
-	//		log.Println("read msg data error ", err)
-	//		return err
-	//	}
-	//}
 	var buff []byte
 	if DataLen > 0 {
 		buff = make([]byte, DataLen)
 	}
-	log.Println("要发送的文件的长度：", DataLen)
-	size, rerr := file.Read(buff)
-	log.Println(size, rerr)
-	if rerr != nil {
-		log.Println("file.Read err:", rerr)
-		return rerr
+	log.Println("联网中心要发送的压缩文件的大小", DataLen)
+	total := 0
+	for {
+		size, rerr := file.Read(buff)
+		log.Println("读取文件的大小为：", size, rerr)
+		if rerr != nil && rerr != io.EOF {
+			log.Println("file.Read err:", rerr)
+			break
+		}
+		if rerr == io.EOF {
+			log.Println("文件读取完毕")
+			log.Println("文件长度", total)
+			break
+		}
+
+		_, werr := connect.Write(buff[:size])
+		if werr != nil {
+			log.Println("err", werr)
+			return werr
+		}
+		total += size
+		log.Println("已发送文件的大小为：", total)
+		if total == DataLen {
+			log.Println("发送报文到 通行宝  成功")
+			return nil
+		}
 	}
-	if rerr == io.EOF {
-		log.Println("文件读取完毕")
-		log.Println("文件长度", size)
-		return rerr
-	}
-	_, werr := connect.Write(buff[:size])
-	if werr != nil {
-		log.Println("联网中心发送文件时， connect.Write error ", werr)
-		return werr
-	}
-	log.Println("发送报文到 通行宝  成功")
 	return nil
 }
 
 //发送
-func Sendxml(sendStru *types.SendStru, conn *net.Conn) error {
+func Sendxml(sendStru *types.SendStru /*, conn *net.Conn*/) error {
+	//连接通行包
+	address := ListeningAddressConfigInit()
+	Address := address.ListeningAddressIp + ":" + address.ListeningAddressPort
+	//Dial
+
+	conn, derr := net.Dial("tcp", Address)
+	if derr != nil {
+		log.Println("Dial 通行宝 error ", derr)
+		return derr
+	}
+	if conn != nil {
+		log.Println("Dial 通行宝 成功")
+	}
 	//把报文写给服务端
 	data := []byte(sendStru.Massageid)
 	length := []byte(sendStru.Xml_length)
@@ -318,17 +314,34 @@ func Sendxml(sendStru *types.SendStru, conn *net.Conn) error {
 	data = append(data, length...)
 	data = append(data, Md5...)
 	//发送
-	err := connsendFile(data, sendStru.Xml_msgName, conn, sendStru)
+	err := connsendFile(data, sendStru.Xml_msgName, &conn, sendStru)
 	if err != nil {
 		log.Println("connsendFile error:", err)
 		return err
 	}
 
-	//发送成功更新 发送状态 发送时间 发送成功后消息包的文件路径
+	//发送成功  更新 发送状态 发送时间 发送成功后消息包的文件路径
 	Mid, _ := strconv.Atoi(sendStru.Massageid)
 	//消息包发送成功更新 发送状态 发送时间 发送成功后消息包的文件路径
 
 	log.Printf("消息包：%d 发送成功 ", Mid)
+	//log.Printf("发送后收到的接收应答 ")
+
+	//读取通行宝的即时应答
+	buf := make([]byte, 100)
+	n, err2 := (conn).Read(buf)
+	if err2 != nil && err2 != io.EOF {
+		log.Println("conn.Read err = ", err2)
+		return err2
+	}
+	if err2 == io.EOF {
+		log.Println("conn.Read 读取联网中心的应答结束", err2)
+		//对联网中心的接收应答处理
+
+		(conn).Close()
+		return nil
+	}
+	log.Println("收到的即时应答 :", string(buf[:n]))
 
 	return nil
 
@@ -406,5 +419,5 @@ func GetXmlFileMd5(filename string) string {
 	md5h := md5.New()
 	io.Copy(md5h, pFile)
 
-	return hex.EncodeToString(md5h.Sum(nil))
+	return strings.ToUpper(hex.EncodeToString(md5h.Sum(nil)))
 }

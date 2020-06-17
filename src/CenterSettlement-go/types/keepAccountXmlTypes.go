@@ -7,17 +7,17 @@ import (
 
 //记账处理消息结构
 //接收联网中心的记账处理xml消息
-type KeepAccountMessage struct {
-	XMLName xml.Name `xml:"Message"`
-	Header  Header   `xml:"Header"`
-	Body    Body     `xml:"Body"`
+type KeepAccountokMessage struct {
+	XMLName xml.Name          `xml:"Message"`
+	Header  KeepAccountHeader `xml:"Header"`
+	Body    KeepAccountOkBody `xml:"Body"`
 }
 
 type KeepAccountHeader struct {
 	XMLName      xml.Name `xml:"Header"`
 	Version      string   //统一 00010000 Hex(8) Header
-	MessageClass int32    //消息传输的机制5
-	MessageType  int32    //消息的应用类型5
+	MessageClass int      //消息传输的机制5
+	MessageType  int      //消息的应用类型5
 	SenderId     string   // Hex(16位，不足补零) 发送方Id
 	ReceiverId   string   //Hex(16位，不足补零) 接收方Id
 	MessageId    int64    //消息序号，从1开始，逐1递增 ，8字节  记账包的消息id
@@ -25,15 +25,21 @@ type KeepAccountHeader struct {
 
 //如果记账没有争议
 type KeepAccountOkBody struct {
-	XMLName           xml.Name  `xml:"Body"`
-	ContentType       int       `xml:",attr"` //记帐消息的ContentType始终为1
-	ServiceProviderId string    //通行宝中心系统Id，
-	IssuerId          string    //发行服务机构Id， 记账消息哪一个发行方
-	MessageId         int64     //交易消息包Id。原始交易包消息中的messageid
-	ProcessTime       time.Time //处理时间
-	Count             int       //本消息对应的原始交易包中交易记录的数量
-	Amount            int       //确认记帐总金额 交易总金额(元) 数据库为分【注意转换的小数问题】
-	DisputedCount     int       //本消息包含的争议交易数量 （可疑帐笔数）
+	XMLName           xml.Name `xml:"Body"`
+	ContentType       int      `xml:",attr"` //记帐消息的ContentType始终为1
+	ServiceProviderId string   //通行宝中心系统Id，
+	IssuerId          string   //发行服务机构Id， 记账消息哪一个发行方
+	MessageId         int64    //交易消息包Id。原始交易包消息中的messageid
+	ProcessTime       string   //处理时间
+	Count             int      //本消息对应的原始交易包中交易记录的数量
+	Amount            string   //确认记帐总金额 交易总金额(元) 数据库为分【注意转换的小数问题】
+	DisputedCount     int      //本消息包含的争议交易数量 （可疑帐笔数）
+}
+
+type KeepAccountMessage struct {
+	XMLName xml.Name          `xml:"Message"`
+	Header  KeepAccountHeader `xml:"Header"`
+	Body    KeepAccountBody   `xml:"Body"`
 }
 
 //如果记账有争议
@@ -43,9 +49,9 @@ type KeepAccountBody struct {
 	ServiceProviderId string           //通行宝中心系统Id，
 	IssuerId          string           //发行服务机构Id， 记账消息哪一个发行方
 	MessageId         int64            //交易消息包Id。原始交易包消息中的messageid
-	ProcessTime       time.Time        //处理时间
+	ProcessTime       string           //处理时间
 	Count             int              //本消息对应的原始交易包中交易记录的数量
-	Amount            int              //确认记帐总金额 交易总金额(元) 数据库为分【注意转换的小数问题】
+	Amount            string           //确认记帐总金额 交易总金额(元) 数据库为分【注意转换的小数问题】
 	DisputedCount     int              //本消息包含的争议交易数量 （可疑帐笔数）
 	DisputedRecord    []DisputedRecord //争议记录内容
 }

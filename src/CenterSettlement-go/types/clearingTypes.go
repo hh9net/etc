@@ -8,16 +8,16 @@ import (
 //清分统计处理消息结构
 //	清分统计处理（可疑帐调整数据）
 type ClearingMessage struct {
-	XMLName xml.Name `xml:"Message"`
-	Header  Header   `xml:"Header"`
-	Body    Body     `xml:"Body"`
+	XMLName xml.Name       `xml:"Message"`
+	Header  ClearingHeader `xml:"Header"`
+	Body    ClearingBody   `xml:"Body"`
 }
 
 type ClearingHeader struct {
 	XMLName      xml.Name `xml:"Header"`
 	Version      string   //统一 00010000 Hex(8) Header
-	MessageClass int32    //消息传输的机制 5
-	MessageType  int32    //消息的应用类型 5
+	MessageClass int      //消息传输的机制 5
+	MessageType  int      //消息的应用类型 5
 	SenderId     string   //Hex(16位，不足补零) 发送方Id
 	ReceiverId   string   //Hex(16位，不足补零) 接收方Id
 	MessageId    int64    //消息序号，从1开始，逐1递增 ，8字节  记账包的消息id
@@ -25,13 +25,13 @@ type ClearingHeader struct {
 
 //清分统计body
 type ClearingBody struct {
-	XMLName         xml.Name  `xml:"Body"`
-	ContentType     int       `xml:",attr"` //争议消息的ContentType始终为2
-	ClearTargetDate time.Time //清分目标日
-	Count           int       //清分总金额(确认付款金额)
-	Amount          string    //对应清分总金额的的交易记录数量，包含原始交易包中由发行方确认应付的交易数量和争议处理结果中确认应付的交易数量之和，不包含争议处理结果中为坏帐的记录数量。浮点数
-	ProcessTime     time.Time //处理时间
-	IssuerId        string    //发行服务机构Id，
+	XMLName         xml.Name `xml:"Body"`
+	ContentType     int      `xml:",attr"` //争议消息的ContentType始终为2
+	ClearTargetDate string   //清分目标日
+	Count           int      //清分总金额(确认付款金额)
+	Amount          string   //对应清分总金额的的交易记录数量，包含原始交易包中由发行方确认应付的交易数量和争议处理结果中确认应付的交易数量之和，不包含争议处理结果中为坏帐的记录数量。浮点数
+	ProcessTime     string   //处理时间
+	IssuerId        string   //发行服务机构Id，
 	List            []List
 }
 

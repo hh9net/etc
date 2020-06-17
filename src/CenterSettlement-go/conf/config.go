@@ -6,10 +6,9 @@ import (
 	"gopkg.in/ini.v1"
 )
 
-///Users/nicker/go/etc/src/CenterSettlement-go/conf
-var conffilepath = "CenterSettlement-go/conf/app.conf"
-
-//var conffilepath = "./conf/app.conf"
+//var conffilepath = "CenterSettlement-go/conf/app.conf"
+//var conffilepath = "../conf/app.conf"//test
+var conffilepath = "./conf/app.conf" // go run main.go
 
 type Config struct { //配置文件要通过tag来指定配置文件中的名称
 	MHostname     string `ini:"mysql_hostname"`

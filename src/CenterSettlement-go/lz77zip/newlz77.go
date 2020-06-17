@@ -350,7 +350,7 @@ func Decompress(input io.Reader, output io.Writer) error {
 
 func UnZipLz77(fname string) error {
 	//pwd := "../centerServer/" + fname //test 测试解压缩是否重写成功
-	pwd := "CenterSettlement-go/receivezipfile/" + fname
+	pwd := "CenterSettlement-go/receivezipfile/" + fname //fname：zip文件
 	origin, err := os.Open(pwd)
 	if err != nil {
 		log.Fatalln(err)
@@ -360,7 +360,7 @@ func UnZipLz77(fname string) error {
 
 	fn := strings.Split(fname, ".lz77")
 	//outpwd := "../centerServer/" + "Go" + fn[0] //test
-	outpwd := "CenterSettlement-go/receivexml/" + fn[0]
+	outpwd := "CenterSettlement-go/receivexml/" + fn[0] //xml文件
 	out, cerr := os.Create(outpwd)
 	if cerr != nil {
 		log.Fatalln(cerr)

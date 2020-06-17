@@ -12,7 +12,7 @@ import (
 func ClearingInsert(data *types.BJsQingftjxx) error {
 	database.DBInit()
 	xorm := database.XormClient
-	//session := TransactionBegin(xorm)
+	session := TransactionBegin(xorm)
 	qingftongjixx := new(types.BJsQingftjxx)
 
 	//赋值
@@ -31,12 +31,9 @@ func ClearingInsert(data *types.BJsQingftjxx) error {
 	qingftongjixx.FNbZhengycljgbsl = data.FNbZhengycljgbsl //F_NB_ZHENGYCLJGBSL	争议处理结果包数量	INT
 	qingftongjixx.FVcXiaoxwjlj = data.FVcXiaoxwjlj         //F_VC_XIAOXWJLJ	消息文件路径	VARCHAR(512)
 	qingftongjixx.FDtChulsj = data.FDtChulsj               //`F_DT_CHULSJ` datetime DEFAULT NULL COMMENT '处理时间',
-	qingftongjixx.FNbWeiyid = data.FNbWeiyid               //`F_NB_WEIYID` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增主键'
-
-	qingftongjixx.FDtJiessj = data.FDtJiessj
 
 	//插入
-	_, err := xorm.Insert(qingftongjixx)
+	_, err := session.Insert(qingftongjixx)
 	if err != nil {
 		log.Println("新增清分处理包的消息记录 error", err)
 		return err
