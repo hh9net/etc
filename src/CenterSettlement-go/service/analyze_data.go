@@ -95,7 +95,7 @@ func ParseFile() error {
 			//
 			////原始数据应答包
 			//if result.Header.MessageClass == 6 && result.Header.MessageType == 7 && result.Body.ContentType == 1 {
-			//	if preqerr := ParseReqFile(result, fileList[i].Name()); preqerr != nil {
+			//	if preqerr := ParseRespFile(result, fileList[i].Name()); preqerr != nil {
 			//		return preqerr
 			//	}
 			//}
@@ -115,7 +115,6 @@ func ParseFile() error {
 func ParseKeepAccountFile(result types.ReceiveMessage, fname string) error {
 	var des string
 	//记账数据包
-
 	//1、修改文件名字  2、移动文件
 	if result.Body.DisputedCount == 0 {
 		des = "CenterSettlement-go/keepAccountFile/" + "JZB-ok_" + fmt.Sprintf("%020d", result.Header.MessageId) + ".xml"
@@ -167,14 +166,29 @@ func ParseDisputeFile(result types.ReceiveMessage, fname string) error {
 }
 
 func ParseClearlingFile(result types.ReceiveMessage, fname string) error {
+	var des string
 	//1、修改文件名字  2、移动文件
+	if result.Body.List.FileCount == 0 {
+		des = "CenterSettlement-go/keepAccountFile/" + "QFB-ok_" + fmt.Sprintf("%020d", result.Header.MessageId) + ".xml"
+	}
+	if result.Body.List.FileCount > 0 {
+		des = "CenterSettlement-go/keepAccountFile/" + "QFB_" + fmt.Sprintf("%020d", result.Header.MessageId) + ".xml"
+	}
 	src := "CenterSettlement-go/receivexml/" + fname
-	des := "CenterSettlement-go/clearling/" + "QFB_" + fmt.Sprintf("%020d", result.Header.MessageId) + ".xml"
 	qffrerr := common.FileRename(src, des)
 	if qffrerr != nil {
 		log.Println("清分数据包 修改文件名字错误：", qffrerr)
 		return qffrerr
 	}
+	if result.Body.List.FileCount == 0 {
+		//解析xml数据 把数据导入数据库
+		qfpxerr := Parsexml("CenterSettlement-go/clearling/", "QFB-ok_"+fmt.Sprintf("%020d", result.Header.MessageId)+".xml")
+		if qfpxerr != nil {
+			log.Println("清分数据包 解析xml数据 把数据导入数据库 时 错误 ：", qfpxerr)
+			return qfpxerr
+		}
+	}
+
 	//解析xml数据 把数据导入数据库
 	qfpxerr := Parsexml("CenterSettlement-go/clearling/", "QFB_"+fmt.Sprintf("%020d", result.Header.MessageId)+".xml")
 	if qfpxerr != nil {
@@ -184,17 +198,18 @@ func ParseClearlingFile(result types.ReceiveMessage, fname string) error {
 	return nil
 }
 
-func ParseReqFile(result types.ReceiveMessage, fname string) error {
+//解析原始记录应答包
+func ParseRespFile(result types.ReceiveMessage, fname string) error {
 	//1、修改文件名字  2、移动文件
 	src := "CenterSettlement-go/receivexml/" + fname
-	des := "CenterSettlement-go/reqfile/" + "REQ_" + fmt.Sprintf("%020d", result.Header.MessageId) + ".xml"
+	des := "CenterSettlement-go/respfile/" + "YDB_" + fmt.Sprintf("%020d", result.Header.MessageId) + ".xml"
 	ydfrerr := common.FileRename(src, des)
 	if ydfrerr != nil {
-		log.Println("清分数据包 修改文件名字错误：", ydfrerr)
+		log.Println("原始记录应答包 修改文件名字错误：", ydfrerr)
 		return ydfrerr
 	}
 	//解析xml数据 把数据导入数据库
-	ydpxerr := Parsexml("CenterSettlement-go/reqfile/", "YDB_"+fmt.Sprintf("%020d", result.Header.MessageId)+".xml")
+	ydpxerr := Parsexml("CenterSettlement-go/respfile/", "YDB_"+fmt.Sprintf("%020d", result.Header.MessageId)+".xml")
 	if ydpxerr != nil {
 		log.Println("原始数据应答包 解析xml数据 把数据导入数据库 时 错误 ：", ydpxerr)
 		return ydpxerr
@@ -302,7 +317,7 @@ func Parsexml(filePath string, fname string) error {
 
 			//更新结算数据  此处需要确认
 
-			case "QFB":
+			case "QFB-ok":
 				var result types.ClearingMessage
 				qfumerr := xml.Unmarshal(content, &result)
 				if qfumerr != nil {
@@ -318,20 +333,53 @@ func Parsexml(filePath string, fname string) error {
 				}
 
 				//新增清分包明细
-				qfshujumx := new(types.BJsQingftjmx)
-				//赋值
-				qfshujumx.FNbQingftjxxxh = result.Header.MessageId
-				qfshujumx.FVcTongxbzxxtid = result.Header.ReceiverId //通行宝中心系统ID
-				//qfshujumx.FNbFenzxh=//分组序号 入库者自行生成，可取数组下标
-				//qfshujumx.FNbYuansjyxxxh=//原始交易消息序号
-				//qfshujumx.FNbZhengycljgwjid=//争议处理结果文件ID
-
-				qfmxerr := storage.ClearingMXInsert(qfshujumx)
-				if qfmxerr != nil {
-					log.Println("新增清分包消息错误 ：", qfmxerr)
+				cmxerr := ClearingMessageMxInsert(result)
+				if cmxerr != nil {
+					return cmxerr
 				}
 
-				//更新结算数据  更新已数据清分
+			//更新结算数据  更新已数据清分
+
+			case "QFB":
+				//有可疑数据 存入fileid
+				var result types.ClearingMessage
+				qfumerr := xml.Unmarshal(content, &result)
+				if qfumerr != nil {
+					log.Println("解析 Clearing 文件夹中xml文件内容的错误信息：", qfumerr)
+				}
+				log.Println("清分包数据：", result)
+
+				//将数据存储数据库
+				//新增清分包消息
+				cerr := ClearingMessageInsert(result)
+				if cerr != nil {
+					return cerr
+				}
+
+				//新增清分包明细
+				cmxerr := ClearingMessageMxInsert(result)
+				if cmxerr != nil {
+					return cmxerr
+				}
+
+			//更新结算数据  更新已数据清分
+
+			//原始交易应答包
+			case "YDB":
+				var result types.RespMessage
+				qfumerr := xml.Unmarshal(content, &result)
+				if qfumerr != nil {
+					log.Println("解析 respfile 文件夹中xml文件内容的错误信息：", qfumerr)
+				}
+				log.Println("原始交易应答包数据：", result)
+
+				//将数据存储数据库
+				//新增原始交易应答包消息
+
+				resperr := RespMessageInsert(result)
+				if resperr != nil {
+					return resperr
+				}
 
 			}
 		}
@@ -592,10 +640,26 @@ func DisputeProcessMessageMxInsert(result types.DisputeProcessMessage) error {
 //争议数据存储后，更新结算数据
 func DisputeProcessUpdate(result types.DisputeProcessMessage) error {
 
+	qfshujumx := new(types.BJsQingftjmx)
+	//赋值
+	qfshujumx.FNbQingftjxxxh = result.Header.MessageId   //清分消息序号
+	qfshujumx.FVcTongxbzxxtid = result.Header.ReceiverId //通行宝中心系统ID
+	qfshujumx.FNbZhengycljgwjid = result.Body.FileId     //争议处理结果文件ID
+	for i, mx := range result.Body.MessageList {
+		qfshujumx.FNbFenzxh = i                 //分组序号 入库者自行生成，可取数组下标
+		qfshujumx.FNbYuansjyxxxh = mx.MessageId //原始交易消息序号
+
+		qfmxerr := storage.ClearingMXInsert(qfshujumx)
+		if qfmxerr != nil {
+			log.Println("新增清分包消息错误 ：", qfmxerr)
+		}
+
+	}
+
 	return nil
 }
 
-//清分
+//新增清分包消息
 func ClearingMessageInsert(result types.ClearingMessage) error {
 
 	qfshuju := new(types.BJsQingftjxx)
@@ -614,10 +678,11 @@ func ClearingMessageInsert(result types.ClearingMessage) error {
 	jine, _ := strconv.Atoi(str[0] + str[1])
 	qfshuju.FNbQingfzje = jine             //总金额
 	qfshuju.FNbQingfsl = result.Body.Count //清分数量
+
 	qfsj := common.StrTimeTotime(common.DataTimeFormatHandle(result.Body.ProcessTime))
 	qfshuju.FDtQingftjclsj = qfsj            //清分统计处理时间
 	qfshuju.FNbYuansjysl = result.Body.Count //原始交易数量
-	lists := len(result.Body.List)
+	lists := len(result.Body.List.MessageId)
 	qfshuju.FNbZhengycljgbsl = lists //争议处理结果包数量
 
 	qfshuju.FDtChulsj = time.Now()                                                                        //处理时间    入库时间                                                          //处理时间
@@ -628,5 +693,38 @@ func ClearingMessageInsert(result types.ClearingMessage) error {
 		log.Println("新增清分包消息错误 ：", qferr)
 	}
 
+	return nil
+}
+
+//新增清分包消息明细
+func ClearingMessageMxInsert(result types.ClearingMessage) error {
+
+	return nil
+}
+
+//新增原始交易应答包消息
+func RespMessageInsert(result types.RespMessage) error {
+
+	ydshuju := new(types.BJsYuansjyydxx)
+
+	//赋值
+
+	ydshuju.FVcBanbh = result.Header.Version          //F_VC_BANBH	版本号	VARCHAR(32)
+	ydshuju.FNbXiaoxlb = result.Header.MessageClass   //F_NB_XIAOXLB	消息类别	INT
+	ydshuju.FNbXiaoxlx = result.Header.MessageType    //F_NB_XIAOXLX	消息类型	INT
+	ydshuju.FVcFaszid = result.Header.SenderId        //F_VC_FASZID	发送者ID	VARCHAR(32)
+	ydshuju.FVcJieszid = result.Header.ReceiverId     //F_VC_JIESZID	接收者ID	VARCHAR(32)
+	ydshuju.FNbXiaoxxh = result.Header.MessageId      //F_NB_XIAOXXH	消息序号	BIGINT
+	ydshuju.FNbQuerdxxxh = result.Body.MessageId      //F_NB_QUERDXXXH	确认的消息序号	BIGINT
+	ydshuju.FDtChulsj = result.Body.ProcessTime       //F_DT_CHULSJ	处理时间	DATETIME
+	ydshuju.FNbZhixjg = result.Body.Result            //F_NB_ZHIXJG	执行结果	INT
+	ydshuju.FVcQingfmbr = result.Body.ClearTargetDate //F_VC_QINGFMBR	清分目标日	VARCHAR(32)
+
+	ydshuju.FVcXiaoxwjlj = "respfile/" + "YDB_" + fmt.Sprintf("%020d", result.Header.MessageId) + ".xml" //F_VC_XIAOXWJLJ	消息文件路径	VARCHAR(512)
+
+	qferr := storage.PackagingRespRecordInsert(ydshuju)
+	if qferr != nil {
+		log.Println("新增清分包消息错误 ：", qferr)
+	}
 	return nil
 }

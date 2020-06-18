@@ -7,16 +7,16 @@ import (
 
 //通用确认消息结构
 type ResponseMessage struct {
-	XMLName xml.Name `xml:"Message"`
-	Header  Header   `xml:"Header"`
-	Body    Body     `xml:"Body"`
+	XMLName xml.Name       `xml:"Message"`
+	Header  ResponseHeader `xml:"Header"`
+	Body    ResponseBody   `xml:"Body"`
 }
 
 type ResponseHeader struct {
 	XMLName      xml.Name `xml:"Header"`
 	Version      string   //统一 00010000 Hex(8) Header
-	MessageClass int32    //消息传输的机制
-	MessageType  int32    //消息的应用类型
+	MessageClass int      //消息传输的机制
+	MessageType  int      //消息的应用类型
 	SenderId     string   // Hex(16位，不足补零) 发送方Id
 	ReceiverId   string   //Hex(16位，不足补零) 接收方Id
 	MessageId    int64    //消息序号，从1开始，逐1递增 ，8字节
@@ -31,9 +31,9 @@ type ResponseBody struct {
 
 //  通用重发请求消息结构
 type ResendMessage struct {
-	XMLName xml.Name `xml:"Message"`
-	Header  Header   `xml:"Header"`
-	Body    Body     `xml:"Body"`
+	XMLName xml.Name     `xml:"Message"`
+	Header  ResendHeader `xml:"Header"`
+	Body    ResendBody   `xml:"Body"`
 }
 
 type ResendHeader struct {
@@ -48,8 +48,9 @@ type ResendHeader struct {
 
 //通用重发请求消息中没有更多的数据，其Body为空。
 type ResendBody struct {
-	XMLName     xml.Name  `xml:"Body"`
-	MessageId   string    //确认的消息Id （对应于发送方的header里的MessageId）从发送方的header取MessageId
-	ProcessTime time.Time //处理时间
-	Result      int       // int8  1.消息已正常接收（用于Advice Response时含已接受建议）
+	XMLName         xml.Name  `xml:"Body"`
+	MessageId       string    //确认的消息Id （对应于发送方的header里的MessageId）从发送方的header取MessageId
+	ProcessTime     time.Time //处理时间
+	Result          int       // int8  1.消息已正常接收（用于Advice Response时含已接受建议）
+	ClearTargetDate string    //ClearTargetDate  目标清分日
 }

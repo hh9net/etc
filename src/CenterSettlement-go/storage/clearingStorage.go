@@ -47,7 +47,7 @@ func ClearingInsert(data *types.BJsQingftjxx) error {
 func ClearingMXInsert(data *types.BJsQingftjmx) error {
 	database.DBInit()
 	xorm := database.XormClient
-	//session := TransactionBegin(xorm)
+	session := TransactionBegin(xorm)
 	qingftongjimx := new(types.BJsQingftjmx)
 
 	//赋值
@@ -58,7 +58,7 @@ func ClearingMXInsert(data *types.BJsQingftjmx) error {
 	qingftongjimx.FNbZhengycljgwjid = data.FNbZhengycljgwjid //争议处理结果文件ID
 
 	//插入
-	_, err := xorm.Insert(qingftongjimx)
+	_, err := session.Insert(qingftongjimx)
 	if err != nil {
 		log.Println("新增清分统计消息明细包记录 成功")
 		return err

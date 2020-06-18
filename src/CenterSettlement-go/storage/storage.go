@@ -38,23 +38,6 @@ func QueryQitaJiessj(KaLx int, Diqu string) *[]types.BJsJiessj {
 	return &tests
 }
 
-//江苏本省
-func QueryJiessj(KaLx int) *[]types.BJsJiessj {
-	//database.DBInit()
-	xorm := database.XormClient
-	//查询多条数据
-	tests := make([]types.BJsJiessj, 0)
-	qerr := xorm.Where("F_NB_DABZT=?", 0).And("F_VC_KAWLH=?", types.JS_NETWORK).And("F_NB_KALX=?", KaLx).Limit(100, 0).Find(&tests)
-	if qerr != nil {
-		log.Fatalln("查询结算数据出错", qerr)
-	}
-	log.Printf("总共查询出 %d 条数据\n", len(tests))
-	for _, v := range tests {
-		log.Printf("打包状态: %d, 交易记录id: %s, 卡网络号: %s\n", v.FNbDabzt, v.FVcJiaoyjlid, v.FVcKawlh)
-	}
-	return &tests
-}
-
 //通过交易记录id 更新打包状态为打包中
 func UpdatePackaging(Jiaoyjlid []string) error {
 	//database.DBInit()
@@ -75,7 +58,7 @@ func UpdatePackaging(Jiaoyjlid []string) error {
 
 	serr := TransactionCommit(session)
 	if serr != nil {
-		log.Println("更新打包状态为：打包中 时，事务错误")
+		log.Println("更新打包状态为：打包中 时，事务错误", serr)
 
 	}
 	log.Println("更新打包状态为：打包中 成功")
@@ -103,7 +86,7 @@ func UpdatePackagingInit(Jiaoyjlid []string) error {
 
 	serr := TransactionCommit(session)
 	if serr != nil {
-		log.Println("更新打包状态为：初始未打包 时，事务错误")
+		log.Println("更新打包状态为：初始未打包 时，事务错误", serr)
 
 	}
 	log.Println("更新打包状态为：初始未打包 成功")
@@ -141,7 +124,7 @@ func PackagingRecordInsert(data types.BJsYuansjyxx) error {
 
 	serr := TransactionCommit(session)
 	if serr != nil {
-		log.Println("新增原始交易数据消息包打包记录 时，事务错误")
+		log.Println("新增原始交易数据消息包打包记录 时，事务错误", serr)
 
 	}
 	log.Println("新增原始交易数据消息包打包记录 成功")
@@ -196,7 +179,7 @@ func PackagingMXRecordInsert(mx []types.BJsYuansjymx) error {
 	}
 	serr := TransactionCommit(session)
 	if serr != nil {
-		log.Println("新增打包明细记录 时，事务错误")
+		log.Println("新增打包明细记录 时，事务错误", serr)
 
 	}
 	log.Printf("原始交易消息包%d中 明细数据有：%d 条 数据 ", Yuansjymx.FVcXiaoxxh, len(mx))
@@ -221,7 +204,7 @@ func UpdateYuansjyxx(Mid int64) error {
 	}
 	serr := TransactionCommit(session)
 	if serr != nil {
-		log.Println("根据 包号 更新原始交易消息包的发送状态 为 ： 发送中 时，事务错误")
+		log.Println("根据 包号 更新原始交易消息包的发送状态 为 ： 发送中 时，事务错误", serr)
 
 	}
 	log.Println(" 根据 包号 更新原始交易消息包的发送状态 为 ： 发送中  成功")
@@ -245,9 +228,9 @@ func SendedUpdateYuansjyxx(Mid int64, fname string) (error, string) {
 	}
 	serr := TransactionCommit(session)
 	if serr != nil {
-		log.Println("根据 包号 更新 发送状态、发送时间、发送成功后的消息包的文件路径 时，事务错误")
-
+		log.Println("根据 包号 更新 发送状态、发送时间、发送成功后的消息包的文件路径 时，事务错误", serr)
 	}
+
 	log.Println(" 根据 包号 更新 发送状态 发送时间 发送成功后消息包的文件路径  成功")
 
 	sj := common.DateTimeFormat(yuansjyxx.FDtFassj)
@@ -275,25 +258,35 @@ func UpdateDataPackagingResults(Jiaoyjlid []string, Msgid int64, jiaoyisj *types
 	}
 	serr := TransactionCommit(session)
 	if serr != nil {
-		log.Println("更新打包状态为：已达包、原始交易包号、包内序号 时，事务错误")
-
+		log.Println("更新打包状态为：已达包、原始交易包号、包内序号 时，事务错误", serr)
 	}
-
 	log.Println("更新打包状态为：已达包、原始交易包号、包内序号 成功")
 
 	return nil
 }
 
-//   新增打包应答记录
-func PackagingResRecordInsert(data types.BJsYuansjyydxx) error {
+//   新增应答记录
+func PackagingRespRecordInsert(data *types.BJsYuansjyydxx) error {
 	//database.DBInit()
 	xorm := database.XormClient
 
 	Yuansjyydxx := new(types.BJsYuansjyydxx)
 	//赋值
-	_, err := xorm.Table("b_js_jiessj").Insert(Yuansjyydxx)
+	Yuansjyydxx.FVcBanbh = data.FVcBanbh         //F_VC_BANBH	版本号	VARCHAR(32)
+	Yuansjyydxx.FNbXiaoxlb = data.FNbXiaoxlb     //F_NB_XIAOXLB	消息类别	INT
+	Yuansjyydxx.FNbXiaoxlx = data.FNbXiaoxlx     //F_NB_XIAOXLX	消息类型	INT
+	Yuansjyydxx.FVcFaszid = data.FVcFaszid       //F_VC_FASZID	发送者ID	VARCHAR(32)
+	Yuansjyydxx.FVcJieszid = data.FVcJieszid     //F_VC_JIESZID	接收者ID	VARCHAR(32)
+	Yuansjyydxx.FNbXiaoxxh = data.FNbXiaoxxh     //F_NB_XIAOXXH	消息序号	BIGINT
+	Yuansjyydxx.FNbQuerdxxxh = data.FNbQuerdxxxh //F_NB_QUERDXXXH	确认的消息序号	BIGINT
+	Yuansjyydxx.FDtChulsj = data.FDtChulsj       //F_DT_CHULSJ	处理时间	DATETIME
+	Yuansjyydxx.FNbZhixjg = data.FNbZhixjg       //F_NB_ZHIXJG	执行结果	INT
+	Yuansjyydxx.FVcQingfmbr = data.FVcQingfmbr   //F_VC_QINGFMBR	清分目标日	VARCHAR(32)
+
+	Yuansjyydxx.FVcXiaoxwjlj = data.FVcXiaoxwjlj
+	_, err := xorm.Table("b_js_yuansjyydxx").Insert(Yuansjyydxx)
 	if err != nil {
-		log.Println("新增打包明细记录 error")
+		log.Println("新增打包明细记录 error", err)
 		return err
 	}
 	return nil

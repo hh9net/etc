@@ -88,50 +88,37 @@ type OBU struct {
 	License  string   //OBU中记录的车牌号 【含颜色】
 }
 
-//一个原始交易数据包
-type OtherMessage struct {
-	XMLName xml.Name `xml:"Message"`
-	Header  Header   `xml:"Header"`
-	Body    Body     `xml:"Body"`
+//原始交易应答包
+type RespMessage struct {
+	XMLName xml.Name   `xml:"Message"`
+	Header  RespHeader `xml:"Header"`
+	Body    RespBody   `xml:"Body"`
 }
 
-type OtherHeader struct {
+type RespHeader struct {
 	XMLName      xml.Name `xml:"Header"`
 	Version      string   //统一 00010000 Hex(8) Header
-	MessageClass int      //消息传输的机制
-	MessageType  int      //消息的应用类型
+	MessageClass int      //消息传输的机制6
+	MessageType  int      //消息的应用类型5
 	SenderId     string   // Hex(16位，不足补零) 发送方Id
 	ReceiverId   string   //Hex(16位，不足补零) 接收方Id
-	MessageId    int64    //消息序号，从1开始，逐1递增 ，8字节
+	MessageId    int64    //消息序号，从1开始，逐1递增 ，8字节  记账包的消息id
 }
 
-type OtherBody struct {
-	XMLName           xml.Name      `xml:"Body"`
-	ContentType       int           `xml:",attr"` //始终为1
-	ClearTargetDate   time.Time     //日期 如：2017-06-05 清分目标日期：取当前日期
-	ServiceProviderId string        //通行宝中心系统Id，表示消息包中的交易是由收费方产生的
-	IssuerId          string        //发行服务机构Id， 表示产生交易记录的发行服务机构。
-	MessageId         int64         //交易消息包Id。配置文件中获得
-	Count             int           //本消息包含的记录数量
-	Amount            string        //交易总金额(元) 数据库为分【注意转换的小数问题】
-	Transaction       []Transaction //交易原始数据
-
+type RespBody struct {
+	XMLName         xml.Name  `xml:"Body"`
+	ContentType     int       `xml:",attr"` //记帐消息的ContentType始终为1
+	MessageId       int64     //确认的消息id
+	ProcessTime     time.Time //处理时间
+	Result          int       //执行结果
+	ClearTargetDate string    //		清分目标日
 }
 
-type OtherTransaction struct {
-	XMLName             xml.Name   `xml:"Transaction"`
-	TransId             int        // 包内顺序Id，从1开始递增 ，包内唯一的交易记录
-	Time                time.Time  //交易的发生时间，需要加TAC计算 2020-05-13 14:34:34
-	Fee                 int        //交易的发生金额(元)
-	Service             Service    //服务信息 2
-	ICCard              ICCard     //IC卡信息
-	Validation          Validation //与校验相关的信息
-	OBU                 OBU        //参加交易的电子标签信息
-	CustomizedData      string     //特定发行方与通行宝收费方之间 约定格式的交易信息【  】
-	Id                  string     //停车场消费交易编号(停车场编号+交易发生的时间+流水号 )
-	Name                string     `xml:"name"`                //停车场名称(不超过150个字符)
-	ParkTime            int        `xml:"parkTime"`            //停放时长(单位：分)
-	VehicleType         int        `xml:"vehicleType"`         //收费车型
-	AlgorithmIdentifier int        `xml:"algorithmIdentifier"` //算法标识 1-3DEX  2-SM4    1
-
-}
+//执行结果：
+//1.	消息已正常接收（用于Advice Response时含已接受建议）
+//2.	消息头错误，如MessageClass或MessageType不符合定义，SenderId不存在等
+//3.	消息格式不正确，即XML Schema验证未通过
+//4.	消息格式正确但内容错误，包括数量不符，内容重复等
+//5.	消息重复
+//6.	消息正常接收，但不接受建议（仅用于Advice Response）
+//7.	消息版本错误

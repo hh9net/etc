@@ -237,6 +237,14 @@ type BJsQingftjxx struct {
 
 //    B_JS_QINGFTONGJIMX【清分统计明细】b_js_qingftjmx
 type BJsQingftjmx struct {
+	//<ClearTargetDate>2018-07-20</ClearTargetDate>//清分目标日
+	//<Amount>882.00</Amount>//清分金额
+	//<Count>77</Count>//清分结算数据
+	//<ProcessTime>2018-07-23T09:09:51</ProcessTime>//处理日期
+	//<List MessageCount="59"//清分原始交易消息包数量 FileCount="0">
+	//<ServiceProviderId>00000000000000FD</ServiceProviderId>//通行宝id
+	//<MessageId>9218</MessageId>//原始交易包号
+
 	FNbQingftjxxxh    int64  //F_NB_QINGFTJXXXH	清分统计消息序号	BIGINT
 	FNbFenzxh         int    //F_NB_FENZXH	分组序号	INT
 	FVcTongxbzxxtid   string //F_VC_TONGXBZXXTID	通行宝中心系统ID	VARCHAR(32)

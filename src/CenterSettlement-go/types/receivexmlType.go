@@ -23,6 +23,7 @@ type ReceiveBody struct {
 	XMLName       xml.Name `xml:"Body"`
 	ContentType   int      `xml:",attr"` //争议消息的ContentType始终为2
 	DisputedCount int      `xml:"DisputedCount"`
+	List          List     `xml:"List"`
 }
 
 //

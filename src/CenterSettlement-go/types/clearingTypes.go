@@ -28,23 +28,30 @@ type ClearingBody struct {
 	XMLName         xml.Name `xml:"Body"`
 	ContentType     int      `xml:",attr"` //争议消息的ContentType始终为2
 	ClearTargetDate string   //清分目标日
-	Count           int      //清分总金额(确认付款金额)
-	Amount          string   //对应清分总金额的的交易记录数量，包含原始交易包中由发行方确认应付的交易数量和争议处理结果中确认应付的交易数量之和，不包含争议处理结果中为坏帐的记录数量。浮点数
-	ProcessTime     string   //处理时间
+	Count           int      //对应清分总金额的的交易记录数量，包含原始交易包中由发行方确认应付的交易数量和争议处理结果中确认应付的交易数量之和， 不包含争议处理结果中为坏帐的记录数量。
+	Amount          string   //清分总金额(确认付款金额)
+	ProcessTime     string   //处理时间 清分统计处理时间
 	IssuerId        string   //发行服务机构Id，
-	List            []List
+	List            List
 }
 
 //ProcessTime之后的内容，或者包含IssuerId及0或多个List，或者仅包含一个List。
 //前者是联网中心为发行方产生的清分统计结果，后者是为通行宝中心系统产生的清分统计结果。
 
 type List struct {
-	XMLName           xml.Name `xml:"List"`
-	MessageCount      int      `xml:",attr"` //本次清分包含的所有原始交易包数量
-	FileCount         int      `xml:",attr"` //本次清分包含的所有争议处理结果包数量
-	ServiceProviderId string   //通行宝中心系统Id
-	MessageId         int64    //通行宝中心系统发的原始交易包Id 由于此处为messageid的明细，所以建议收费方上传打包时尽量在一个messageid中多打包原始记录（小于10000条），减少此处的数据量，因为该包格式为单包
-	FileId            int      //争议处理结果文件Id (可疑调整数据)
+	XMLName      xml.Name `xml:"List"`
+	MessageCount int      `xml:",attr"` //本次清分包含的所有原始交易包数量
+	FileCount    int      `xml:",attr"` //本次清分包含的所有争议处理结果包数量
+
+	ServiceProviderId string //通行宝中心系统Id
+	MessageId         []MessageId
+	FileId            int //争议处理结果文件Id (含有可疑调整数据的有)
+}
+
+type MessageId struct {
+	MessageId int64 //通行宝中心系统发的原始交易包Id 由于此处为messageid的明细，
+	// 所以建议收费方上传打包时尽量在一个messageid中多打包原始记录（小于10000条），
+	//减少此处的数据量，因为该包格式为单包
 }
 
 //List说明本次清分所包含的交易记录范围。该范围可以通过交易记录消息包MessageId和争议处理结果FileId确定。
