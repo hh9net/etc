@@ -1,4 +1,4 @@
-package conf
+package centerServer
 
 import (
 	"gopkg.in/ini.v1"
@@ -16,9 +16,7 @@ var m *sync.RWMutex
 //注意读取messageid时，要做加锁处理
 func GenerateMessageId() int64 {
 	m = new(sync.RWMutex)
-
-	///Users/nicker/go/etc/src/CenterSettlement-go/conf
-	cfg, err := ini.Load("CenterSettlement-go/conf/id.conf") //读配置文件
+	cfg, err := ini.Load("./id.conf") //读配置文件
 	//cfg, err := ini.Load("./conf/id.conf") //读配置文件  goland不能使用 ./ 方式  go run main.go 可以
 
 	if err != nil {
@@ -35,14 +33,14 @@ func GenerateMessageId() int64 {
 	s := strconv.Itoa(int(newid))
 	m.Lock()
 	cfg.Section("").Key("messageid").SetValue(s) //  修改后值然后进行保存
-	Saveerr := cfg.SaveTo("CenterSettlement-go/conf/id.conf")
+	Saveerr := cfg.SaveTo("./id.conf")
 	//Saveerr := cfg.SaveTo("./conf/id.conf")
 	m.Unlock()
 	if Saveerr != nil {
 		log.Fatal("Fail to SaveTo file:", Saveerr)
 	}
 
-	log.Println(" file new messageid: ", s)
+	log.Println(" id.conf file new messageid: ", s)
 	log.Println(" xmlfile new messageid: ", id)
 	return id
 }

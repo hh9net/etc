@@ -167,3 +167,32 @@ func JieSuanMessageChuliInset(msg Message) error {
 	log.Println("联网中心 新增结算处理数据 时 成功")
 	return nil
 }
+
+//查询记账包数据  	//查询记账状态为1的数据，表示为已记账
+func QueryKeepAccountdata() {
+	db := NewDatabase()
+	//查询多条数据
+	tests := make([]Jiessjchuli, 0)
+	//测试 每次查10条
+
+	//同一个数据包 可以记账的数据
+	qerr := db.orm.Where("f_nb_jizjg=?", 1).Limit(10, 0).Find(&tests)
+	if qerr != nil {
+		log.Fatalln("查询结算数据出错", qerr)
+	}
+	log.Printf("总共查询出 %d 条数据\n", len(tests))
+	for _, v := range tests {
+		log.Printf("记账状态: %d, 原始交易包序号: %d\n", v.FNbJizjg, v.FNbYuansjybxh)
+	}
+
+}
+
+//查询争议包数据
+func QueryDisputedata() {
+
+}
+
+//查询争议包数据
+func QueryClearingdata() {
+
+}

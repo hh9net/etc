@@ -59,3 +59,12 @@ func TestToABCD(t *testing.T) {
 	str := strings.ToUpper(s)
 	fmt.Println("str =", str)
 }
+
+func TestGenerateKeepAccountXml(t *testing.T) {
+	GenerateKeepAccountXml()
+
+}
+
+func TestQueryKeepAccountdata(t *testing.T) {
+	QueryKeepAccountdata()
+}

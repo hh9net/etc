@@ -15,6 +15,7 @@ var XormClient *xorm.Engine
 func DBInit() {
 	config := conf.ConfigInit() //数据库配置
 	params := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8", config.MUserName, config.MPass, config.MHostname, config.MPort, config.Mdatabasename)
+	log.Println(params)
 	x, err := xorm.NewEngine("mysql", params)
 	if x == nil {
 		log.Println("获取xorm为空")
@@ -23,9 +24,10 @@ func DBInit() {
 	if err != nil {
 		log.Fatal("连接数据库error")
 	}
-	log.Println("连接数据库成功")
+
 	if XormClient == nil {
 		XormClient = new(xorm.Engine)
 	}
+	log.Println("连接数据库成功")
 	XormClient = x
 }

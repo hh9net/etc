@@ -182,7 +182,7 @@ func ParseClearlingFile(result types.ReceiveMessage, fname string) error {
 	}
 	if result.Body.List.FileCount == 0 {
 		//解析xml数据 把数据导入数据库
-		qfpxerr := Parsexml("CenterSettlement-go/clearling/", "QFB-ok_"+fmt.Sprintf("%020d", result.Header.MessageId)+".xml")
+		qfpxerr := Parsexml("CenterSettlement-go/clearing/", "QFB-ok_"+fmt.Sprintf("%020d", result.Header.MessageId)+".xml")
 		if qfpxerr != nil {
 			log.Println("清分数据包 解析xml数据 把数据导入数据库 时 错误 ：", qfpxerr)
 			return qfpxerr
@@ -190,7 +190,7 @@ func ParseClearlingFile(result types.ReceiveMessage, fname string) error {
 	}
 
 	//解析xml数据 把数据导入数据库
-	qfpxerr := Parsexml("CenterSettlement-go/clearling/", "QFB_"+fmt.Sprintf("%020d", result.Header.MessageId)+".xml")
+	qfpxerr := Parsexml("CenterSettlement-go/clearing/", "QFB_"+fmt.Sprintf("%020d", result.Header.MessageId)+".xml")
 	if qfpxerr != nil {
 		log.Println("清分数据包 解析xml数据 把数据导入数据库 时 错误 ：", qfpxerr)
 		return qfpxerr
@@ -685,8 +685,8 @@ func ClearingMessageInsert(result types.ClearingMessage) error {
 	lists := len(result.Body.List.MessageId)
 	qfshuju.FNbZhengycljgbsl = lists //争议处理结果包数量
 
-	qfshuju.FDtChulsj = time.Now()                                                                        //处理时间    入库时间                                                          //处理时间
-	qfshuju.FVcXiaoxwjlj = "clearling/" + "QFB_" + fmt.Sprintf("%020d", result.Header.MessageId) + ".xml" //消息文件路径
+	qfshuju.FDtChulsj = time.Now()                                                                       //处理时间    入库时间                                                          //处理时间
+	qfshuju.FVcXiaoxwjlj = "clearing/" + "QFB_" + fmt.Sprintf("%020d", result.Header.MessageId) + ".xml" //消息文件路径
 
 	qferr := storage.ClearingInsert(qfshuju)
 	if qferr != nil {
