@@ -18,8 +18,8 @@ func GenerateMessageId() int64 {
 	m = new(sync.RWMutex)
 
 	///Users/nicker/go/etc/src/CenterSettlement-go/conf
-	cfg, err := ini.Load("CenterSettlement-go/conf/id.conf") //读配置文件
-	//cfg, err := ini.Load("./conf/id.conf") //读配置文件  goland不能使用 ./ 方式  go run main.go 可以
+	//cfg, err := ini.Load("CenterSettlement-go/conf/id.conf") //读配置文件
+	cfg, err := ini.Load("./conf/id.conf") //读配置文件  goland不能使用 ./ 方式  go run main.go 可以
 
 	if err != nil {
 		log.Fatal("Fail to read file:", err)
@@ -35,8 +35,8 @@ func GenerateMessageId() int64 {
 	s := strconv.Itoa(int(newid))
 	m.Lock()
 	cfg.Section("").Key("messageid").SetValue(s) //  修改后值然后进行保存
-	Saveerr := cfg.SaveTo("CenterSettlement-go/conf/id.conf")
-	//Saveerr := cfg.SaveTo("./conf/id.conf")
+	//Saveerr := cfg.SaveTo("CenterSettlement-go/conf/id.conf")
+	Saveerr := cfg.SaveTo("./conf/id.conf")
 	m.Unlock()
 	if Saveerr != nil {
 		log.Fatal("Fail to SaveTo file:", Saveerr)

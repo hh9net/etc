@@ -1,6 +1,7 @@
 package centerServer
 
 import (
+	"CenterSettlement-go/log"
 	"encoding/xml"
 	"time"
 )
@@ -90,8 +91,8 @@ type OBU struct {
 
 //结算处理表
 type Jiessjchuli struct {
-	Weiyi          int       `xorm:"auto increment"`
-	FVcJiaoyjlid   string    //`xorm:"pk"` //F_VC_JIAOYJLID	交易记录ID	VARCHAR(128)
+	//WeiyiId int64 `xorm:"pk autoincr"`
+	//FVcJiaoyjlid   string    //`xorm:"pk"` //F_VC_JIAOYJLID	交易记录ID	VARCHAR(128)
 	FNbYuansjybxh  int64     //F_NB_YUANSJYBXH	原始交易包序号	BIGINT
 	FNbJiaoybnxh   int       //F_NB_JIAOYBNXH	交易包内序号	INT
 	FNbJizjg       int       //F_NB_JIZJG	记账结果	INT "0：未记账  1：已记账    2：争议数据"
@@ -115,7 +116,7 @@ type Jiessjchuli struct {
 }
 
 type JieSuanMessage struct {
-	Weiyi        int    `xorm:"auto increment"`
+	//WeiyiId int64 `xorm:"pk autoincr"`
 	Version      string //统一 00010000 Hex(8) Header
 	MessageClass int    //消息传输的机制5
 	MessageType  int    //消息的应用类型7
@@ -129,10 +130,14 @@ type JieSuanMessage struct {
 	Count             int    //本消息包含的记录数量
 	Amount            string //交易总金额(元) 数据库为分【注意转换的小数问题】
 
+	JiZhangZt int //0：未记账处理 1：在记账中 2：已记账
+
+	ZhengyChulizt int //0：无争议 1：有争议
+
 }
 
 type JieSuanMessageMx struct {
-	Weiyi        int    `xorm:"auto increment"`
+	//WeiyiId int64 `xorm:"pk autoincr"`
 	Version      string //统一 00010000 Hex(8) Header
 	MessageClass int    //消息传输的机制5
 	MessageType  int    //消息的应用类型7
@@ -149,7 +154,7 @@ type JieSuanMessageMx struct {
 	Fee     string //交易的发生金额(元)
 
 	CustomizedData      string //特定发行方与通行宝收费方之间 约定格式的交易信息【  】
-	Id                  string //停车场消费交易编号(停车场编号+交易发生的时间+流水号 )
+	BhId                string //停车场消费交易编号(停车场编号+交易发生的时间+流水号 )
 	Name                string //停车场名称(不超过150个字符)
 	ParkTime            int    //停放时长(单位：分)
 	VehicleType         string //收费车型
@@ -173,5 +178,43 @@ type JieSuanMessageMx struct {
 
 	OBUId    string //OBU物理编号，BCD码  4501191509252866
 	OBEState string //2字节的OBU状态
+
+}
+
+type XormTest struct {
+	WeiyiId int64 `xorm:"pk autoincr"`
+	Name    string
+}
+
+func XorminitTest() {
+	db := NewDatabase()
+	is, err := db.orm.IsTableExist(
+		//new(JieSuanMessage),
+		new(XormTest),
+		//new(JieSuanMessageMx),
+	)
+	if err != nil {
+		log.Fatal("创建数据库判断数据库表是否存在时 error  ", err)
+	}
+	if is == false {
+		err := db.orm.Sync2(
+			new(XormTest),
+		)
+		//err = db.orm.CreateTables(new(SJsJiessj))
+		if err != nil {
+			log.Fatal()
+			log.Fatal("创建数据库 映射表 error ", err)
+		}
+	} else {
+		log.Fatal("创建数据库 映射表 表已存在")
+	}
+}
+
+func XormInsert() {
+	db := NewDatabase()
+	x := new(XormTest)
+	x.Name = "sun"
+
+	db.orm.Insert(x)
 
 }

@@ -39,7 +39,7 @@ func Server() {
 	if err != nil {
 		log.Println(err.Error())
 	}
-	defer listener.Close()
+	//defer listener.Close()
 
 	//联网中心开始接收数据
 	for {
@@ -101,16 +101,6 @@ func ReceiveHandler(conn net.Conn) {
 			return
 		}
 	}
-
-	//处理文件
-	herr := HandleFile()
-	if herr != nil {
-		log.Println("HandleFile 执行失败 ")
-		return
-	}
-	log.Println("HandleFile  ok ")
-	//获取数据
-	//GetData(buffer[:n])
 }
 
 func CheckFile(msgmd5, fileNameid string) error {
@@ -287,7 +277,27 @@ func RevFile(fileNameid string, conn net.Conn, msglength string) error {
 	}
 	//return nil
 }
+func Handle() {
+	//处理文件
+	//tiker := time.NewTicker(time.Second * 5)
+	for {
+		log.Println("++++++++++处理文件+++++++++++")
+		//log.Println("扫描centerYuanshi文件夹,解析文件、数据入库", <-tiker.C)
+		herr := HandleFile()
+		if herr == errors.New("该centerYuanshi 文件夹下没有需要解析的文件") {
+			log.Println("该centerYuanshi 文件夹下没有需要解析的文件")
+			return
+		}
+		if herr != nil {
+			log.Println("HandleFile 执行失败 ")
+			return
+		}
 
+		if herr == nil {
+			log.Println("HandleFile 执行  ok ")
+		}
+	}
+}
 func HandleFile() error {
 	tiker := time.NewTicker(time.Second * 5)
 	for {
@@ -303,13 +313,13 @@ func HandleFile() error {
 		log.Println("该centerYuanshi文件夹下有xml文件的数量 ：", len(fileList))
 		if len(fileList) == 0 {
 			log.Println("该centerYuanshi 文件夹下没有需要解析的文件")
-			return nil
+			return errors.New("该centerYuanshi 文件夹下没有需要解析的文件")
 		}
 		for i := range fileList {
 			log.Println("该centerYuanshi文件夹需要数据入库的 xml 名字为:", fileList[i].Name()) //打印当前文件或目录下的文件或目录名
+
 			//判断文件的结尾名
 			if strings.HasSuffix(fileList[i].Name(), ".xml") {
-
 				//解析xml文件
 				content, rderr := ioutil.ReadFile("../centerYuanshi/" + fileList[i].Name())
 				if rderr != nil {
@@ -429,19 +439,19 @@ func Parsexml(pwdfname string, fname string, msg Message) (error, string, int) {
 		log.Println("新增结算数据消息包 error", err)
 		return err, fname, 1
 	}
-
-	//新增结算数据明细
-	mxerr := JieSuanMessageMxInset(msg)
-	if mxerr != nil {
-		log.Println("新增结算数据明细 error", mxerr)
-		return mxerr, fname, 2
-	}
-	//新增结算处理
-	clerr := JieSuanMessageChuliInset(msg)
-	if clerr != nil {
-		log.Println("新增结算处理记录 error ", clerr)
-		return clerr, fname, 3
-	}
+	//
+	////新增结算数据明细
+	//mxerr := JieSuanMessageMxInset(msg)
+	//if mxerr != nil {
+	//	log.Println("新增结算数据明细 error", mxerr)
+	//	return mxerr, fname, 2
+	//}
+	////新增结算处理
+	//clerr := JieSuanMessageChuliInset(msg)
+	//if clerr != nil {
+	//	log.Println("新增结算处理记录 error ", clerr)
+	//	return clerr, fname, 3
+	//}
 
 	//把解析过的原始交易消息xml移动文件夹
 	x1 := pwdfname

@@ -6,11 +6,11 @@ import (
 )
 
 //文件处理
-//获取文件大小
+//获取压缩文件的大小
 func GetFileSize(fname string) int64 {
 	//path := "CenterSettlement-go/sendzipxml/" + fname + ".lz77"
 
-	path := "CenterSettlement-go/sendzipxml/" + fname + ".lz77"
+	path := "./sendzipxml/" + fname + ".lz77"
 	fileInfo, err := os.Stat(path)
 	if err != nil {
 		log.Println("获取文件大小 error ", err)

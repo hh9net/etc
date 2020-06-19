@@ -22,7 +22,7 @@ func DelFile(src string) {
 	//"./1.txt"
 	del := os.Remove(src)
 	if del != nil {
-		log.Println(del)
+		log.Println("删除失败", del)
 	}
 }
 

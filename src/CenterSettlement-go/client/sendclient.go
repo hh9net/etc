@@ -16,7 +16,9 @@ func connsendFile(data []byte, fname string, conn *net.Conn) error {
 	//暂时通过客户端sleep 100毫秒解决粘包问题，还可以通过tcp重连解决，以后再用（包头+数据）封装数据包的方式解决
 	//time.Sleep(time.Millisecond * 100)
 
-	path := "CenterSettlement-go/sendzipxml/" + fname + ".lz77"
+	//path := "CenterSettlement-go/sendzipxml/" + fname + ".lz77"
+	path := "./sendzipxml/" + fname + ".lz77" // go run main.go
+
 	log.Println("path:=", path)
 	file, oserr := os.Open(path)
 	if oserr != nil {

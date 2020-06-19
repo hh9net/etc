@@ -30,7 +30,7 @@ func (db *DB) NewTable() {
 	db = NewDatabase()
 	is, err := db.orm.IsTableExist(
 		//new(JieSuanMessage),
-		new(Jiessjchuli),
+		new(JieSuanMessage),
 		//new(JieSuanMessageMx),
 	)
 	if err != nil {
@@ -39,8 +39,8 @@ func (db *DB) NewTable() {
 	if is == false {
 		err := db.orm.Sync2(
 			new(JieSuanMessage),
-			new(JieSuanMessageMx),
-			new(Jiessjchuli),
+			//new(JieSuanMessageMx),
+			//new(Jiessjchuli),
 		)
 		//err = db.orm.CreateTables(new(SJsJiessj))
 		if err != nil {
@@ -56,6 +56,7 @@ func JieSuanMessageInset(msg Message) error {
 	db := NewDatabase()
 	jiessjmsg := new(JieSuanMessage)
 	//赋值
+
 	jiessjmsg.Version = msg.Header.Version
 	jiessjmsg.MessageClass = msg.Header.MessageClass
 	jiessjmsg.MessageType = msg.Header.MessageType
@@ -100,7 +101,7 @@ func JieSuanMessageMxInset(msg Message) error {
 		jiessjmsg.Fee = T.Fee
 
 		jiessjmsg.CustomizedData = T.CustomizedData           //特定发行方与通行宝收费方之间 约定格式的交易信息【  】
-		jiessjmsg.Id = T.Id                                   //停车场消费交易编号(停车场编号+交易发生的时间+流水号 )
+		jiessjmsg.BhId = T.Id                                 //停车场消费交易编号(停车场编号+交易发生的时间+流水号 )
 		jiessjmsg.Name = T.Name                               //停车场名称(不超过150个字符)
 		jiessjmsg.ParkTime = T.ParkTime                       //停放时长(单位：分)
 		jiessjmsg.VehicleType = T.VehicleType                 //收费车型
@@ -169,22 +170,58 @@ func JieSuanMessageChuliInset(msg Message) error {
 }
 
 //查询记账包数据  	//查询记账状态为1的数据，表示为已记账
-func QueryKeepAccountdata() {
+func QueryKeepAccountdata() (error, *map[int64]*[]Jiessjchuli, *[]JieSuanMessage) {
 	db := NewDatabase()
 	//查询多条数据
 	tests := make([]Jiessjchuli, 0)
-	//测试 每次查10条
 
-	//同一个数据包 可以记账的数据
-	qerr := db.orm.Where("f_nb_jizjg=?", 1).Limit(10, 0).Find(&tests)
+	msgerr, msgids := QueryKeepAccountMsgdata()
+	if msgerr != nil {
+		log.Println("查询可以记账的原始交易消息包出错", msgerr)
+	}
+
+	jzshuju := make(map[int64]*[]Jiessjchuli)
+
+	for _, mid := range *msgids {
+
+		//同一个数据包 可以记账的数据
+		qerr := db.orm.Where("FNbYuansjybxh=?", mid.MessageId).And("FNbJizjg=?", 1).Find(&tests)
+		if qerr != nil {
+			log.Fatalln("查询结算数据出错", qerr)
+			return qerr, nil
+		}
+		log.Printf("总共查询出 %d 条数据\n", len(tests))
+
+		if len(tests) == mid.Count {
+			log.Println("此包没有争议数据")
+		}
+		for _, v := range tests {
+			log.Printf("记账状态: %d, 原始交易包序号: %d\n", v.FNbJizjg, v.FNbYuansjybxh)
+		}
+		//消息包中可以记账的数据
+		jzshuju[mid.MessageId] = (&tests)
+	}
+
+	return nil, &jzshuju, msgids
+}
+
+//查询出需要记账的消息包
+func QueryKeepAccountMsgdata() (error, *[]JieSuanMessage) {
+	db := NewDatabase()
+	//查询多条数据
+	tests := make([]JieSuanMessage, 0)
+	//查询可以记账的 消息记录
+	qerr := db.orm.Where("ji_zhang_zt=?", 1).Find(&tests)
 	if qerr != nil {
-		log.Fatalln("查询结算数据出错", qerr)
+		log.Fatalln("查询原始交易包数据出错", qerr)
+		return qerr, nil
 	}
 	log.Printf("总共查询出 %d 条数据\n", len(tests))
 	for _, v := range tests {
-		log.Printf("记账状态: %d, 原始交易包序号: %d\n", v.FNbJizjg, v.FNbYuansjybxh)
+		log.Printf("记账状态: %d, 原始交易包序号: %d\n", v.JiZhangZt, v.MessageId)
 	}
 
+	return nil, &tests
 }
 
 //查询争议包数据
@@ -195,4 +232,44 @@ func QueryDisputedata() {
 //查询争议包数据
 func QueryClearingdata() {
 
+}
+
+//工具函数 把明细表置为1
+func Updatedata() error {
+	db := NewDatabase()
+	//查询多条数据
+	tests := new(Jiessjchuli)
+	for i := 100347; i <= 100392; i++ {
+		//测试 更新记账状态
+		tests.FNbJizjg = 1
+
+		count, err := db.orm.Table("jiessjchuli").Where("f_nb_yuansjybxh=?", i).Update(tests)
+		if err != nil {
+			log.Println("更新打包状态 失败", err, count)
+			return err
+		}
+		log.Printf("更新包号 %d 打包状态 成功%d", i, count)
+
+	}
+	return nil
+}
+
+//工具函数 把原始交易包记账状态置为可以记账
+func UpdateJZdata() error {
+	db := NewDatabase()
+	//查询多条数据
+	tests := new(JieSuanMessage)
+	for i := 100347; i <= 100392; i++ {
+		//测试 更新记账状态 表示在记账中
+		tests.JiZhangZt = 1
+
+		count, err := db.orm.Table("jie_suan_message").Where("message_id=?", i).Update(tests)
+		if err != nil {
+			log.Println("更新打包状态 失败", err, count)
+			return err
+		}
+		log.Printf("更新包号 %d 打包状态 成功%d", i, count)
+
+	}
+	return nil
 }

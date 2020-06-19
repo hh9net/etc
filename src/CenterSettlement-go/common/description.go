@@ -61,6 +61,14 @@ func Name(data string) string {
 func GetLiush(FVcChedjyxh string) string {
 	Liush := []byte(FVcChedjyxh)
 	//log.Println(len(FVcChedjyxh))
+	if len(FVcChedjyxh) == 0 {
+		return "00"
+	}
+
+	if len(FVcChedjyxh) == 1 {
+		return "0" + string(Liush[:])
+
+	}
 	return string(Liush[len(FVcChedjyxh)-2:])
 }
 
@@ -68,6 +76,7 @@ func GetLiush(FVcChedjyxh string) string {
 func GetId(tingccbh string, jysj string, liush string) string {
 	sj := Jytime(jysj)
 	hb := tingccbh + sj + liush
+	log.Println("停车场消费交易编号(停车场编号+交易发生的时间+流水号 )", hb)
 	return hb
 }
 

@@ -18,16 +18,17 @@ func DBInit() {
 	log.Println(params)
 	x, err := xorm.NewEngine("mysql", params)
 	if x == nil {
-		log.Println("获取xorm为空")
+		log.Println("获取xorm为空", x)
 		x = new(xorm.Engine)
 	}
 	if err != nil {
-		log.Fatal("连接数据库error")
+		log.Fatal("连接数据库error", err)
+		return
 	}
 
 	if XormClient == nil {
 		XormClient = new(xorm.Engine)
 	}
-	log.Println("连接数据库成功")
+	log.Println("连接数据库，生成一个连接xorm的对象 成功")
 	XormClient = x
 }
