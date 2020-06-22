@@ -185,10 +185,10 @@ func QueryKeepAccountdata() (error, *map[int64]*[]Jiessjchuli, *[]JieSuanMessage
 	for _, mid := range *msgids {
 
 		//同一个数据包 可以记账的数据
-		qerr := db.orm.Where("FNbYuansjybxh=?", mid.MessageId).And("FNbJizjg=?", 1).Find(&tests)
+		qerr := db.orm.Where("f_nb_yuansjybxh=?", mid.MessageId).And("f_nb_jizjg=?", 1).Find(&tests)
 		if qerr != nil {
 			log.Fatalln("查询结算数据出错", qerr)
-			return qerr, nil
+			return qerr, nil, nil
 		}
 		log.Printf("总共查询出 %d 条数据\n", len(tests))
 

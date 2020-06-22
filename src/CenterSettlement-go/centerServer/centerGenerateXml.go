@@ -22,13 +22,7 @@ func GenerateKeepAccountXml() {
 			log.Fatal(qerr)
 		}
 		//遍历map
-
 		for msgid, jzsj := range *jzshuju {
-			//for _,mid:=range *msg{
-			//
-			//
-			//}
-
 			//组织xml数据  生成xml
 			GenerateJZokXml(msgid, jzsj, msg)
 		}
@@ -59,7 +53,6 @@ func GenerateJZokXml(msgid int64, jzsj *[]Jiessjchuli, msg *[]JieSuanMessage) {
 	Messageid := GenerateMessageId()
 	Filenameid := fmt.Sprintf("%020d", Messageid)
 	log.Println(Filenameid)
-	//new(KeepAccountokMessage)
 	var t string
 	t = common.DateFormat()
 	//
@@ -93,13 +86,15 @@ func GenerateJZokXml(msgid int64, jzsj *[]Jiessjchuli, msg *[]JieSuanMessage) {
 				outputxml, err := xml.MarshalIndent(jzmsg, "  ", "  ")
 				if err != nil {
 					log.Printf("error: %v\n", err)
-					//return err, ""
+					return
 				}
 
 				fname := createxml("JZB-ok", outputxml, Filenameid)
 				if fname == "" {
 					log.Println("生成记账包失败")
+					return
 				}
+				log.Println(fname)
 			}
 
 			//有争议
