@@ -97,7 +97,7 @@ type Jiessjchuli struct {
 	FNbJiaoybnxh   int       //F_NB_JIAOYBNXH	交易包内序号	INT
 	FNbJizjg       int       //F_NB_JIZJG	记账结果	INT "0：未记账  1：已记账    2：争议数据"
 	FNbZhengylx    int       //F_NB_ZHENGYLX	争议类型	INT 0，不是争议，1，验证未通过
-	FNbJizbxh      int       //F_NB_JIZBXH	记账包序号	INT
+	FNbJizbxh      int64     //F_NB_JIZBXH	记账包序号	INT
 	FNbZhengyclbxh int64     //F_NB_ZHENGYCLBXH	争议处理包序号	BIGINT  记账结果：争议放过、坏账时
 	FNbQingfbxh    int64     //F_NB_QINGFBXH	清分包序号	BIGINT
 	FNbKalx        int       //F_NB_KALX	卡类型	INT  储值卡22，23 记账卡

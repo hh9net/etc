@@ -112,7 +112,7 @@ func TestGenerateKeepAccountXml(t *testing.T) {
 }
 
 func TestQueryKeepAccountdata(t *testing.T) {
-	QueryKeepAccountdata()
+	//QueryKeepAccountdata()
 }
 
 func TestUpdatedata(t *testing.T) {

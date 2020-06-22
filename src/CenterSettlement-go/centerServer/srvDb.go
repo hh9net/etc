@@ -169,58 +169,21 @@ func JieSuanMessageChuliInset(msg Message) error {
 	return nil
 }
 
-//查询记账包数据  	//查询记账状态为1的数据，表示为已记账
-func QueryKeepAccountdata() (error, *map[int64]*[]Jiessjchuli, *[]JieSuanMessage) {
-	db := NewDatabase()
-	//查询多条数据
-	tests := make([]Jiessjchuli, 0)
-
-	msgerr, msgids := QueryKeepAccountMsgdata()
-	if msgerr != nil {
-		log.Println("查询可以记账的原始交易消息包出错", msgerr)
-	}
-
-	jzshuju := make(map[int64]*[]Jiessjchuli)
-
-	for _, mid := range *msgids {
-
-		//同一个数据包 可以记账的数据
-		qerr := db.orm.Where("f_nb_yuansjybxh=?", mid.MessageId).And("f_nb_jizjg=?", 1).Find(&tests)
-		if qerr != nil {
-			log.Fatalln("查询结算数据出错", qerr)
-			return qerr, nil, nil
-		}
-		log.Printf("总共查询出 %d 条数据\n", len(tests))
-
-		if len(tests) == mid.Count {
-			log.Println("此包没有争议数据")
-		}
-		for _, v := range tests {
-			log.Printf("记账状态: %d, 原始交易包序号: %d\n", v.FNbJizjg, v.FNbYuansjybxh)
-		}
-		//消息包中可以记账的数据
-		jzshuju[mid.MessageId] = (&tests)
-	}
-
-	return nil, &jzshuju, msgids
-}
-
 //查询出需要记账的消息包
 func QueryKeepAccountMsgdata() (error, *[]JieSuanMessage) {
 	db := NewDatabase()
 	//查询多条数据
 	tests := make([]JieSuanMessage, 0)
-	//查询可以记账的 消息记录
+	//查询可以记账的 消息记录 1 可以记账
 	qerr := db.orm.Where("ji_zhang_zt=?", 1).Find(&tests)
 	if qerr != nil {
 		log.Fatalln("查询原始交易包数据出错", qerr)
 		return qerr, nil
 	}
-	log.Printf("总共查询出 %d 条数据\n", len(tests))
+	log.Printf("总共查询出 %d 条需要记账的消息包数据\n", len(tests))
 	for _, v := range tests {
 		log.Printf("记账状态: %d, 原始交易包序号: %d\n", v.JiZhangZt, v.MessageId)
 	}
-
 	return nil, &tests
 }
 
@@ -245,10 +208,10 @@ func Updatedata() error {
 
 		count, err := db.orm.Table("jiessjchuli").Where("f_nb_yuansjybxh=?", i).Update(tests)
 		if err != nil {
-			log.Println("更新打包状态 失败", err, count)
+			log.Println("更新记账打包状态 失败", err, count)
 			return err
 		}
-		log.Printf("更新包号 %d 打包状态 成功%d", i, count)
+		log.Printf("更新包号 %d 记账打包状态 成功 %d", i, count)
 
 	}
 	return nil
@@ -265,11 +228,49 @@ func UpdateJZdata() error {
 
 		count, err := db.orm.Table("jie_suan_message").Where("message_id=?", i).Update(tests)
 		if err != nil {
-			log.Println("更新打包状态 失败", err, count)
+			log.Println("更新记账打包状态 失败", err, count)
 			return err
 		}
-		log.Printf("更新包号 %d 打包状态 成功%d", i, count)
+		log.Printf("更新包号 %d 记账打包状态 成功%d", i, count)
 
 	}
+	return nil
+}
+
+//更新记账处理结果
+func UpdateJZclzt(msgid int64, jzbh int64) error {
+	db := NewDatabase()
+	//查询多条数据
+	tests := new(Jiessjchuli)
+
+	//测试 更新记账状态  2 已记账
+	tests.FNbJizjg = 2     //已记账
+	tests.FNbQingfjg = 1   //可以清分
+	tests.FNbJizbxh = jzbh //记账包号
+	//tests.FNbZhengycljg = 0 //非争议
+	count, err := db.orm.Table("jiessjchuli").Where("f_nb_yuansjybxh=?", msgid).Update(tests)
+	if err != nil {
+		log.Println("更新打包状态 失败", err, count)
+		return err
+	}
+	log.Printf("更新包号 %d 打包状态 成功%d", msgid, count)
+
+	return nil
+}
+
+//更新原始交易消息包  记账状态
+func UpdatemsgJZ(msgid int64) error {
+	db := NewDatabase()
+	//查询多条数据
+	tests := new(JieSuanMessage)
+
+	//测试 更新记账状态 表示在记账中 2:已记账
+	tests.JiZhangZt = 2
+	count, err := db.orm.Table("jie_suan_message").Where("message_id=?", msgid).Update(tests)
+	if err != nil {
+		log.Println("更新打包状态 失败", err, count)
+		return err
+	}
+	log.Printf("更新包号 %d 打包状态 成功%d", msgid, count)
 	return nil
 }
