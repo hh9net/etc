@@ -53,12 +53,12 @@ func InsertMessageMXData(data *types.BJsJizclmx) error {
 	//赋值
 	jizclmx.FNbYuansjyxxxh = data.FNbYuansjyxxxh //F_NB_YUANSJYXXXH	原始交易消息序号	BIGINT
 	jizclmx.FNbChuljg = data.FNbChuljg           //处理结果
-	jizclmx.FNbbaonxh = data.FNbbaonxh           //包内序号
+	jizclmx.FNbBaonxh = data.FNbBaonxh           //包内序号
 
 	//插入
 	_, err := xorm.Insert(jizclmx)
 	if err != nil {
-		log.Fatal("新增记账处理消息明细记录 error")
+		log.Fatal("新增记账处理消息明细记录 error", err)
 		return err
 	}
 	return nil
@@ -77,7 +77,7 @@ func InsertResMessageData(data types.BJsJizclydxx) error {
 	//插入
 	_, err := xorm.Insert(jizclydxx)
 	if err != nil {
-		log.Fatal("新增记账处理应答消息记录 error")
+		log.Fatal("新增记账处理应答消息记录 error", err)
 		return err
 	}
 	return nil

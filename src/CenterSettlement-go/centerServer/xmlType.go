@@ -129,6 +129,23 @@ type ClearingHeader struct {
 	ReceiverId   string   //Hex(16位，不足补零) 接收方Id
 	MessageId    int64    //消息序号，从1开始，逐1递增 ，8字节  记账包的消息id
 }
+type ClearingOKMessage struct {
+	XMLName xml.Name       `xml:"Message"`
+	Header  ClearingHeader `xml:"Header"`
+	Body    ClearingOKBody `xml:"Body"`
+}
+
+//清分统计body
+type ClearingOKBody struct {
+	XMLName         xml.Name `xml:"Body"`
+	ContentType     int      `xml:",attr"` //争议消息的ContentType始终为2
+	ClearTargetDate string   //清分目标日
+	Count           int      //对应清分总金额的的交易记录数量，包含原始交易包中由发行方确认应付的交易数量和争议处理结果中确认应付的交易数量之和， 不包含争议处理结果中为坏帐的记录数量。
+	Amount          string   //清分总金额(确认付款金额)
+	ProcessTime     string   //处理时间 清分统计处理时间
+	//IssuerId        string   //发行服务机构Id，
+	List ListOK
+}
 
 //清分统计body
 type ClearingBody struct {
@@ -138,17 +155,26 @@ type ClearingBody struct {
 	Count           int      //对应清分总金额的的交易记录数量，包含原始交易包中由发行方确认应付的交易数量和争议处理结果中确认应付的交易数量之和， 不包含争议处理结果中为坏帐的记录数量。
 	Amount          string   //清分总金额(确认付款金额)
 	ProcessTime     string   //处理时间 清分统计处理时间
-	IssuerId        string   //发行服务机构Id，
-	List            List
+	//IssuerId        string   //发行服务机构Id，
+	List List
 }
 
 //ProcessTime之后的内容，或者包含IssuerId及0或多个List，或者仅包含一个List。
 //前者是联网中心为发行方产生的清分统计结果，后者是为通行宝中心系统产生的清分统计结果。
+type ListOK struct {
+	XMLName      xml.Name `xml:"List"`
+	MessageCount string   `xml:",attr"` //本次清分包含的所有原始交易包数量
+	FileCount    string   `xml:",attr"` //本次清分包含的所有争议处理结果包数量
+
+	ServiceProviderId string  //通行宝中心系统Id
+	MessageId         []int64 `xml:"MessageId"`
+	//FileId            int //争议处理结果文件Id (含有可疑调整数据的有)
+}
 
 type List struct {
 	XMLName      xml.Name `xml:"List"`
-	MessageCount int      `xml:",attr"` //本次清分包含的所有原始交易包数量
-	FileCount    int      `xml:",attr"` //本次清分包含的所有争议处理结果包数量
+	MessageCount string   `xml:",attr"` //本次清分包含的所有原始交易包数量
+	FileCount    string   `xml:",attr"` //本次清分包含的所有争议处理结果包数量
 
 	ServiceProviderId string //通行宝中心系统Id
 	MessageId         []Messageid

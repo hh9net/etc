@@ -45,7 +45,8 @@ func Receive() {
 
 //处理任务
 func HandleTask(conn *net.Conn) {
-	//go HandleMessage(conn)
+	//go
+	HandleMessage(conn)
 }
 
 //线程3  接收数据包
@@ -98,8 +99,8 @@ func Save(conn *net.Conn) (string, error) {
 
 		//2、移动文件
 		//移动xml
-		x1 := "CenterSettlement-go/receivexml/" + fileNameid + ".xml"
-		x2 := "CenterSettlement-go/receivexml/errorxml/" + fileNameid + ".xml"
+		x1 := "./receivexml/" + fileNameid + ".xml"
+		x2 := "./receivexml/errorxml/" + fileNameid + ".xml"
 		mxerr := common.MoveFile(x1, x2)
 		if mxerr != nil {
 			log.Println("移动CheckFile失败 的xml error")
@@ -107,8 +108,8 @@ func Save(conn *net.Conn) (string, error) {
 		}
 
 		//移动xmlzip
-		xz1 := "CenterSettlement-go/receivezipfile/" + fileNameid + ".xml.lz77"
-		xz2 := "CenterSettlement-go/receivezipfile/errorxmlzip/" + fileNameid + ".xml.lz77"
+		xz1 := "./receivezipfile/" + fileNameid + ".xml.lz77"
+		xz2 := "./receivezipfile/errorxmlzip/" + fileNameid + ".xml.lz77"
 		mxzerr := common.MoveFile(xz1, xz2)
 		if mxzerr != nil {
 			log.Println("移动CheckFile失败 的zipxml error\"")
@@ -124,7 +125,7 @@ func Save(conn *net.Conn) (string, error) {
 //接收文件 保存为文件 即时应答
 func RevFile(fileNameid string, conn *net.Conn, msglength string) (error, string) {
 	//创建文件
-	fs, err := os.Create("CenterSettlement-go/receivezipfile/" + fileNameid + ".xml.lz77")
+	fs, err := os.Create("./receivezipfile/" + fileNameid + ".xml.lz77")
 	defer fs.Close()
 	if err != nil {
 		log.Println("os.Create err =", err)
@@ -221,7 +222,7 @@ func InstantResponse(d []byte, conn *net.Conn) {
 
 //校验文件md5
 func CheckFile(msgmd5, fileNameid string) error {
-	pwd := "CenterSettlement-go/receivezipfile/"
+	pwd := "./receivezipfile/"
 	fileInfoList, err := ioutil.ReadDir(pwd)
 	if err != nil {
 		log.Fatal(err)
@@ -240,8 +241,8 @@ func CheckFile(msgmd5, fileNameid string) error {
 			}
 
 			//解压缩成功 移动zipxml文件
-			s := "CenterSettlement-go/receivezipfile/" + fileInfoList[i].Name()
-			des := "CenterSettlement-go/receiveUnzipsucceed/" + fileInfoList[i].Name()
+			s := "./receivezipfile/" + fileInfoList[i].Name()
+			des := "./receiveUnzipsucceed/" + fileInfoList[i].Name()
 			merr := client.MoveFile(s, des)
 			if merr != nil {
 				log.Println("client.MoveFile err : ", merr)
@@ -274,7 +275,7 @@ func CheckFile(msgmd5, fileNameid string) error {
 // 获取xml文件msg的md5码
 func GetFileMd5(filename string) string {
 	// 文件全路径名
-	path := "CenterSettlement-go/receivexml/" + filename
+	path := "./receivexml/" + filename
 	pFile, err := os.Open(path)
 	if err != nil {
 		log.Printf("打开文件失败，filename=%v, err=%v", filename, err)

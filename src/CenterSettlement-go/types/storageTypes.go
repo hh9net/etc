@@ -147,7 +147,7 @@ type BJsJizclxx struct {
 //   B_JS_JIZCLMX【记账处理明细】
 type BJsJizclmx struct {
 	FNbYuansjyxxxh int64 //F_NB_YUANSJYXXXH	原始交易消息序号	BIGINT
-	FNbbaonxh      int   //F_NB_BAONXH	包内序号	INT
+	FNbBaonxh      int   //F_NB_BAONXH	包内序号	INT
 	FNbChuljg      int   //F_NB_CHULJG	处理结果	INT
 	FNbWeiyid      int   //`F_NB_WEIYID` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
 }
@@ -167,8 +167,8 @@ type BJsJizclydxx struct {
 	FNbWeiyid    int       //`F_NB_WEIYID` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
 }
 
-//   B_JS_ZHENGYCLXX【争议交易处理消息】
-type BJsZhengyclxx struct {
+//   B_JS_ZHENGYCLXX【争议交易处理消息】b_js_zhengyjyclxx
+type BJsZhengyjyclxx struct {
 	FVcBanbh        string    //F_VC_BANBH	版本号	VARCHAR(32)
 	FNbXiaoxlb      int       //F_NB_XIAOXLB	消息类别	INT
 	FNbXiaoxlx      int       //F_NB_XIAOXLX	消息类型	INT
@@ -176,8 +176,8 @@ type BJsZhengyclxx struct {
 	FVcJieszid      string    //F_VC_JIESZID	接收者ID	VARCHAR(32)
 	FNbXiaoxxh      int64     //F_NB_XIAOXXH	消息序号	BIGINT
 	FDtJiessj       time.Time //F_DT_JIESSJ	接收时间	DATETIME
-	FVcAQingffid    string    //F_VC_QINGFFID	清分方ID	VARCHAR(32)
-	FVclianwzxid    string    //F_VC_LIANWZXID	联网中心ID	VARCHAR(32)
+	FVcQingffid     string    //F_VC_QINGFFID	清分方ID	VARCHAR(32)
+	FVcLianwzxid    string    //F_VC_LIANWZXID	联网中心ID	VARCHAR(32)
 	FVcFaxfid       string    //F_VC_FAXFID	发行方ID	VARCHAR(32)
 	FVcZhengyjgwjid int       //F_VC_ZHENGYJGWJID	争议结果文件ID	INT
 	FDtZhengyclsj   time.Time //F_DT_ZHENGYCLSJ	争议处理时间	DATETIME

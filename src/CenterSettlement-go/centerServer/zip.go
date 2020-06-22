@@ -18,7 +18,7 @@ func CenterZipxml(fname string, lx string) error {
 		pwd = "../centerdispute/" + fname
 	//清分
 	case "qf":
-		pwd = "../centerclearling/" + fname
+		pwd = "../centerClearing/" + fname
 	}
 	log.Println("zipxmlpwd:", pwd)
 

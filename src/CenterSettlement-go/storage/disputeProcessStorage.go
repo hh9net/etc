@@ -8,10 +8,10 @@ import (
 
 //争议处理
 //新增争议处理结果消息包记录
-func DisputeProcessXXInsert(data *types.BJsZhengyclxx) error {
+func DisputeProcessXXInsert(data *types.BJsZhengyjyclxx) error {
 	xorm := database.XormClient
 	session := TransactionBegin(xorm)
-	zhengyclxx := new(types.BJsZhengyclxx)
+	zhengyclxx := new(types.BJsZhengyjyclxx)
 
 	//赋值
 	zhengyclxx.FVcBanbh = data.FVcBanbh               //F_VC_BANBH	版本号	VARCHAR(32)
@@ -21,8 +21,8 @@ func DisputeProcessXXInsert(data *types.BJsZhengyclxx) error {
 	zhengyclxx.FVcJieszid = data.FVcJieszid           //F_VC_JIESZID	接收者ID	VARCHAR(32)
 	zhengyclxx.FNbXiaoxxh = data.FNbXiaoxxh           //F_NB_XIAOXXH	消息序号	BIGINT
 	zhengyclxx.FDtJiessj = data.FDtJiessj             //F_DT_JIESSJ	接收时间	DATETIME
-	zhengyclxx.FVcAQingffid = data.FVcAQingffid       //F_VC_QINGFFID	清分方ID	VARCHAR(32)
-	zhengyclxx.FVclianwzxid = data.FVclianwzxid       //F_VC_LIANWZXID	联网中心ID	VARCHAR(32)
+	zhengyclxx.FVcQingffid = data.FVcQingffid         //F_VC_QINGFFID	清分方ID	VARCHAR(32)
+	zhengyclxx.FVcLianwzxid = data.FVcLianwzxid       //F_VC_LIANWZXID	联网中心ID	VARCHAR(32)
 	zhengyclxx.FVcFaxfid = data.FVcFaxfid             //F_VC_FAXFID	发行方ID	VARCHAR(32)
 	zhengyclxx.FVcZhengyjgwjid = data.FVcZhengyjgwjid //F_VC_ZHENGYJGWJID	争议结果文件ID	INT
 	zhengyclxx.FDtZhengyclsj = data.FDtZhengyclsj     //F_DT_ZHENGYCLSJ	争议处理时间	DATETIME
@@ -33,9 +33,16 @@ func DisputeProcessXXInsert(data *types.BJsZhengyclxx) error {
 	//插入
 	_, err := session.Insert(zhengyclxx)
 	if err != nil {
-		log.Fatal("新增争议处理包的消息记录 error")
+		log.Fatal("新增争议处理包的消息记录 error", err)
 		return err
 	}
+
+	serr := TransactionCommit(session)
+	if serr != nil {
+		log.Println("新增争议处理结果消息包记录 时，事务错误", serr)
+
+	}
+
 	return nil
 }
 
@@ -57,8 +64,14 @@ func DisputeProcessMxInsert(data *types.BJsZhengyjyclmx) error {
 	//插入
 	_, err := session.Insert(zhengyjyclmx)
 	if err != nil {
-		log.Fatal("新增争议处理结果消息包明细记录 error")
+		log.Fatal("新增争议处理结果消息包明细记录 error", err)
 		return err
+	}
+
+	serr := TransactionCommit(session)
+	if serr != nil {
+		log.Println("新增争议处理结果消息包明细记录 时，事务错误", serr)
+
 	}
 	return nil
 }
@@ -66,7 +79,7 @@ func DisputeProcessMxInsert(data *types.BJsZhengyjyclmx) error {
 //新增争议处理结果应答消息包记录
 func DisputeProcessResInsert(data types.BJsZhengyclydxx) error {
 	xorm := database.XormClient
-	//session := TransactionBegin(xorm)
+	session := TransactionBegin(xorm)
 	zhengyclydxx := new(types.BJsZhengyclydxx)
 
 	//赋值
@@ -82,10 +95,16 @@ func DisputeProcessResInsert(data types.BJsZhengyclydxx) error {
 	zhengyclydxx.FVcXiaoxwjlj = data.FVcXiaoxwjlj //F_VC_XIAOXWJLJ	消息文件路径	VARCHAR(512)
 
 	//插入
-	_, err := xorm.Insert(zhengyclydxx)
+	_, err := session.Insert(zhengyclydxx)
 	if err != nil {
-		log.Fatal("新增争议处理结果应答消息包记录 error")
+		log.Fatal("新增争议处理结果应答消息包记录 error", err)
 		return err
+	}
+
+	serr := TransactionCommit(session)
+	if serr != nil {
+		log.Println("新增争议处理结果应答消息包记录时，事务错误", serr)
+
 	}
 	return nil
 }

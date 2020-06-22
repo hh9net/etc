@@ -106,6 +106,7 @@ func TestToABCD(t *testing.T) {
 	fmt.Println("str =", str)
 }
 
+//记账包生成
 func TestGenerateKeepAccountXml(t *testing.T) {
 	GenerateKeepAccountXml()
 
@@ -124,6 +125,7 @@ func TestUpdatedata(t *testing.T) {
 func TestUpdateJZdata(t *testing.T) {
 	//
 	UpdateJZdata()
+
 }
 
 func TestXorminitTest(t *testing.T) {
@@ -133,4 +135,22 @@ func TestXorminitTest(t *testing.T) {
 
 func TestQueryKeepAccountMsgdata(t *testing.T) {
 	QueryKeepAccountMsgdata()
+}
+
+func TestGenerateDisputeXml(t *testing.T) {
+	GenerateDisputeXml()
+}
+
+//生成清分包
+func TestGenerateClearlingtXml(t *testing.T) {
+	GenerateClearlingtXml()
+
+}
+
+func TestUpdateQFclztGJ(t *testing.T) {
+	UpdateQFclztGJ()
+}
+
+func TestUpdateQFmsgGongJu(t *testing.T) {
+	UpdateQFmsgGongJu()
 }

@@ -35,10 +35,10 @@ func CenterClient() {
 		}
 
 		//发送清分包数据
-		err3 := SendClearing()
-		if err3 != nil {
-			log.Println("发送清分包数据 error ", err3)
-		}
+		//err3 := SendClearing()
+		//if err3 != nil {
+		//	log.Println("发送清分包数据 error ", err3)
+		//}
 
 		//发送应答包
 	}
@@ -61,7 +61,7 @@ func SendKeepAccount() error {
 
 		for i := range fileInfoList {
 			//判断文件的	前缀名
-			if strings.HasPrefix(fileInfoList[i].Name(), "JZB_") {
+			if strings.HasPrefix(fileInfoList[i].Name(), "JZB") {
 				log.Println("打印当前文件或目录下的文件名", fileInfoList[i].Name())
 
 				//压缩xml文件
@@ -155,7 +155,7 @@ func SendClearing() error {
 	log.Println("执行发送争议包")
 	//tiker := time.NewTicker(time.Second * 5)
 	for {
-		pwd := "../centerclearing/"
+		pwd := "../centerClearing/"
 		fileInfoList, err := ioutil.ReadDir(pwd)
 		if err != nil {
 			log.Fatal(err)
@@ -176,7 +176,7 @@ func SendClearing() error {
 				}
 				log.Println("清分包压缩成功")
 				//MoveFile
-				s1 := "../centerclearing/" + fileInfoList[i].Name()
+				s1 := "../centerClearing/" + fileInfoList[i].Name()
 				s2 := "../centerCompressed/" + fileInfoList[i].Name()
 
 				mverr := MoveFile(s1, s2)

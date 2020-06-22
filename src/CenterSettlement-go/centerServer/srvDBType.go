@@ -133,6 +133,7 @@ type JieSuanMessage struct {
 	JiZhangZt int //0：未记账处理 1：在记账中 2：已记账
 
 	ZhengyChulizt int //0：无争议 1：有争议
+	Qingfzt       int //0 1:可以清分
 
 }
 

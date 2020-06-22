@@ -197,14 +197,17 @@ func QueryClearingdata() {
 
 }
 
-//工具函数 把明细表置为1
+//工具函数 把处理表置为1
 func Updatedata() error {
 	db := NewDatabase()
 	//查询多条数据
 	tests := new(Jiessjchuli)
 	for i := 100347; i <= 100392; i++ {
+		//for i := 125661; i <= 125661; i++ {
 		//测试 更新记账状态
 		tests.FNbJizjg = 1
+		tests.FNbQingfjg = 0
+		tests.FNbJizbxh = 0
 
 		count, err := db.orm.Table("jiessjchuli").Where("f_nb_yuansjybxh=?", i).Update(tests)
 		if err != nil {
@@ -212,7 +215,6 @@ func Updatedata() error {
 			return err
 		}
 		log.Printf("更新包号 %d 记账打包状态 成功 %d", i, count)
-
 	}
 	return nil
 }
@@ -225,15 +227,32 @@ func UpdateJZdata() error {
 	for i := 100347; i <= 100392; i++ {
 		//测试 更新记账状态 表示在记账中
 		tests.JiZhangZt = 1
-
+		//tests.Qingfzt = 1
 		count, err := db.orm.Table("jie_suan_message").Where("message_id=?", i).Update(tests)
 		if err != nil {
 			log.Println("更新记账打包状态 失败", err, count)
 			return err
 		}
-		log.Printf("更新包号 %d 记账打包状态 成功%d", i, count)
-
+		log.Println("更新包号 记账打包状态 成功 ", i, count, err)
 	}
+	return nil
+}
+
+//更新原始交易消息包  记账状态
+func UpdatemsgJZ(msgid int64) error {
+	db := NewDatabase()
+	//查询多条数据
+	tests := new(JieSuanMessage)
+
+	//测试 更新记账状态 表示在记账中 2:已记账
+	tests.JiZhangZt = 2
+	tests.Qingfzt = 1 //可以清分
+	count, err := db.orm.Table("jie_suan_message").Where("message_id=?", msgid).Update(tests)
+	if err != nil {
+		log.Println("更新打包状态 失败", err, count)
+		return err
+	}
+	log.Printf("更新包号 %d 打包状态 成功%d", msgid, count)
 	return nil
 }
 
@@ -247,30 +266,105 @@ func UpdateJZclzt(msgid int64, jzbh int64) error {
 	tests.FNbJizjg = 2     //已记账
 	tests.FNbQingfjg = 1   //可以清分
 	tests.FNbJizbxh = jzbh //记账包号
-	//tests.FNbZhengycljg = 0 //非争议
+
 	count, err := db.orm.Table("jiessjchuli").Where("f_nb_yuansjybxh=?", msgid).Update(tests)
 	if err != nil {
 		log.Println("更新打包状态 失败", err, count)
 		return err
 	}
 	log.Printf("更新包号 %d 打包状态 成功%d", msgid, count)
-
+	log.Println("记账包号：", tests.FNbJizbxh)
 	return nil
 }
 
-//更新原始交易消息包  记账状态
-func UpdatemsgJZ(msgid int64) error {
+//查询出需要记账的消息包
+func QueryCleariungMsgdata() (error, *[]JieSuanMessage) {
+	db := NewDatabase()
+	//查询多条数据
+	tests := make([]JieSuanMessage, 0)
+	//查询可以记账的 消息记录 1 可以记账
+	qerr := db.orm.Where("qingfzt=?", 1).Find(&tests)
+	if qerr != nil {
+		log.Fatalln("查询原始交易包数据出错", qerr)
+		return qerr, nil
+	}
+	log.Printf("总共查询出 %d 条需要清分的消息包数据\n", len(tests))
+	for _, v := range tests {
+		log.Printf("清分状态: %d, 原始交易包序号: %d\n", v.Qingfzt, v.MessageId)
+	}
+	return nil, &tests
+}
+
+//更新清分处理结果
+func UpdateQFclzt(msgids []int64, qfbh int64) error {
+	db := NewDatabase()
+	//查询多条数据
+	tests := new(Jiessjchuli)
+	for _, msgid := range msgids {
+		//测试 更新清分状态  2 已清分
+		tests.FNbQingfjg = 2     //已清分
+		tests.FNbQingfbxh = qfbh //清分包号
+		count, err := db.orm.Table("jiessjchuli").Where("f_nb_yuansjybxh=?", msgid).Update(tests)
+		if err != nil {
+			log.Println("更新清分打包状态 失败", err, count)
+			return err
+		}
+		log.Printf("更新清分包号 %d 清分打包状态 成功 更新条数 %d ；清分包id： %d ", msgid, count, qfbh)
+	}
+	return nil
+}
+
+//更新原始交易消息包  清分状态为：2 已清分
+func UpdatemsgQFzt(msgids []int64) error {
 	db := NewDatabase()
 	//查询多条数据
 	tests := new(JieSuanMessage)
-
-	//测试 更新记账状态 表示在记账中 2:已记账
-	tests.JiZhangZt = 2
-	count, err := db.orm.Table("jie_suan_message").Where("message_id=?", msgid).Update(tests)
-	if err != nil {
-		log.Println("更新打包状态 失败", err, count)
-		return err
+	for _, msgid := range msgids {
+		// 更新清分状态 表示在清分中 2:已清分
+		tests.Qingfzt = 2
+		count, err := db.orm.Table("jie_suan_message").Where("message_id=?", msgid).Update(tests)
+		if err != nil {
+			log.Println("更新清分打包状态 失败", err, count)
+			return err
+		}
+		log.Printf("更新包号 %d 清分消息打包状态 成功%d", msgid, count)
 	}
-	log.Printf("更新包号 %d 打包状态 成功%d", msgid, count)
+	return nil
+}
+
+//清分处理工具函数
+func UpdateQFclztGJ() error {
+	db := NewDatabase()
+	//查询多条数据
+	tests := new(Jiessjchuli)
+	for i := 100347; i <= 100392; i++ {
+		//测试 更新清分状态  2 已清分
+		tests.FNbQingfjg = 1  //已清分
+		tests.FNbQingfbxh = 1 //清分包号
+		count, err := db.orm.Table("jiessjchuli").Where("f_nb_yuansjybxh=?", i).Update(tests)
+		if err != nil {
+			log.Println("更新清分打包状态 失败", err, count)
+			return err
+		}
+		log.Printf("更新清分包号 %d 清分打包状态 成功%d", i, count)
+	}
+	return nil
+}
+
+//清分处理工具函数
+func UpdateQFmsgGongJu() error {
+	db := NewDatabase()
+	//查询多条数据
+	tests := new(JieSuanMessage)
+	for i := 100347; i <= 100392; i++ {
+		//测试 更新清分状态  2 已清分
+		tests.Qingfzt = 1
+		count, err := db.orm.Table("jie_suan_message").Where("message_id=?", i).Update(tests)
+		if err != nil {
+			log.Println("更新清分打包状态 失败", err, count)
+			return err
+		}
+		log.Printf("更新清分包号 %d 清分打包状态 成功%d", i, count)
+	}
 	return nil
 }

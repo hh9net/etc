@@ -35,9 +35,9 @@ func main() {
 	//goroutine1
 	//go service.HandleGeneratexml()
 	//goroutine2
-	go service.HandleSendXml()
+	//go service.HandleSendXml()
 	//goroutine4
-	//go service.AnalyzeDataPakage()
+	go service.AnalyzeDataPakage()
 	//goroutine3
 	//service.Receive()
 

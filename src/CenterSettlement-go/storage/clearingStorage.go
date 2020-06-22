@@ -38,7 +38,12 @@ func ClearingInsert(data *types.BJsQingftjxx) error {
 		log.Println("新增清分处理包的消息记录 error", err)
 		return err
 	}
-	log.Println("新增清分处理包的消息记录 成功")
+	serr := TransactionCommit(session)
+	if serr != nil {
+		log.Println("新增清分包记录 时，事务错误", serr)
+
+	}
+	log.Println("新增清分处理包的消息记录 成功", qingftongjixx)
 	return nil
 
 }
@@ -63,7 +68,12 @@ func ClearingMXInsert(data *types.BJsQingftjmx) error {
 		log.Println("新增清分统计消息明细包记录 成功")
 		return err
 	}
-	log.Println("新增清分统计消息明细包记录 成功")
+	serr := TransactionCommit(session)
+	if serr != nil {
+		log.Println("新增清分统计消息明细包记录 时，事务错误", serr)
+
+	}
+	log.Println("新增清分统计消息明细包记录 成功", qingftongjimx)
 	return nil
 
 }
@@ -72,17 +82,23 @@ func ClearingMXInsert(data *types.BJsQingftjmx) error {
 func ClearingYDInsert(data *types.BJsQingftjxxyd) error {
 
 	xorm := database.XormClient
-	//session := TransactionBegin(xorm)
+	session := TransactionBegin(xorm)
 	qingftongjixxyd := new(types.BJsQingftjxxyd)
 
 	//赋值
 	qingftongjixxyd.FNbQuerdxxxh = data.FNbQuerdxxxh
 
 	//插入
-	_, err := xorm.Insert(qingftongjixxyd)
+	_, err := session.Insert(qingftongjixxyd)
 	if err != nil {
 		log.Fatal("新增清分应答消息包记录 error", err)
 		return err
+	}
+
+	serr := TransactionCommit(session)
+	if serr != nil {
+		log.Println("新增清分应答消息包记录时，事务错误", serr)
+
 	}
 	return nil
 }
