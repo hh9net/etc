@@ -23,10 +23,10 @@ var (
 //线程1
 //处理原始数据的打包
 func HandleGeneratexml() {
-	log.Println("执行线程1")
-	tiker := time.NewTicker(time.Second * 3)
+
+	tiker := time.NewTicker(time.Second * 5)
 	for {
-		log.Println("执行线程1", <-tiker.C)
+		log.Println(<-tiker.C, "执行线程1，处理原始数据的打包")
 
 		//其他省市地区    xml文件生成
 		for _, Diqu := range types.Gl_network {
@@ -141,12 +141,8 @@ func Genaratexml(Kalx int, Diqu string) (error, string) {
 
 			//把打包状态该为0【初始化为未打包】
 		}
-
-		//        新增打包应答记录
-
 		return nil, fname
 	}
-
 	return nil, fname
 }
 

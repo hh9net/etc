@@ -38,7 +38,6 @@ func ParseFile() error {
 	//扫描receivexml 文件夹 读取文件信息
 	//获取文件或目录相关信息
 	pwd := "./receivexml/"
-	//pwd := "../receivexml/"//test
 	fileList, err := ioutil.ReadDir(pwd)
 	if err != nil {
 		log.Fatal(err)
@@ -224,7 +223,7 @@ func ParseRespFile(result types.ReceiveMessage, fname string) error {
 //到对应的文件夹下，使用对应的xml结构体，获取数据，插入数据
 //解析xml数据 把数据导入数据库
 func Parsexml(filePath string, fname string) error {
-	log.Println("解析xml数据 把数据导入数据库", filePath+fname)
+	log.Println("解析xml数据：filePath+fname， 把数据导入数据库", filePath+fname)
 	fileInfoList, rerr := ioutil.ReadDir(filePath)
 	if rerr != nil {
 		log.Fatal(rerr)
@@ -234,7 +233,7 @@ func Parsexml(filePath string, fname string) error {
 		//判断文件的结尾名
 		//log.Println("名字是否一致",fileInfoList[i].Name(), fname)
 		if fileInfoList[i].Name() == fname {
-			log.Println("消息包入库的xml文件名：", fileInfoList[i].Name()) //打印当前文件或目录下的文件或目录名
+			log.Println("消息包要入数据库的xml文件名：", fileInfoList[i].Name()) //打印当前文件或目录下的文件或目录名
 
 			//解析xml文件 获取xml文件位置
 			content, rderr := ioutil.ReadFile(filePath + fname)

@@ -119,6 +119,8 @@ func Save(conn *net.Conn) (string, error) {
 
 	//文件正确、解析文件、数据入库
 
+	//生成确认消息应答包
+
 	return fname, nil
 }
 
@@ -292,4 +294,16 @@ func GetFileMd5(filename string) string {
 func ParsingFile(Filename string) {
 	//1、扫描文件夹，改名字
 	log.Println("去执行线程4吧，本线程3的工作完成了！")
+}
+
+//
+//生成对应的确认消息应答包
+func GenerateRespMessage() {
+	// 记账包应答、争议包应答、清分包应答
+
+	//获取数据
+
+	//
+
+	//生成xml
 }

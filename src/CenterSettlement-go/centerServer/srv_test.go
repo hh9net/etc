@@ -11,16 +11,12 @@ import (
 )
 
 func TestServer(t *testing.T) {
+	//模拟联网中心，处理结算数据
+	Server()
+}
+func TestHandle(t *testing.T) {
 	//处理文件
 	Handle()
-
-	//模拟联网中心，处理结算数据
-	//Server()
-	//处理文件的解析
-	//HandleFile()
-	//处理文件的发送
-	//CenterClient()
-
 }
 
 func TestHandleFile(t *testing.T) {
