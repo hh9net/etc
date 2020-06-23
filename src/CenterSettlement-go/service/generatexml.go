@@ -76,9 +76,7 @@ func Genaratexml(Kalx int, Diqu string) (error, string) {
 	jiaoyisj := TransAssignment(jiesuansj, Messageid)
 
 	//使用MarshalIndent函数，生成的XML格式有缩进
-	outputxml, err := xml.MarshalIndent(jiaoyisj, "  ", "  ")
-	//使用Marshal函数，生成的XML格式无缩进
-	//outputxml,err:=xml.Marshal(v)
+	outputxml, err := xml.MarshalIndent(jiaoyisj, "  ", " ")
 	if err != nil {
 		log.Printf("error: %v\n", err)
 		return err, ""
@@ -164,8 +162,6 @@ func TransAssignment(jiesuansj []types.BJsJiessj, Messageid int64) *types.Messag
 
 		Tran.Service.ServiceType = types.SERVICETYPE //交易服务类型 【写死2】
 		//账单描述  南京南站南广场P3|11小时32分40秒
-		//通过用户账单描述获取 账单信息
-		//d := common.Description(v.FVcZhangdms)
 
 		//停车场名称
 		name := storage.GetTingcc(v.FVcTingccbh)
@@ -318,30 +314,23 @@ func createxml(Kawlh string, Kalx int, outputxml []byte) string {
 	if Kalx == 23 {
 		kalxstr = "JZ"
 	}
-	//CenterSettlement-go
-	//fw, f_werr := os.Create("CenterSettlement-go/generatexml/" + kalxstr + "_" + Kawlh + "_" + Filenameid + ".xml")
-
 	fw, f_werr := os.Create("./generatexml/" + kalxstr + "_" + Kawlh + "_" + Filenameid + ".xml") //go run main.go
 	if f_werr != nil {
 		log.Fatal("Read:", f_werr)
 		return ""
 	}
 	//加入XML头
-	//headerBytes := []byte(xml.Header)
+	headerBytes := []byte(xml.Header)
 	//拼接XML头和实际XML内容
-	//xmlOutPutData := append(headerBytes, outputxml...)
-	//这里可以不写，直接使用channel发送给线程2
-	//写入文件
-	//ioutil.WriteFile("CenterSettlement-go/generatexml/"+kalxstr+"_3201_"+Filenameid+".xml", xmlOutPutData, os.ModeAppend)
+	xmlOutPutData := append(headerBytes, outputxml...)
 
-	_, ferr := fw.Write((outputxml))
+	_, ferr := fw.Write((xmlOutPutData))
 	if ferr != nil {
 		log.Printf("Write xml file error: %v\n", ferr)
 		return ""
 	}
 	//更新消息包信息
 	fw.Close()
-	//return "../generatexml/"+kalxstr+"_3201_"+Filenameid+".xml"
 	return kalxstr + "_" + Kawlh + "_" + Filenameid + ".xml"
 
 }
@@ -388,10 +377,4 @@ func GetMD5code() {
 	//md5 := md5.New()
 	//io.Copy(md5, file)
 	//MD5Str := hex.EncodeToString(md5.Sum(nil))
-}
-
-//封装一个函数，处理xml数据的准备
-func xmldata() {
-	//原始交易数据
-
 }

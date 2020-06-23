@@ -6,10 +6,10 @@ import (
 )
 
 //通用确认消息结构
-type ResponseMessage struct {
+type ResponseCTMessage struct {
 	XMLName xml.Name       `xml:"Message"`
 	Header  ResponseHeader `xml:"Header"`
-	Body    ResponseBody   `xml:"Body"`
+	Body    ResponseCTBody `xml:"Body"`
 }
 
 type ResponseHeader struct {
@@ -22,11 +22,23 @@ type ResponseHeader struct {
 	MessageId    int64    //消息序号，从1开始，逐1递增 ，8字节
 }
 
+type ResponseCTBody struct {
+	XMLName     xml.Name `xml:"Body"`
+	ContentType int      `xml:",attr"`
+	MessageId   int64    //确认的消息Id （对应于发送方的header里的MessageId）从发送方的header取MessageId
+	ProcessTime string   //处理时间
+	Result      int      // int8  1.消息已正常接收（用于Advice Response时含已接受建议）
+}
+type ResponseMessage struct {
+	XMLName xml.Name       `xml:"Message"`
+	Header  ResponseHeader `xml:"Header"`
+	Body    ResponseBody   `xml:"Body"`
+}
 type ResponseBody struct {
-	XMLName     xml.Name  `xml:"Body"`
-	MessageId   string    //确认的消息Id （对应于发送方的header里的MessageId）从发送方的header取MessageId
-	ProcessTime time.Time //处理时间
-	Result      int       // int8  1.消息已正常接收（用于Advice Response时含已接受建议）
+	XMLName     xml.Name `xml:"Body"`
+	MessageId   int64    //确认的消息Id （对应于发送方的header里的MessageId）从发送方的header取MessageId
+	ProcessTime string   //处理时间
+	Result      int      // int8  1.消息已正常接收（用于Advice Response时含已接受建议）
 }
 
 //  通用重发请求消息结构

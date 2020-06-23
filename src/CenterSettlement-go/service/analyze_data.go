@@ -2,6 +2,7 @@ package service
 
 import (
 	"CenterSettlement-go/common"
+	"CenterSettlement-go/conf"
 	"CenterSettlement-go/storage"
 	"CenterSettlement-go/types"
 	"encoding/xml"
@@ -9,6 +10,7 @@ import (
 	"github.com/pkg/errors"
 	"io/ioutil"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -20,8 +22,8 @@ func AnalyzeDataPakage() {
 
 	tiker := time.NewTicker(time.Second * 15)
 	for {
-		log.Println("执行线程4", <-tiker.C)
-		log.Println("现在执行线程4", common.DateTimeNowFormat())
+		log.Println(<-tiker.C, "执行线程4 处理数据包")
+		log.Println(common.DateTimeNowFormat(), "现在执行线程4 处理数据包")
 
 		//1、处理文件解压，解压至receivexml文件夹 [已ok]
 		//2、处理文件解析
@@ -36,7 +38,6 @@ func AnalyzeDataPakage() {
 //2、处理文件解析
 func ParseFile() error {
 	//扫描receivexml 文件夹 读取文件信息
-	//获取文件或目录相关信息
 	pwd := "./receivexml/"
 	fileList, err := ioutil.ReadDir(pwd)
 	if err != nil {
@@ -49,7 +50,7 @@ func ParseFile() error {
 		return nil
 	}
 	for i := range fileList {
-		log.Println("该receivexml 文件夹下需要解析的xml文件名字为:", fileList[i].Name()) //打印当前文件或目录下的文件或目录名
+		log.Println("该receivexml 文件夹下需要解析的xml文件名字为:", fileList[i].Name())
 
 		//判断文件的结尾名
 		if strings.HasSuffix(fileList[i].Name(), ".xml") {
@@ -111,7 +112,10 @@ func ParseFile() error {
 	return nil
 }
 
+//记账包的解析
 func ParseKeepAccountFile(result types.ReceiveMessage, fname string) error {
+	//记账包的确认应答
+	GenerateRespMessage("jz", result)
 
 	var des string
 	//记账数据包
@@ -148,9 +152,14 @@ func ParseKeepAccountFile(result types.ReceiveMessage, fname string) error {
 	return nil
 }
 
+//争议包的解析
 func ParseDisputeFile(result types.ReceiveMessage, fname string) error {
-	//1、修改文件名字  2、移动文件
+	//争议包的确认应答
+	GenerateRespMessage("zy", result)
 
+	//新增原始交易应答包
+
+	//1、修改文件名字  2、移动文件
 	src := "./receivexml/" + fname
 	des := "./disputeProcessFile/" + "ZYB_" + fmt.Sprintf("%020d", result.Header.MessageId) + ".xml"
 	zyfrerr := common.FileRename(src, des)
@@ -167,7 +176,10 @@ func ParseDisputeFile(result types.ReceiveMessage, fname string) error {
 	return nil
 }
 
+//清分包的解析
 func ParseClearlingFile(result types.ReceiveMessage, fname string) error {
+	//清分包的确认应答
+	GenerateRespMessage("qf", result)
 	var des string
 	//1、修改文件名字  2、移动文件
 	if result.Body.List.FileCount == 0 {
@@ -384,7 +396,6 @@ func Parsexml(filePath string, fname string) error {
 				if resperr != nil {
 					return resperr
 				}
-
 			}
 		}
 		//这里加一个跳转
@@ -792,4 +803,119 @@ func RespMessageInsert(result types.RespMessage) error {
 		log.Println("新增清分包消息错误 ：", qferr)
 	}
 	return nil
+}
+
+//
+//生成对应的确认消息应答包
+func GenerateRespMessage(lx string, result types.ReceiveMessage) (error, string) {
+	// 记账包应答、争议包应答、清分包应答
+	var msgclass, msgtype int
+	var lxstr string
+	Messageid := conf.GenerateMessageId()
+	Filenameid = fmt.Sprintf("%020d", Messageid)
+
+	switch lx {
+	case "jz":
+		msgclass = 6
+		msgtype = 5
+		lxstr = "JZYDB"
+
+	case "zy":
+		msgclass = 6
+		msgtype = 7
+		lxstr = "ZYYDB"
+	case "qf":
+		msgclass = 6
+		msgtype = 5
+		lxstr = "QFYDB"
+	}
+	var ydmsgct *types.ResponseCTMessage
+	if result.Body.ContentType > 0 {
+		//获取数据
+		ydmsgct = &types.ResponseCTMessage{
+			Header: types.ResponseHeader{
+				Version:      "00010000",
+				MessageClass: msgclass,
+				MessageType:  msgtype,
+				SenderId:     "00000000000000FD",
+				ReceiverId:   "0000000000000020",
+				MessageId:    Messageid},
+			Body: types.ResponseCTBody{
+				ContentType: result.Body.ContentType,
+				ProcessTime: common.DateTimeNowFormat(), //处理时间
+				Result:      1,                          // int8  1.消息已正常接收（用于Advice Response时含已接受建议）
+				MessageId:   result.Header.MessageId,
+			}}
+
+		//生成xml
+		//使用MarshalIndent函数，生成的XML格式有缩进
+		outputxml, err := xml.MarshalIndent(ydmsgct, "  ", " ")
+		if err != nil {
+			log.Printf("error: %v\n", err)
+			return err, ""
+		}
+
+		fw, f_werr := os.Create("./generatexml/" + lxstr + "_" + Filenameid + ".xml") //go run main.go
+		if f_werr != nil {
+			log.Fatal("Read:", f_werr)
+			return f_werr, ""
+		}
+		//加入XML头
+		headerBytes := []byte(xml.Header)
+		//拼接XML头和实际XML内容
+		xmlOutPutData := append(headerBytes, outputxml...)
+
+		_, ferr := fw.Write((xmlOutPutData))
+		if ferr != nil {
+			log.Printf("Write xml file error: %v\n", ferr)
+			return ferr, ""
+		}
+		//更新消息包信息
+		fw.Close()
+
+		return nil, lxstr + "_" + Filenameid + ".xml"
+	}
+
+	ydmsg := &types.ResponseMessage{
+		Header: types.ResponseHeader{
+			Version:      "00010000",
+			MessageClass: msgclass,
+			MessageType:  msgtype,
+			SenderId:     "00000000000000FD",
+			ReceiverId:   "0000000000000020",
+			MessageId:    Messageid},
+		Body: types.ResponseBody{
+			ProcessTime: common.DateTimeNowFormat(), //处理时间
+			Result:      1,                          // int8  1.消息已正常接收（用于Advice Response时含已接受建议）
+			MessageId:   result.Header.MessageId,
+		}}
+
+	//生成xml
+	//使用MarshalIndent函数，生成的XML格式有缩进
+	outputxml, err := xml.MarshalIndent(ydmsg, "  ", " ")
+	if err != nil {
+		log.Printf("error: %v\n", err)
+		return err, ""
+	}
+
+	fw, f_werr := os.Create("./generatexml/" + lxstr + "_" + Filenameid + ".xml") //go run main.go
+	if f_werr != nil {
+		log.Fatal("Read:", f_werr)
+		return f_werr, ""
+	}
+	//加入XML头
+	headerBytes := []byte(xml.Header)
+	//拼接XML头和实际XML内容
+	xmlOutPutData := append(headerBytes, outputxml...)
+
+	_, ferr := fw.Write((xmlOutPutData))
+	if ferr != nil {
+		log.Printf("Write xml file error: %v\n", ferr)
+		return ferr, ""
+	}
+	//更新消息包信息
+	fw.Close()
+
+	return nil, lxstr + "_" + Filenameid + ".xml"
+
 }
