@@ -22,8 +22,7 @@ func AnalyzeDataPakage() {
 
 	tiker := time.NewTicker(time.Second * 15)
 	for {
-		log.Println(<-tiker.C, "执行线程4 处理数据包")
-		log.Println(common.DateTimeNowFormat(), "现在执行线程4 处理数据包")
+		log.Println(common.DateTimeFormat(<-tiker.C), "执行线程4 处理数据包")
 
 		//1、处理文件解压，解压至receivexml文件夹 [已ok]
 		//2、处理文件解析

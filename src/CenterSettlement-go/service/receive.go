@@ -21,7 +21,7 @@ import (
 
 //接收联网中心发来数据包
 func Receive() {
-	log.Println("执行线程 接收联网中心发送文件")
+	log.Println("执行线程3 接收联网中心发送文件")
 	//监听联网中心数据端口 "192.168.150.164:8809"
 	address := conf.ListeningAddressConfigInit()
 	Address := address.ListeningAddressIp + ":" + address.ListeningAddressPort
@@ -30,7 +30,7 @@ func Receive() {
 		fmt.Println("Listen", lerr)
 		return
 	}
-	log.Println("执行线程 等待联网中心发送文件")
+	log.Println("执行线程3 等待联网中心发送文件")
 	for {
 		connect, cerr := listen.Accept()
 		if cerr != nil {
@@ -45,7 +45,6 @@ func Receive() {
 
 //处理任务
 func HandleTask(conn *net.Conn) {
-	//go
 	HandleMessage(conn)
 }
 

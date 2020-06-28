@@ -19,12 +19,11 @@ import (
 //线程2 发送数据包
 func HandleSendXml() {
 	//从文件夹sendzipxml中扫描打包文件（判断这个文件夹下面有没有文件）
-	tiker := time.NewTicker(time.Second * 5)
+	tiker := time.NewTicker(time.Second * 15)
 	for {
-		log.Println(<-tiker.C, "执行线程2 发送原始交易包")
+		log.Println(common.DateTimeFormat(<-tiker.C), "执行线程2 发送原始交易包")
 
 		pwd := "./generatexml/" //先压缩后发送    go run main.go
-
 		fileInfoList, err := ioutil.ReadDir(pwd)
 		if err != nil {
 			log.Fatal(err)
@@ -39,7 +38,7 @@ func HandleSendXml() {
 				//压缩文件
 				zerr := lz77zip.ZipLz77(fileInfoList[i].Name())
 				if zerr != nil {
-					log.Println("发送文件时 压缩xml文件失败")
+					log.Println("发送文件时 压缩xml文件失败", zerr)
 					return
 				}
 				//压缩成功 移动xml文件

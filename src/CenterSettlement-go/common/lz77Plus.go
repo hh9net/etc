@@ -1,27 +1,31 @@
-package lz77zip
+package common
 
 import (
 	"bytes"
 	"encoding/binary"
 	"errors"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"io"
-	"log"
 	"math"
 	"os"
+	"runtime"
 	"strings"
+	"sync"
 )
 
 const BLOCKSIZE = 64 * 1024
 
 type encoder struct {
-	data   []byte
-	offset int
+	data    []byte
+	indexed *heap
+	offset  int
 }
 
 func newEncoder() *encoder {
 	return &encoder{
-		data: make([]byte, BLOCKSIZE+16),
+		data:    make([]byte, BLOCKSIZE+16),
+		indexed: newHeap(),
 	}
 }
 
@@ -50,19 +54,20 @@ func (e *encoder) bytes() []byte {
 func (e *encoder) Encode(source []byte) []byte {
 	total := len(source)
 	last := total - 1
-	indexed := newHeap()
 
-	var prev string
+	e.indexed.Reset()
+	indexed := e.indexed
+
+	var prev []byte
 	for i := 0; i < last && e.offset/8 <= total; i++ {
-		a := source[i]
-		b := source[i+1]
-		k := fmt.Sprintf("%c%c", a, b)
+		b := i + 2
+		k := source[i:b]
 		length, offset := indexed.Seek(source, i, k)
 
 		if length == 0 {
 			// 输出单个非匹配字符 0(1bit) + char(8bit)
 			e.appendBit(0)
-			e.appendWord(uint16(a), 8)
+			e.appendWord(uint16(source[i]), 8)
 		} else {
 			// 输出匹配术语 flag(1bit) + len(γ编码) + offset(最大16bit)
 			e.appendBit(1)
@@ -93,12 +98,11 @@ func (e *encoder) Encode(source []byte) []byte {
 				if i >= last {
 					break
 				}
-				a = source[i]
-				b = source[i+1]
-				k = fmt.Sprintf("%c%c", a, b)
+				b = i + 2
+				k = source[i:b]
 			}
 		}
-		if prev != "" {
+		if len(prev) != 0 {
 			indexed.Store(prev, i-1)
 		}
 		prev = k
@@ -120,37 +124,49 @@ func (e *encoder) Reset() {
 }
 
 type heap struct {
-	data       map[string][]int
+	data       []int
 	duplicated int
 	size       int
+	table      []int
 }
 
 func newHeap() *heap {
 	return &heap{
-		data: make(map[string][]int),
-		size: 1,
+		data:  make([]int, 0, 2*BLOCKSIZE),
+		size:  1,
+		table: make([]int, BLOCKSIZE),
 	}
 }
 
-func (h *heap) Seek(source []byte, start int, k string) (length, offset int) {
-	list := h.data[k]
-	tail := len(list)
+func (h *heap) Reset() {
+	h.data = h.data[:0]
+	h.duplicated = 0
+	h.size = 1
+	for i := range h.table {
+		h.table[i] = 0
+	}
+}
 
-	for tail > 0 {
-		tail--
+func (h *heap) Seek(source []byte, start int, k []byte) (length, offset int) {
+	i := int(k[0])*256 + int(k[1])
+	sl := len(source)
 
-		a := start
-		b := list[tail]
-		var c int
-		for a < len(source) && b < h.size && source[a] == source[b] {
+	for j := h.table[i]; j > 0; {
+		j -= 2
+		a := 2 + start
+		b := 2 + h.data[j]
+		c := 2
+		for a < sl && b < h.size && source[a] == source[b] {
 			a++
 			b++
 			c++
 		}
 		if c > length {
 			length = c
-			offset = list[tail]
+			offset = h.data[j]
 		}
+
+		j = h.data[j+1]
 	}
 	return
 }
@@ -159,7 +175,7 @@ func (h *heap) Size() int {
 	return h.size
 }
 
-func (h *heap) Store(k string, offset int) {
+func (h *heap) Store(k []byte, offset int) {
 	h.size++
 
 	if k[0] == k[1] {
@@ -169,15 +185,80 @@ func (h *heap) Store(k string, offset int) {
 		}
 		h.duplicated = offset
 	}
-	h.data[k] = append(h.data[k], offset)
+
+	i := int(k[0])*256 + int(k[1])
+	h.data = append(h.data, offset, h.table[i])
+	h.table[i] = len(h.data)
 }
 
-func Compress(input io.Reader, output io.Writer) error {
-	block := make([]byte, BLOCKSIZE)
-	data := make([]byte, 2)
+type orderer struct {
+	*sync.WaitGroup
+
+	C   chan task
+	i   int
+	out io.Writer
+}
+
+type task struct {
+	id   int
+	data []byte
+}
+
+func newOrderer(out io.Writer) *orderer {
+	ord := &orderer{out: out}
+	ord.C = make(chan task, runtime.NumCPU())
+	ord.WaitGroup = &sync.WaitGroup{}
+	return ord
+}
+
+func (ord *orderer) Start() {
+	var mu sync.Mutex
+	cond := sync.NewCond(&mu)
+
+	for i := 0; i < runtime.NumCPU(); i++ {
+		ord.Add(1)
+		go ord.Go(cond)
+	}
+}
+
+func (ord *orderer) Go(c *sync.Cond) {
+	data := make([]byte, 4)
 	enc := newEncoder()
 
+	for task := range ord.C {
+		n := len(task.data)
+		enc.Reset()
+		result := enc.Encode(task.data)
+
+		binary.BigEndian.PutUint16(data[:2], uint16(n))
+		if len(result) < n {
+			binary.BigEndian.PutUint16(data[2:], uint16(len(result)))
+		} else {
+			copy(data[2:], data[:2])
+			result = task.data
+		}
+
+		c.L.Lock()
+		for ord.i != task.id {
+			c.Wait()
+		}
+
+		ord.out.Write(data)
+		ord.out.Write(result)
+		ord.i++
+		c.Broadcast()
+		c.L.Unlock()
+	}
+	ord.Done()
+}
+
+func CompressPlus(input io.Reader, output io.Writer) error {
+	ord := newOrderer(output)
+	ord.Start()
+
+	var i int
 	for {
+		block := make([]byte, BLOCKSIZE)
 		n, err := input.Read(block)
 		if err != nil {
 			if errors.Is(err, io.EOF) {
@@ -185,21 +266,12 @@ func Compress(input io.Reader, output io.Writer) error {
 			}
 			return err
 		}
-		binary.BigEndian.PutUint16(data, uint16(n))
-		output.Write(data)
 
-		enc.Reset()
-		result := enc.Encode(block[:n])
-
-		if len(result) < n {
-			binary.BigEndian.PutUint16(data, uint16(len(result)))
-			output.Write(data)
-			output.Write(result)
-		} else {
-			output.Write(data)
-			output.Write(block[:n])
-		}
+		ord.C <- task{i, block[:n]}
+		i++
 	}
+	close(ord.C)
+	ord.Wait()
 	return nil
 }
 
@@ -302,12 +374,12 @@ func (d *decoder) Reset(block []byte) {
 	d.offset = 0
 }
 
-func Decompress(input io.Reader, output io.Writer) error {
+func DecompressPlus(input io.Reader, output io.Writer) error {
 	data := make([]byte, 2)
-	src := make([]byte, BLOCKSIZE)
 	dst := make([]byte, BLOCKSIZE)
-	dec := newDecoder(nil)
+	src := make([]byte, BLOCKSIZE)
 
+	dec := newDecoder(nil)
 	for {
 		if _, err := input.Read(data); err != nil {
 			if errors.Is(err, io.EOF) {
@@ -364,7 +436,7 @@ func UnZipLz77(fname string) error {
 		return err
 	}
 	defer out.Close()
-	if unzerr := Decompress(origin, out); unzerr != nil {
+	if unzerr := DecompressPlus(origin, out); unzerr != nil {
 		log.Fatalln(unzerr)
 		return err
 	}
@@ -388,7 +460,7 @@ func ZipLz77(fname string) error {
 	}
 	defer out.Close()
 
-	if zerr := Compress(origin, out); zerr != nil {
+	if zerr := CompressPlus(origin, out); zerr != nil {
 		log.Fatalln(zerr)
 		return zerr
 	}

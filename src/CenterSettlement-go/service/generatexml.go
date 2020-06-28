@@ -26,7 +26,7 @@ func HandleGeneratexml() {
 
 	tiker := time.NewTicker(time.Second * 15)
 	for {
-		log.Println(<-tiker.C, "执行线程1，处理原始数据的打包")
+		log.Println(common.DateTimeFormat(<-tiker.C), "执行线程1，处理原始数据的打包")
 
 		//其他省市地区    xml文件生成
 		for _, Diqu := range types.Gl_network {
