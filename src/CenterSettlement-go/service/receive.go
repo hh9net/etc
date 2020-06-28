@@ -59,13 +59,11 @@ func HandleMessage(conn *net.Conn) {
 	}
 	//解析文件
 	ParsingFile(Filename)
-	//defer (*conn).Close()
-
 }
 
 //保存联网中心发来的数据 ，即使应答
 func Save(conn *net.Conn) (string, error) {
-	//var fileName string
+
 	//接受客户端发来的要传文件的文件信息data
 	buffer := make([]byte, 58)
 	d, e := (*conn).Read(buffer)
@@ -117,7 +115,6 @@ func Save(conn *net.Conn) (string, error) {
 	}
 
 	//文件正确、解析文件、数据入库
-
 	return fname, nil
 }
 

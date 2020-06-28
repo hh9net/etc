@@ -19,7 +19,6 @@ import (
 //线程4 处理数据包  定期扫描 接收联网的接收数据的文件夹 receivexml，如果有文件就解压， 解压后分析包。
 func AnalyzeDataPakage() {
 	//定期检查文件夹receivexml
-
 	tiker := time.NewTicker(time.Second * 15)
 	for {
 		log.Println(common.DateTimeFormat(<-tiker.C), "执行线程4 处理数据包")
