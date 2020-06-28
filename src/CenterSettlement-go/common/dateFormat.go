@@ -6,10 +6,10 @@ import (
 )
 
 //时间格式化
-//2006-01-02 15:04:05
+//转换成时间格式： 2006-01-02 15:04:05
 func DateTimeFormat(t time.Time) string {
 	datetime := t.Format("2006-01-02 15:04:05") //后面的参数是固定的 否则将无输出
-	log.Println("DateTimeFormat :", datetime)
+	//log.Println("DateTimeFormat :", datetime)
 	return datetime
 }
 

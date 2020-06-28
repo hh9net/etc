@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+//时差
 func TimeDifference(intime time.Time, outtime time.Time) string {
 
 	var day string
@@ -15,7 +16,6 @@ func TimeDifference(intime time.Time, outtime time.Time) string {
 	inT, _ := time.Parse("2006-01-02 15:04:05", in)
 	outT, _ := time.Parse("2006-01-02 15:04:05", out)
 	t := outT.Sub(inT).String()
-	//t := outTime.Sub(inTime).String()
 	log.Println("时间差", t)
 	if strings.Contains(t, "h") {
 		//h

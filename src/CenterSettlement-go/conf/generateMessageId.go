@@ -15,10 +15,8 @@ var m *sync.RWMutex
 
 //注意读取messageid时，要做加锁处理
 func GenerateMessageId() int64 {
-	m = new(sync.RWMutex)
 
-	///Users/nicker/go/etc/src/CenterSettlement-go/conf
-	//cfg, err := ini.Load("CenterSettlement-go/conf/id.conf") //读配置文件
+	m = new(sync.RWMutex)
 	cfg, err := ini.Load("./conf/id.conf") //读配置文件  goland不能使用 ./ 方式  go run main.go 可以
 
 	if err != nil {
@@ -29,20 +27,20 @@ func GenerateMessageId() int64 {
 	if rerr != nil {
 		log.Fatal("Fail to read messageid:", rerr)
 	}
-	log.Println("read conffile messageid: ", id)
+
+	log.Println("read conffile messageid: ", id) //取值 ：messageid
 
 	newid := id + 1
 	s := strconv.Itoa(int(newid))
 	m.Lock()
 	cfg.Section("").Key("messageid").SetValue(s) //  修改后值然后进行保存
-	//Saveerr := cfg.SaveTo("CenterSettlement-go/conf/id.conf")
 	Saveerr := cfg.SaveTo("./conf/id.conf")
 	m.Unlock()
 	if Saveerr != nil {
 		log.Fatal("Fail to SaveTo file:", Saveerr)
 	}
 
-	log.Println(" file new messageid: ", s)
-	log.Println(" xmlfile new messageid: ", id)
+	log.Println(" conffile new messageid: ", s) //  修改后保存的值
+	log.Println(" xmlfile new messageid: ", id) //取值 messageid
 	return id
 }

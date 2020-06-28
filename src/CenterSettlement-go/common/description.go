@@ -13,18 +13,13 @@ func Description(data string) string {
 }
 
 //交易详细信息 1|04|3201|3201000002|1101|20200508 134217|03|3201|3201000002|1002|20200506 161547
-//      收费车型[ok]|出口类型[04]|出口路网号[3201]|出口站/广场号 |出口车道号|出口时间【ok】 |入口类型【03】｜入口路网号 ｜入口站/广场号 ｜入口车道号 ｜入口时间【ok】
+//收费车型[ok]|出口类型[04]|出口路网号[3201]|出口站/广场号 |出口车道号|出口时间【ok】 |入口类型【03】｜入口路网号 ｜入口站/广场号 ｜入口车道号 ｜入口时间【ok】
 //cx:车型 ckz：出口站、入口站ckcd：出口车道，入口车道cksj：出口时间 rksj：入口时间
 func Detail(cx string, ckz string, ckcd string, cksj string, rksj string) string {
-	//2020-05-03 12:13:11
-	//log.Println("cksj", cksj)
-	//log.Println("rksj", rksj)
-
-	//log.Printf("(cx %s, ckz %s, ckcd %s, cksj %s, rksj %s", cx, ckz, ckcd, cksj, rksj)
 	csj := timeDetail(cksj)
 	rsj := timeDetail(rksj)
 	detail := cx + "|04|" + "3201|" + ckz + "|" + ckcd + "|" + csj + "|03|" + "3201|" + ckz + "|" + ckcd + "|" + rsj
-	log.Printf(detail)
+	log.Println(detail)
 
 	return detail
 }
@@ -52,22 +47,13 @@ func Jytime(sj string) string {
 //出口类型 写固定值【04】    出口网络号 写固定值【3201】 出口站 写F_VC_TINGCCBH， 出口车道号，写F_VC_CHEDID, 入口类型，写固定【03】，
 //入口站 写F_VC_TINGCCBH ,入口车道号，写F_VC_CHEDID
 
-func Name(data string) string {
-	s := strings.Split(data, "|")
-	d := s[1]
-	log.Println(data)
-	return d
-}
 func GetLiush(FVcChedjyxh string) string {
 	Liush := []byte(FVcChedjyxh)
-	//log.Println(len(FVcChedjyxh))
 	if len(FVcChedjyxh) == 0 {
 		return "00"
 	}
-
 	if len(FVcChedjyxh) == 1 {
 		return "0" + string(Liush[:])
-
 	}
 	return string(Liush[len(FVcChedjyxh)-2:])
 }

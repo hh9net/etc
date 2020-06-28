@@ -13,20 +13,15 @@ import (
 //在收到联网中心的数据后，解析数据，插入数据
 //在发送给联网中心前查询数据
 //注意事务处理
-//通过交易状态为0，卡网络号为江苏本省， 卡类型为储值卡、查询交易结算数据
-
-type DB struct {
-	//Db database.XormClient
-}
+//通过交易状态为0，卡网络号为地区， 卡类型为储值卡、记账卡，查询出交易结算数据
 
 //查询其他省的结算数据
 func QueryQitaJiessj(KaLx int, Diqu string) *[]types.BJsJiessj {
-	//database.DBInit()
+
 	xorm := database.XormClient
 	//查询多条数据
 	tests := make([]types.BJsJiessj, 0)
-	//qerr := xorm.Where("F_NB_DABZT=?", 0).And("F_VC_KAWLH=?", Diqu).And("F_NB_KALX=?", KaLx).Limit(100, 0).Find(&tests)
-	//测试 每次查两条
+	// 每次查100条
 	qerr := xorm.Where("F_NB_DABZT=?", 0).And("F_VC_KAWLH=?", Diqu).And("F_NB_KALX=?", KaLx).Limit(100, 0).Find(&tests)
 	if qerr != nil {
 		log.Fatalln("查询结算数据出错", qerr)
@@ -40,9 +35,7 @@ func QueryQitaJiessj(KaLx int, Diqu string) *[]types.BJsJiessj {
 
 //通过交易记录id 更新打包状态为打包中
 func UpdatePackaging(Jiaoyjlid []string) error {
-	//database.DBInit()
 	xorm := database.XormClient
-
 	session := TransactionBegin(xorm)
 
 	for _, id := range Jiaoyjlid {
@@ -59,27 +52,24 @@ func UpdatePackaging(Jiaoyjlid []string) error {
 	serr := TransactionCommit(session)
 	if serr != nil {
 		log.Println("更新打包状态为：打包中 时，事务错误", serr)
-
+		return serr
 	}
 	log.Println("更新打包状态为：打包中 成功")
-
 	return nil
 }
 
-//通过交易记录id 更新打包状态为打包中
+//通过交易记录id 更新打包状态为 初始状态0
 func UpdatePackagingInit(Jiaoyjlid []string) error {
-	//database.DBInit()
 	xorm := database.XormClient
-
 	session := TransactionBegin(xorm)
 
 	for _, id := range Jiaoyjlid {
 		Jiessj := new(types.BJsJiessj)
 		Jiessj.FNbDabzt = 0
-		log.Printf("交易记录id:%s 打包状态更新为：1", id)
+		log.Printf("交易记录id:%s 打包状态更新为：0", id)
 		_, err := session.Table("b_js_jiessj").Where("F_VC_JIAOYJLID=?", id).Update(Jiessj)
 		if err != nil {
-			log.Println("更新打包状态失败", err)
+			log.Println("更新打包状态为：0 失败", err)
 			return err
 		}
 	}
@@ -87,7 +77,7 @@ func UpdatePackagingInit(Jiaoyjlid []string) error {
 	serr := TransactionCommit(session)
 	if serr != nil {
 		log.Println("更新打包状态为：初始未打包 时，事务错误", serr)
-
+		return serr
 	}
 	log.Println("更新打包状态为：初始未打包 成功")
 
@@ -95,9 +85,8 @@ func UpdatePackagingInit(Jiaoyjlid []string) error {
 }
 
 //打包成功
-//   新增打包记录【插入表b_js_yuansjyxx】
+//   新增打包记录【插入 原始交易消息表 b_js_yuansjyxx】
 func PackagingRecordInsert(data types.BJsYuansjyxx) error {
-	//database.DBInit()
 	xorm := database.XormClient
 	session := TransactionBegin(xorm)
 	yuansjyxx := new(types.BJsYuansjyxx)
@@ -125,7 +114,7 @@ func PackagingRecordInsert(data types.BJsYuansjyxx) error {
 	serr := TransactionCommit(session)
 	if serr != nil {
 		log.Println("新增原始交易数据消息包打包记录 时，事务错误", serr)
-
+		return serr
 	}
 	log.Println("新增原始交易数据消息包打包记录 成功")
 	return nil
@@ -133,19 +122,18 @@ func PackagingRecordInsert(data types.BJsYuansjyxx) error {
 
 //   新增打包明细记录
 func PackagingMXRecordInsert(mx []types.BJsYuansjymx) error {
-	//database.DBInit()
 	xorm := database.XormClient
 	session := TransactionBegin(xorm)
 
 	Yuansjymx := new(types.BJsYuansjymx)
 	//赋值
 	for _, v := range mx {
-		Yuansjymx.FVcXiaoxxh = v.FVcXiaoxxh
-		Yuansjymx.FNbBaonxh = v.FNbBaonxh
-		Yuansjymx.FDtJiaoysj = v.FDtJiaoysj
-		Yuansjymx.FNbJine = v.FNbJine
-		Yuansjymx.FVcDingzjyxx = v.FVcDingzjyxx
-		Yuansjymx.FVcJiaoybh = v.FVcJiaoybh
+		Yuansjymx.FVcXiaoxxh = v.FVcXiaoxxh     //消息序号
+		Yuansjymx.FNbBaonxh = v.FNbBaonxh       //包内序号
+		Yuansjymx.FDtJiaoysj = v.FDtJiaoysj     //交易时间
+		Yuansjymx.FNbJine = v.FNbJine           //金额
+		Yuansjymx.FVcDingzjyxx = v.FVcDingzjyxx //定制交易信息 CustomizedData
+		Yuansjymx.FVcJiaoybh = v.FVcJiaoybh     //交易编号 停车场编号+交易发生时间+流水号
 		Yuansjymx.FVcTingccmc = v.FVcTingccmc
 		Yuansjymx.FNbTingfsc = v.FNbTingfsc
 
@@ -170,28 +158,25 @@ func PackagingMXRecordInsert(mx []types.BJsYuansjymx) error {
 		Yuansjymx.FVcObuzt = v.FVcObuzt
 		Yuansjymx.FVcObuncph = v.FVcObuncph
 
-		log.Println("原始交易消息明细数据：", Yuansjymx)
 		_, err := session.Table("b_js_yuansjymx").Insert(Yuansjymx)
 		if err != nil {
 			log.Println("新增打包明细记录 error", err)
 			return err
 		}
 	}
+
 	serr := TransactionCommit(session)
 	if serr != nil {
 		log.Println("新增打包明细记录 时，事务错误", serr)
-
+		return serr
 	}
 	log.Printf("原始交易消息包%d中 明细数据有：%d 条 数据 ", Yuansjymx.FVcXiaoxxh, len(mx))
-
 	log.Println("新增打包明细记录 成功")
 	return nil
 }
 
 //更新数据    根据 包号 更新原始交易消息包的【发送状态   发送中】
-
 func UpdateYuansjyxx(Mid int64) error {
-	//database.DBInit()
 	xorm := database.XormClient
 	session := TransactionBegin(xorm)
 
@@ -205,7 +190,7 @@ func UpdateYuansjyxx(Mid int64) error {
 	serr := TransactionCommit(session)
 	if serr != nil {
 		log.Println("根据 包号 更新原始交易消息包的发送状态 为 ： 发送中 时，事务错误", serr)
-
+		return serr
 	}
 	log.Println(" 根据 包号 更新原始交易消息包的发送状态 为 ： 发送中  成功")
 	return nil
@@ -213,7 +198,6 @@ func UpdateYuansjyxx(Mid int64) error {
 
 // 原始交易消息包发送成功更新 发送状态 发送时间 发送成功后消息包的文件路径
 func SendedUpdateYuansjyxx(Mid int64, fname string) (error, string) {
-	//database.DBInit()
 	xorm := database.XormClient
 	session := TransactionBegin(xorm)
 
@@ -239,16 +223,15 @@ func SendedUpdateYuansjyxx(Mid int64, fname string) (error, string) {
 
 //   更新结算数据打包结果【打包状态：已打包、原始交易包号、包内序号、清分目标日】
 func UpdateDataPackagingResults(Jiaoyjlid []string, Msgid int64, jiaoyisj *types.Message) error {
-	//database.DBInit()
 	xorm := database.XormClient
 	session := TransactionBegin(xorm)
+
 	for i, idstr := range Jiaoyjlid {
 		Jiessj := new(types.BJsJiessj)
-		Jiessj.FNbDabzt = 2
-		Jiessj.FNbYuansjybxh = Msgid
-		//Xuh, _ := strconv.Atoi(idstr)
-		Jiessj.FNbJiaoybnxh = i + 1
-		Jiessj.FVcQingfmbr = jiaoyisj.Body.ClearTargetDate //打包当天日期
+		Jiessj.FNbDabzt = 2                                //已打包
+		Jiessj.FNbYuansjybxh = Msgid                       //消息包id
+		Jiessj.FNbJiaoybnxh = i + 1                        //包内序号
+		Jiessj.FVcQingfmbr = jiaoyisj.Body.ClearTargetDate //清分目标日 打包当天日期
 
 		_, err := session.Table("b_js_jiessj").Where("F_VC_JIAOYJLID=?", idstr).Update(Jiessj)
 		if err != nil {
@@ -256,19 +239,19 @@ func UpdateDataPackagingResults(Jiaoyjlid []string, Msgid int64, jiaoyisj *types
 			return err
 		}
 	}
+
 	serr := TransactionCommit(session)
 	if serr != nil {
-		log.Println("更新打包状态为：已达包、原始交易包号、包内序号 时，事务错误", serr)
+		log.Println("更新 打包状态：已打包、原始交易包号、包内序号、清分目标日 时，事务错误", serr)
 	}
-	log.Println("更新打包状态为：已达包、原始交易包号、包内序号 成功")
-
+	log.Println("更新 打包状态：已打包、原始交易包号、包内序号、清分目标日 成功")
 	return nil
 }
 
 //   新增应答记录
 func PackagingRespRecordInsert(data *types.BJsYuansjyydxx) error {
-	//database.DBInit()
 	xorm := database.XormClient
+	session := TransactionBegin(xorm)
 
 	Yuansjyydxx := new(types.BJsYuansjyydxx)
 	//赋值
@@ -282,11 +265,16 @@ func PackagingRespRecordInsert(data *types.BJsYuansjyydxx) error {
 	Yuansjyydxx.FDtChulsj = data.FDtChulsj       //F_DT_CHULSJ	处理时间	DATETIME
 	Yuansjyydxx.FNbZhixjg = data.FNbZhixjg       //F_NB_ZHIXJG	执行结果	INT
 	Yuansjyydxx.FVcQingfmbr = data.FVcQingfmbr   //F_VC_QINGFMBR	清分目标日	VARCHAR(32)
-	_, err := xorm.Table("b_js_yuansjyydxx").Insert(Yuansjyydxx)
+	_, err := session.Table("b_js_yuansjyydxx").Insert(Yuansjyydxx)
 	if err != nil {
-		log.Println("新增打包明细记录 error", err)
+		log.Println("新增应答记录 error", err)
 		return err
 	}
 
+	serr := TransactionCommit(session)
+	if serr != nil {
+		log.Println("新增应答记录 时，事务错误", serr)
+		return serr
+	}
 	return nil
 }
