@@ -73,14 +73,14 @@ func HandleSendXml() {
 				}
 				//发送
 				client.Sendxml(sendStru, &conn)
-
+				//读取即时应答 (buf[:n])
 				buf := make([]byte, 1024)
 				n, err2 := conn.Read(buf)
 				if err2 != nil {
 					log.Println("conn.Read err = ", err2)
 					return
 				}
-				//str := string(buf[:n])
+
 				//对联网中心的接收应答处理
 				resperr := ImmediateResponseProcessing(string(buf[:n]), fileInfoList[i].Name(), sendStru, &conn)
 				if resperr != nil {
@@ -128,13 +128,12 @@ func ParsingXMLFiles(fname string) *types.SendStru {
 
 //即使应答处理
 func ImmediateResponseProcessing(str string, name string, sendStru *types.SendStru, conn *net.Conn) error {
-	log.Println(str)
+	log.Println("接收即使应答为：", str)
 	b := []byte(str)
 	if string(b[len(str)-1:]) == "1" {
 
 		log.Println("收到联网中心的接收成功的即时应答")
 		//TCP 记录联网中心的即时应答
-		//TCP接收记录
 
 		has, serr, reqcount := storage.GetTcpReqRecord(string(b[:len(str)-1]))
 		if serr != nil {

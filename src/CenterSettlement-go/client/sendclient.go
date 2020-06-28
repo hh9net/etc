@@ -36,7 +36,7 @@ func connsendFile(data []byte, fname string, conn *net.Conn, Xml_length string) 
 		log.Println(size, rerr)
 		if rerr != nil && rerr != io.EOF {
 			log.Println("file.Read err:", rerr)
-			break
+			return rerr
 		}
 		if rerr == io.EOF {
 			log.Println("文件读取完毕")
@@ -68,19 +68,23 @@ func Sendxml(sendStru *types.SendStru, conn *net.Conn) {
 	err := connsendFile(data, sendStru.Xml_msgName, conn, sendStru.Xml_length)
 	if err != nil {
 		log.Println("发送 原始交易消息包 connsendFile error:", err)
+		//如果发送失败 触发重发
+
 		return
 	}
 	//发送成功
 	Mid, _ := strconv.Atoi(sendStru.Massageid)
-	//原始交易消息包发送成功更新 发送状态 发送时间 发送成功后消息包的文件路径
+	//原始交易消息包 发送成功       更新 发送状态 发送时间 发送成功后消息包的文件路径
 	err1, DBsj := storage.SendedUpdateYuansjyxx(int64(Mid), sendStru.Xml_msgName)
 	if err1 != nil {
 		log.Println("storage.SendedUpdateYuansjyxx  error:", err1)
+		return
 	}
 	//TCP发送记录
 	has, serr, count := storage.GetTcpSendRecord(strconv.Itoa(Mid))
 	if serr != nil {
 		log.Println("查询TCP发送记录错误")
+		return
 	}
 	var record storage.BJsTcpqqjl
 
@@ -94,6 +98,7 @@ func Sendxml(sendStru *types.SendStru, conn *net.Conn) {
 		err2 := storage.TcpSendRecordInsert(record)
 		if err2 != nil {
 			log.Println("storage.TcpSendRecordInsert error:", err2)
+			return
 		}
 	}
 	if has == true {
@@ -103,6 +108,7 @@ func Sendxml(sendStru *types.SendStru, conn *net.Conn) {
 		err3 := storage.TcpSendRecordUpdate(record)
 		if err3 != nil {
 			log.Println("storage.TcpSendRecordUpdate error:", err3)
+			return
 		}
 	}
 	log.Println("TCP发送记录 插入完成")
