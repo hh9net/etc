@@ -1,13 +1,11 @@
 package client
 
 import (
-	storage "CenterSettlement-go/storage"
 	"CenterSettlement-go/types"
 	"io"
 	"log"
 	"net"
 	"os"
-	"strconv"
 )
 
 func connsendFile(data []byte, fname string, conn *net.Conn) error {
@@ -69,40 +67,40 @@ func Sendxml(sendStru *types.SendStru, conn *net.Conn) {
 		return
 	}
 	//发送成功
-	Mid, _ := strconv.Atoi(sendStru.Massageid)
-	//原始交易消息包发送成功更新 发送状态 发送时间 发送成功后消息包的文件路径
-	err1, DBsj := storage.SendedUpdateYuansjyxx(int64(Mid), sendStru.Xml_msgName)
-	if err1 != nil {
-		log.Println("storage.SendedUpdateYuansjyxx  error:", err1)
-	}
-	//TCP发送记录
-	has, serr, count := storage.GetTcpSendRecord(strconv.Itoa(Mid))
-	if serr != nil {
-		log.Println("查询TCP发送记录错误")
-	}
-	var record storage.BJsTcpqqjl
-
-	if has == false {
-		log.Println("此msgid属于第一次发送")
-		record.FVcXiaoxxh = strconv.Itoa(Mid)
-		record.FDtZuixsj = DBsj
-		record.FNbChongfcs = 0
-		record.FNbFasz = 1
-		record.FNbMd5 = sendStru.Md5_str
-		err2 := storage.TcpSendRecordInsert(record)
-		if err2 != nil {
-			log.Println("storage.TcpSendRecordInsert error:", err2)
-		}
-	}
-	if has == true {
-		log.Println("此msgid 已经发送")
-		record.FVcXiaoxxh = strconv.Itoa(Mid)
-		record.FNbChongfcs = count + 1
-		err3 := storage.TcpSendRecordUpdate(record)
-		if err3 != nil {
-			log.Println("storage.TcpSendRecordUpdate error:", err3)
-		}
-	}
-	log.Println("TCP发送记录 插入完成")
+	//Mid, _ := strconv.Atoi(sendStru.Massageid)
+	////原始交易消息包发送成功更新 发送状态 发送时间 发送成功后消息包的文件路径
+	//err1, DBsj := storage.SendedUpdateYuansjyxx(int64(Mid), sendStru.Xml_msgName)
+	//if err1 != nil {
+	//	log.Println("storage.SendedUpdateYuansjyxx  error:", err1)
+	//}
+	////TCP发送记录
+	//has, serr, count := storage.GetTcpSendRecord(strconv.Itoa(Mid))
+	//if serr != nil {
+	//	log.Println("查询TCP发送记录错误")
+	//}
+	//var record storage.BJsTcpqqjl
+	//
+	//if has == false {
+	//	log.Println("此msgid属于第一次发送")
+	//	record.FVcXiaoxxh = strconv.Itoa(Mid)
+	//	record.FDtZuixsj = DBsj
+	//	record.FNbChongfcs = 0
+	//	record.FNbFasz = 1
+	//	record.FNbMd5 = sendStru.Md5_str
+	//	err2 := storage.TcpSendRecordInsert(record)
+	//	if err2 != nil {
+	//		log.Println("storage.TcpSendRecordInsert error:", err2)
+	//	}
+	//}
+	//if has == true {
+	//	log.Println("此msgid 已经发送")
+	//	record.FVcXiaoxxh = strconv.Itoa(Mid)
+	//	record.FNbChongfcs = count + 1
+	//	err3 := storage.TcpSendRecordUpdate(record)
+	//	if err3 != nil {
+	//		log.Println("storage.TcpSendRecordUpdate error:", err3)
+	//	}
+	//}
+	//log.Println("TCP发送记录 插入完成")
 
 }

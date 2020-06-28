@@ -785,14 +785,17 @@ func RespMessageInsert(result types.RespMessage) error {
 
 	//赋值
 
-	ydshuju.FVcBanbh = result.Header.Version          //F_VC_BANBH	版本号	VARCHAR(32)
-	ydshuju.FNbXiaoxlb = result.Header.MessageClass   //F_NB_XIAOXLB	消息类别	INT
-	ydshuju.FNbXiaoxlx = result.Header.MessageType    //F_NB_XIAOXLX	消息类型	INT
-	ydshuju.FVcFaszid = result.Header.SenderId        //F_VC_FASZID	发送者ID	VARCHAR(32)
-	ydshuju.FVcJieszid = result.Header.ReceiverId     //F_VC_JIESZID	接收者ID	VARCHAR(32)
-	ydshuju.FNbXiaoxxh = result.Header.MessageId      //F_NB_XIAOXXH	消息序号	BIGINT
-	ydshuju.FNbQuerdxxxh = result.Body.MessageId      //F_NB_QUERDXXXH	确认的消息序号	BIGINT
-	ydshuju.FDtChulsj = result.Body.ProcessTime       //F_DT_CHULSJ	处理时间	DATETIME
+	ydshuju.FVcBanbh = result.Header.Version        //F_VC_BANBH	版本号	VARCHAR(32)
+	ydshuju.FNbXiaoxlb = result.Header.MessageClass //F_NB_XIAOXLB	消息类别	INT
+	ydshuju.FNbXiaoxlx = result.Header.MessageType  //F_NB_XIAOXLX	消息类型	INT
+	ydshuju.FVcFaszid = result.Header.SenderId      //F_VC_FASZID	发送者ID	VARCHAR(32)
+	ydshuju.FVcJieszid = result.Header.ReceiverId   //F_VC_JIESZID	接收者ID	VARCHAR(32)
+	ydshuju.FNbXiaoxxh = result.Header.MessageId    //F_NB_XIAOXXH	消息序号	BIGINT
+	ydshuju.FNbQuerdxxxh = result.Body.MessageId    //F_NB_QUERDXXXH	确认的消息序号	BIGINT
+
+	t := common.StrTimeTotime(common.DataTimeFormatHandle(result.Body.ProcessTime))
+
+	ydshuju.FDtChulsj = t                             //F_DT_CHULSJ	处理时间	DATETIME
 	ydshuju.FNbZhixjg = result.Body.Result            //F_NB_ZHIXJG	执行结果	INT
 	ydshuju.FVcQingfmbr = result.Body.ClearTargetDate //F_VC_QINGFMBR	清分目标日	VARCHAR(32)
 
@@ -800,8 +803,9 @@ func RespMessageInsert(result types.RespMessage) error {
 
 	qferr := storage.PackagingRespRecordInsert(ydshuju)
 	if qferr != nil {
-		log.Println("新增清分包消息错误 ：", qferr)
+		log.Println("新增应答包消息错误 ：", qferr)
 	}
+	log.Println("新增应答包消息成功")
 	return nil
 }
 

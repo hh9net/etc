@@ -122,7 +122,7 @@ type BJsYuansjyydxx struct {
 	FNbZhixjg    int       //F_NB_ZHIXJG	执行结果	INT
 	FVcQingfmbr  string    //F_VC_QINGFMBR	清分目标日	VARCHAR(32)
 	FVcXiaoxwjlj string    //F_VC_XIAOXWJLJ	消息文件路径	VARCHAR(512)
-	FNbWiyid     int       //`F_NB_WEIYID` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+	FNbWeiyid    int       //`F_NB_WEIYID` int(11) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
 }
 
 // B_JS_JIZCLXX【记账处理消息】

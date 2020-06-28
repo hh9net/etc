@@ -172,6 +172,13 @@ func TransAssignment(jiesuansj []types.BJsJiessj, Messageid int64) *types.Messag
 		//cx:车型 ckz：出口站、入口站ckcd：出口车道，入口车道cksj：出口时间 rksj：入口时间
 
 		rksj := common.DateTimeFormat(v.FDtYonghrksj)
+		//站编码转换
+		if v.FVcTingccbh == "0025000011" || v.FVcTingccbh == "0025000010" {
+			v.FVcTingccbh = "3201020001"
+		}
+		//if v.FVcTingccbh=="0025000010"{
+		//	v.FVcTingccbh="3201020001"
+		//}
 
 		detail := common.Detail(v.FVcChex, v.FVcTingccbh, v.FVcChedid, jiaoysj, rksj)
 		Tran.Service.Detail = detail //交易详细信息 1|04|3201|3201000006|1105|20191204 211733|03|3201|320
@@ -360,7 +367,7 @@ func ChePYS(in string) string {
 	case "12":
 		ys = "红"
 	case "10000":
-		ys = ""
+		ys = "蓝"
 	}
 	return ys
 }

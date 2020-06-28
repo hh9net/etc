@@ -5,7 +5,7 @@ import (
 	"CenterSettlement-go/common"
 	"CenterSettlement-go/conf"
 	"CenterSettlement-go/lz77zip"
-	storage "CenterSettlement-go/storage"
+	"CenterSettlement-go/storage"
 	"CenterSettlement-go/types"
 	"fmt"
 	"io/ioutil"
@@ -57,6 +57,7 @@ func HandleSendXml() {
 				//解析文件
 				//		解析文件  获取数据
 				sendStru := ParsingXMLFiles(fileInfoList[i].Name())
+				log.Println("连接联网中心服务器")
 
 				//连接联网中心服务器
 				address := conf.AddressConfigInit()
@@ -117,7 +118,7 @@ func ParsingXMLFiles(fname string) *types.SendStru {
 	sendStru.Xml_msgName = fname
 
 	log.Println("报文信息：", sendStru)
-
+	//
 	//5、更新数据    根据 包号 更新原始交易消息包的【发送状态   发送中】
 	Mid, _ := strconv.Atoi(sendStru.Massageid)
 	err := storage.UpdateYuansjyxx(int64(Mid))
@@ -185,7 +186,6 @@ func ImmediateResponseProcessing(str string, name string, sendStru *types.SendSt
 			client.Sendxml(sendStru, conn)
 			log.Printf("原始交易包发送失败,触发重发机制,重发第%d次", 1+i)
 		}
-
 	}
 	return nil
 }

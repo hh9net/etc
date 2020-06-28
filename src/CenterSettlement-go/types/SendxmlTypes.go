@@ -2,7 +2,6 @@ package types
 
 import (
 	"encoding/xml"
-	"time"
 )
 
 //一个原始交易数据包
@@ -106,12 +105,12 @@ type RespHeader struct {
 }
 
 type RespBody struct {
-	XMLName         xml.Name  `xml:"Body"`
-	ContentType     int       `xml:",attr"` //记帐消息的ContentType始终为1
-	MessageId       int64     //确认的消息id
-	ProcessTime     time.Time //处理时间
-	Result          int       //执行结果
-	ClearTargetDate string    //		清分目标日
+	XMLName         xml.Name `xml:"Body"`
+	ContentType     int      `xml:",attr"` //记帐消息的ContentType始终为1
+	MessageId       int64    //确认的消息id
+	ProcessTime     string   //处理时间
+	Result          int      //执行结果
+	ClearTargetDate string   //		清分目标日
 }
 
 //执行结果：

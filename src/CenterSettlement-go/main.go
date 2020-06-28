@@ -35,14 +35,14 @@ func main() {
 	//goroutine1
 	//go service.HandleGeneratexml()
 	//goroutine2
-	go service.HandleSendXml()
+	//go service.HandleSendXml()
 	//goroutine4
-	//go service.AnalyzeDataPakage()
+	go service.AnalyzeDataPakage()
 	//goroutine3
 	//service.Receive()
 
 	for {
-		tiker := time.NewTicker(time.Second * 10)
+		tiker := time.NewTicker(time.Second * 30)
 		for {
 			log.Println("执行主go程 ", <-tiker.C)
 		}

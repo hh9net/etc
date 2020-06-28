@@ -256,7 +256,8 @@ func CheckFile(msgmd5, fileNameid string) error {
 			if fileNameid == fstr[0] {
 				//校验文件 校验其md5
 				fmd5 := GetFileMd5(fileNameid + ".xml")
-				if fmd5 == msgmd5 {
+				//不区分md5大小写
+				if strings.EqualFold(fmd5, msgmd5) {
 					log.Println("文件md5一致", fmd5, msgmd5)
 					log.Println(" 可以进行 解析消息包文件，把获取数据导入数据库")
 					//
@@ -286,6 +287,8 @@ func GetFileMd5(filename string) string {
 	io.Copy(md5h, pFile)
 	log.Println("成功获取md5")
 	return strings.ToUpper(hex.EncodeToString(md5h.Sum(nil)))
+	//return  hex.EncodeToString(md5h.Sum(nil))//线上产生的md5为小写
+
 }
 
 //解析文件

@@ -282,12 +282,11 @@ func PackagingRespRecordInsert(data *types.BJsYuansjyydxx) error {
 	Yuansjyydxx.FDtChulsj = data.FDtChulsj       //F_DT_CHULSJ	处理时间	DATETIME
 	Yuansjyydxx.FNbZhixjg = data.FNbZhixjg       //F_NB_ZHIXJG	执行结果	INT
 	Yuansjyydxx.FVcQingfmbr = data.FVcQingfmbr   //F_VC_QINGFMBR	清分目标日	VARCHAR(32)
-
-	Yuansjyydxx.FVcXiaoxwjlj = data.FVcXiaoxwjlj
 	_, err := xorm.Table("b_js_yuansjyydxx").Insert(Yuansjyydxx)
 	if err != nil {
 		log.Println("新增打包明细记录 error", err)
 		return err
 	}
+
 	return nil
 }
