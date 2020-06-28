@@ -376,7 +376,6 @@ func UnZipLz77(fname string) error {
 	}
 	log.Println("原始交易xml消息解压成功")
 	return nil
-	//log.Println(Decompress(origin, os.Stdout))
 }
 
 func ZipLz77(fname string) error {

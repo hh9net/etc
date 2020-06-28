@@ -35,7 +35,7 @@ func HandleSendXml() {
 			//判断文件的结尾名
 			if strings.HasSuffix(fileInfoList[i].Name(), ".xml") {
 				log.Println("打印当前文件或目录下的文件名", fileInfoList[i].Name())
-				//压缩文件
+				//压缩文件   后面使用并发压缩与并发解压缩 可以提高速度近10倍
 				zerr := lz77zip.ZipLz77(fileInfoList[i].Name())
 				if zerr != nil {
 					log.Println("发送文件时 压缩xml文件失败", zerr)
@@ -51,24 +51,25 @@ func HandleSendXml() {
 						log.Println("client.MoveFile err : ", merr)
 						return
 					}
+
+					//移动成功 应该更新原始交易包  文件路径
+
 				}
 
-				//解析文件
-				//		解析文件  获取数据
+				// 解析文件  获取TCP报文发送数据
 				sendStru := ParsingXMLFiles(fileInfoList[i].Name())
 				log.Println("连接联网中心服务器")
-
 				//连接联网中心服务器
 				address := conf.AddressConfigInit()
 				Address := address.AddressIp + ":" + address.AddressPort
-				log.Println("Address:", Address)
+				log.Println("联网中心服务器 Address:", Address)
 				conn, derr := net.Dial("tcp", Address)
 				if derr != nil {
 					log.Println("Dial 失败", derr)
 					return
 				}
 				if conn != nil {
-					log.Println("Dial 成功")
+					log.Println("Dial 联网中心服务器 成功")
 				}
 				//发送
 				client.Sendxml(sendStru, &conn)
@@ -91,23 +92,23 @@ func HandleSendXml() {
 	}
 }
 
-//解析xml文件
+//解析xml文件 fname为原始交易消息包xml文件的名字
 func ParsingXMLFiles(fname string) *types.SendStru {
 	var sendStru types.SendStru
 	//1、获取消息包序号Massageid
 	fnstr := strings.Split(fname, "_")
 	idstr := strings.Split(fnstr[2], ".")
-	sendStru.Massageid = idstr[0]
+	sendStru.Massageid = idstr[0] //20位
 
 	//2、获取压缩文件大小
 	lengthstr := fmt.Sprintf("%06d", common.GetFileSize(fname))
-	sendStru.Xml_length = lengthstr
-	log.Println("要发送压缩文件的大小", lengthstr)
+	sendStru.Xml_length = lengthstr //
+	log.Println("要发送压缩文件的大小（6位数）：", lengthstr)
 
-	//3、获取xml文件md5
+	//3、获取xml文件md5 字母全大写【联网中心大小写忽略】
 	sendStru.Md5_str = common.GetFileMd5(fname) //fname 是 xml
 	if sendStru.Md5_str != "" {
-		log.Println("文件md5为 ：", sendStru.Md5_str)
+		log.Println(" 文件大小写忽略 的 md5 为 ：", sendStru.Md5_str)
 	} else {
 		log.Fatal("获取文件md5 error ")
 		return nil
@@ -116,8 +117,6 @@ func ParsingXMLFiles(fname string) *types.SendStru {
 	//4、获得xml文件名
 	sendStru.Xml_msgName = fname
 
-	log.Println("报文信息：", sendStru)
-	//
 	//5、更新数据    根据 包号 更新原始交易消息包的【发送状态   发送中】
 	Mid, _ := strconv.Atoi(sendStru.Massageid)
 	err := storage.UpdateYuansjyxx(int64(Mid))

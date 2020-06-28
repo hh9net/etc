@@ -175,7 +175,7 @@ func PackagingMXRecordInsert(mx []types.BJsYuansjymx) error {
 	return nil
 }
 
-//更新数据    根据 包号 更新原始交易消息包的【发送状态   发送中】
+//更新原始交易消息数据    根据 包号 更新原始交易消息包的【发送状态   发送中】
 func UpdateYuansjyxx(Mid int64) error {
 	xorm := database.XormClient
 	session := TransactionBegin(xorm)
@@ -184,15 +184,15 @@ func UpdateYuansjyxx(Mid int64) error {
 	yuansjyxx.FNbFaszt = 1
 	_, err := session.Table("b_js_yuansjyxx").Where("F_NB_XIAOXXH=?", Mid).Update(yuansjyxx)
 	if err != nil {
-		log.Println(" 根据 包号 更新原始交易消息包的发送状态 为 ： 发送中 error", err)
+		log.Println(" 根据 包号 更新原始交易消息包的发送状态 为 ： 1发送中 error", err)
 		return err
 	}
 	serr := TransactionCommit(session)
 	if serr != nil {
-		log.Println("根据 包号 更新原始交易消息包的发送状态 为 ： 发送中 时，事务错误", serr)
+		log.Println("根据 包号 更新原始交易消息包的发送状态 为 ： 1发送中 时，事务错误", serr)
 		return serr
 	}
-	log.Println(" 根据 包号 更新原始交易消息包的发送状态 为 ： 发送中  成功")
+	log.Println(" 根据 包号 更新原始交易消息包的发送状态 为 ： 1发送中  成功")
 	return nil
 }
 
