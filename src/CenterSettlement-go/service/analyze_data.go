@@ -8,8 +8,8 @@ import (
 	"encoding/xml"
 	"fmt"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"io/ioutil"
-	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -18,11 +18,11 @@ import (
 
 //线程4 处理数据包  定期扫描 接收联网的接收数据的文件夹 receivexml，如果有文件就解压， 解压后分析包。
 func AnalyzeDataPakage() {
-	//定期检查文件夹receivexml
-	tiker := time.NewTicker(time.Second * 15)
-	for {
-		log.Println(common.DateTimeFormat(<-tiker.C), "执行线程4 处理数据包")
 
+	//定期检查文件夹receivexml
+	tiker := time.NewTicker(time.Second * 30)
+	for {
+		log.Println("执行线程4 处理数据包")
 		//1、处理文件解压，解压至receivexml文件夹 [已ok]
 
 		//2、处理文件解析
@@ -31,6 +31,9 @@ func AnalyzeDataPakage() {
 			log.Println("ParseFile 失败 ", perr)
 			return
 		}
+
+		log.Println("执行线程4 处理数据包", common.DateTimeFormat(<-tiker.C))
+
 	}
 }
 

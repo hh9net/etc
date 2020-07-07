@@ -8,8 +8,8 @@ import (
 	"CenterSettlement-go/storage"
 	"CenterSettlement-go/types"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"io/ioutil"
-	"log"
 	"net"
 	"strconv"
 	"strings"
@@ -18,11 +18,11 @@ import (
 
 //线程2 发送数据包
 func HandleSendXml() {
+
 	//从文件夹sendzipxml中扫描打包文件（判断这个文件夹下面有没有文件）
 	tiker := time.NewTicker(time.Second * 15)
 	for {
-		log.Println(common.DateTimeFormat(<-tiker.C), "执行线程2 发送原始交易包")
-
+		log.Println("执行线程2 发送原始交易包")
 		pwd := "./generatexml/" //先压缩后发送    go run main.go
 		fileInfoList, err := ioutil.ReadDir(pwd)
 		if err != nil {
@@ -89,6 +89,7 @@ func HandleSendXml() {
 				conn.Close()
 			}
 		}
+		log.Println("执行线程2 发送原始交易包 ", common.DateTimeFormat(<-tiker.C))
 	}
 }
 

@@ -3,8 +3,8 @@ package client
 import (
 	"CenterSettlement-go/storage"
 	"CenterSettlement-go/types"
+	log "github.com/sirupsen/logrus"
 	"io"
-	"log"
 	"net"
 	"os"
 	"strconv"

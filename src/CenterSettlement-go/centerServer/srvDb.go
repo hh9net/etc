@@ -2,7 +2,7 @@ package centerServer
 
 import (
 	"github.com/go-xorm/xorm"
-	"log"
+	log "github.com/sirupsen/logrus"
 )
 
 const pwd = "shx19930509321"

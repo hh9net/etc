@@ -9,7 +9,7 @@ import (
 	"encoding/hex"
 	"encoding/xml"
 	"fmt"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"os"
 	"strconv"
 	"time"
@@ -23,10 +23,11 @@ var (
 //线程1
 //处理原始数据的打包
 func HandleGeneratexml() {
+	log.Println("执行线程1，处理原始数据的打包")
+	//tiker := time.NewTicker(time.Minute * 10)//每10分钟执行一下
+	tiker := time.NewTicker(time.Second * 30) //每10秒执行一下
 
-	tiker := time.NewTicker(time.Second * 15)
 	for {
-		log.Println(common.DateTimeFormat(<-tiker.C), "执行线程1，处理原始数据的打包")
 
 		//其他省市地区    xml文件生成
 		for _, Diqu := range types.Gl_network {
@@ -44,7 +45,7 @@ func HandleGeneratexml() {
 
 			//记账卡 jz xml文件生成
 			jzerr, jzfn := Genaratexml(types.CREDITCARD, Diqu)
-			if czerr != nil {
+			if jzerr != nil {
 				log.Println("此地区记账卡原始交易数据打包 错误", Diqu, jzerr)
 				return
 			}
@@ -52,6 +53,8 @@ func HandleGeneratexml() {
 				log.Println("没有此地区记账卡原始数据", Diqu)
 			}
 		}
+		<-tiker.C
+		log.Println(common.DateTimeFormat(<-tiker.C), "执行线程1，处理原始数据的打包")
 	}
 }
 
@@ -79,12 +82,12 @@ func Genaratexml(Kalx int, Diqu string) (error, string) {
 		log.Printf("打包原始记录消息包 xml.MarshalIndent error: %v\n", err)
 		return err, ""
 	}
-	//更新结算数据为  打包中  jiesuansj
+	//更新结算数据为  打包中
 	sjid := make([]string, 0)
 	for _, v := range jiesuansj {
 		sjid = append(sjid, v.FVcJiaoyjlid)
 	}
-	// 更新打包状态  打包中
+	// 更新打包状态 为： 打包中
 	uerr := storage.UpdatePackaging(sjid)
 	if uerr != nil {
 		log.Println("打包状态 为打包中 失败", uerr)
@@ -101,7 +104,7 @@ func Genaratexml(Kalx int, Diqu string) (error, string) {
 		for _, v := range jiesuansj {
 			sjid = append(sjid, v.FVcJiaoyjlid)
 		}
-		//更新打包状态  初始
+		//更新打包状态 为  初始
 		uperr := storage.UpdatePackagingInit(sjid)
 		if uperr != nil {
 			log.Println("更新打包状态 为 初始、未打包状态 失败", uperr)

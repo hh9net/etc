@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
-	"log"
+	log "github.com/sirupsen/logrus"
 )
 
 //this file is made to finish it that change a number from base 10 to hex

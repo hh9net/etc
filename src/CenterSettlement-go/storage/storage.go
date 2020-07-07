@@ -5,7 +5,7 @@ import (
 	"CenterSettlement-go/database"
 	"CenterSettlement-go/types"
 	_ "github.com/go-sql-driver/mysql"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -22,14 +22,14 @@ func QueryQitaJiessj(KaLx int, Diqu string) *[]types.BJsJiessj {
 	//查询多条数据
 	tests := make([]types.BJsJiessj, 0)
 	// 每次查100条
-	qerr := xorm.Where("F_NB_DABZT=?", 0).And("F_VC_KAWLH=?", Diqu).And("F_NB_KALX=?", KaLx).Limit(100, 0).Find(&tests)
+	qerr := xorm.Where("F_NB_DABZT=?", 0).And("F_VC_KAWLH=?", Diqu).And("F_NB_KALX=?", KaLx).Limit(10, 0).Find(&tests)
 	if qerr != nil {
 		log.Fatalln("查询结算数据出错", qerr)
 	}
-	log.Printf("总共查询出 %d 条数据\n", len(tests))
-	for _, v := range tests {
-		log.Printf("打包状态: %d, 交易记录id: %s, 卡网络号: %s\n", v.FNbDabzt, v.FVcJiaoyjlid, v.FVcKawlh)
-	}
+	log.Printf("卡网络号: %s，总共查询出 %d 条数据\n", Diqu, len(tests))
+	//for _, v := range tests {
+	//	log.Printf("打包状态: %d, 交易记录id: %s, 卡网络号: %s\n", v.FNbDabzt, v.FVcJiaoyjlid, v.FVcKawlh)
+	//}
 	return &tests
 }
 
@@ -41,7 +41,7 @@ func UpdatePackaging(Jiaoyjlid []string) error {
 	for _, id := range Jiaoyjlid {
 		Jiessj := new(types.BJsJiessj)
 		Jiessj.FNbDabzt = 1
-		log.Printf("交易记录id:%s 打包状态更新为：1", id)
+		//log.Printf("交易记录id:%s 打包状态更新为：1", id)
 		_, err := session.Table("b_js_jiessj").Where("F_VC_JIAOYJLID=?", id).Update(Jiessj)
 		if err != nil {
 			log.Println("更新打包状态 失败", err)
@@ -90,7 +90,7 @@ func PackagingRecordInsert(data types.BJsYuansjyxx) error {
 	xorm := database.XormClient
 	session := TransactionBegin(xorm)
 	yuansjyxx := new(types.BJsYuansjyxx)
-	log.Println("PackagingRecordInsert data : ", data)
+	//log.Println("PackagingRecordInsert data : ", data)
 	yuansjyxx.FVcBanbh = data.FVcBanbh             //版本号
 	yuansjyxx.FNbXiaoxlb = data.FNbXiaoxlb         //消息类别
 	yuansjyxx.FNbXiaoxlx = data.FNbXiaoxlx         //消息类型

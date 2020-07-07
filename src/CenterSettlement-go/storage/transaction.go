@@ -2,7 +2,7 @@ package storage
 
 import (
 	"github.com/go-xorm/xorm"
-	"log"
+	log "github.com/sirupsen/logrus"
 )
 
 func TransactionCommit(session *xorm.Session) error {

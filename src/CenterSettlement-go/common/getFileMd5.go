@@ -3,8 +3,8 @@ package common
 import (
 	"crypto/md5"
 	"encoding/hex"
+	log "github.com/sirupsen/logrus"
 	"io"
-	"log"
 	"os"
 	"strings"
 )

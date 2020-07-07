@@ -1,7 +1,7 @@
 package centerServer
 
 import (
-	"log"
+	log "github.com/sirupsen/logrus"
 
 	"gopkg.in/ini.v1"
 )

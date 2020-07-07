@@ -1,7 +1,7 @@
 package client
 
 import (
-	"log"
+	log "github.com/sirupsen/logrus"
 	"os"
 )
 

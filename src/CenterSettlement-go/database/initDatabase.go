@@ -3,7 +3,7 @@ package database
 import (
 	"CenterSettlement-go/conf"
 	"fmt"
-	"log"
+	log "github.com/sirupsen/logrus"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-xorm/xorm"

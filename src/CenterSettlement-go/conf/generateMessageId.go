@@ -1,8 +1,8 @@
 package conf
 
 import (
+	log "github.com/sirupsen/logrus"
 	"gopkg.in/ini.v1"
-	"log"
 	"strconv"
 	"sync"
 )
