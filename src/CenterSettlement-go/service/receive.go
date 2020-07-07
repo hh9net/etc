@@ -57,8 +57,7 @@ func HandleMessage(conn *net.Conn) {
 		log.Println("记录文件时 Save(conn) 错误", err)
 		return
 	}
-	//解析文件
-	ParsingFile(Filename)
+	log.Println("去执行线程4 解析文件 吧，本线程3 接收文件的工作完成了！", Filename)
 }
 
 //保存联网中心发来的数据 ，即使应答
@@ -210,7 +209,7 @@ func InstantResponse(d []byte, conn *net.Conn) {
 	// 返回接收成功
 	_, err := (*conn).Write(d)
 	if err != nil {
-		log.Println("联网中心 conn.Write 错误")
+		log.Println("联网中心 conn.Write 错误", err)
 	}
 	//关闭连接
 	//(*conn).Close()
@@ -256,7 +255,6 @@ func CheckFile(msgmd5, fileNameid string) error {
 				if strings.EqualFold(fmd5, msgmd5) {
 					log.Println("文件md5一致", fmd5, msgmd5)
 					log.Println(" 可以进行 解析消息包文件，把获取数据导入数据库")
-					//
 
 					return nil
 				} else {
@@ -283,12 +281,6 @@ func GetFileMd5(filename string) string {
 	io.Copy(md5h, pFile)
 	log.Println("成功获取md5")
 	return strings.ToUpper(hex.EncodeToString(md5h.Sum(nil)))
-	//return  hex.EncodeToString(md5h.Sum(nil))//线上产生的md5为小写
+	//return  hex.EncodeToString(md5h.Sum(nil))//线上产生的md5为小写 本系统已经做了大小写忽略
 
-}
-
-//解析文件
-func ParsingFile(Filename string) {
-	//1、扫描文件夹，改名字
-	log.Println("去执行线程4吧，本线程3的工作完成了！")
 }

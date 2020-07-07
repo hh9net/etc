@@ -24,10 +24,11 @@ func AnalyzeDataPakage() {
 		log.Println(common.DateTimeFormat(<-tiker.C), "执行线程4 处理数据包")
 
 		//1、处理文件解压，解压至receivexml文件夹 [已ok]
+
 		//2、处理文件解析
 		perr := ParseFile()
 		if perr != nil {
-			log.Println("ParseFile 失败 ")
+			log.Println("ParseFile 失败 ", perr)
 			return
 		}
 	}
@@ -61,9 +62,9 @@ func ParseFile() error {
 
 			//将xml文件转换为对象
 			var result types.ReceiveMessage
-			err = xml.Unmarshal(content, &result)
-			if err != nil {
-				log.Println("解析 receivexml文件夹中xml文件内容时，错误信息为：", err)
+			uerr := xml.Unmarshal(content, &result)
+			if uerr != nil {
+				log.Println("解析 receivexml文件夹中xml文件内容时，错误信息为：", uerr)
 			}
 
 			log.Println("result:", result.Header.MessageClass, result.Header.MessageType, result.Body.ContentType, result.Header.MessageId)
@@ -113,7 +114,11 @@ func ParseFile() error {
 //记账包的解析
 func ParseKeepAccountFile(result types.ReceiveMessage, fname string) error {
 	//记账包的确认应答
-	GenerateRespMessage("jz", result)
+	gerr, filename := GenerateRespMessage("jz", result)
+	if gerr != nil {
+		return gerr
+	}
+	log.Printf("记账包的确认应答包的名字", filename)
 
 	var des string
 	//记账数据包
@@ -132,6 +137,7 @@ func ParseKeepAccountFile(result types.ReceiveMessage, fname string) error {
 	}
 
 	log.Println("keepAccount result:", result)
+
 	//解析xml数据 把数据导入数据库
 	if result.Body.DisputedCount == 0 {
 		jzpxerr := Parsexml("./keepAccountFile/", "JZB-ok"+fmt.Sprintf("%020d", result.Header.MessageId)+".xml")
@@ -153,7 +159,12 @@ func ParseKeepAccountFile(result types.ReceiveMessage, fname string) error {
 //争议包的解析
 func ParseDisputeFile(result types.ReceiveMessage, fname string) error {
 	//争议包的确认应答
-	GenerateRespMessage("zy", result)
+	gerr, filename := GenerateRespMessage("zy", result)
+	if gerr != nil {
+		return gerr
+	}
+
+	log.Printf("争议处理包的确认应答包的名字", filename)
 
 	//新增原始交易应答包
 
@@ -177,7 +188,12 @@ func ParseDisputeFile(result types.ReceiveMessage, fname string) error {
 //清分包的解析
 func ParseClearlingFile(result types.ReceiveMessage, fname string) error {
 	//清分包的确认应答
-	GenerateRespMessage("qf", result)
+	gerr, filename := GenerateRespMessage("qf", result)
+	if gerr != nil {
+		return gerr
+	}
+	log.Printf("清分处理包的确认应答包的名字", filename)
+
 	var des string
 	//1、修改文件名字  2、移动文件
 	if result.Body.List.FileCount == 0 {
@@ -919,5 +935,4 @@ func GenerateRespMessage(lx string, result types.ReceiveMessage) (error, string)
 	fw.Close()
 
 	return nil, lxstr + "_" + Filenameid + ".xml"
-
 }
