@@ -102,7 +102,7 @@ func Sendxml(sendStru *types.SendStru, conn *net.Conn) {
 		}
 	}
 	if has == true {
-		log.Println("此msgid 已经发送")
+		log.Println("此msgid 已经发送过了")
 		record.FVcXiaoxxh = strconv.Itoa(Mid)
 		record.FNbChongfcs = count + 1
 		err3 := storage.TcpSendRecordUpdate(record)
@@ -112,5 +112,4 @@ func Sendxml(sendStru *types.SendStru, conn *net.Conn) {
 		}
 	}
 	log.Println("TCP发送记录 插入完成")
-
 }

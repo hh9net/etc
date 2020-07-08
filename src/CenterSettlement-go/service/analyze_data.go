@@ -20,7 +20,7 @@ import (
 func AnalyzeDataPakage() {
 
 	//定期检查文件夹receivexml
-	tiker := time.NewTicker(time.Second * 30)
+	tiker := time.NewTicker(time.Second * 10)
 	for {
 		log.Println("执行线程4 处理数据包")
 		//1、处理文件解压，解压至receivexml文件夹 [已ok]
@@ -47,16 +47,14 @@ func ParseFile() error {
 		return err
 	}
 	log.Println("该文件夹下有文件的数量 ：", len(fileList))
-	if len(fileList) == 0 {
-		log.Println("该receivexml 文件夹下没有需要解析的文件")
+	if len(fileList) == 1 {
+		log.Println("该receivexml 文件夹下没有需要解析的xml文件")
 		return nil
 	}
 	for i := range fileList {
-		log.Println("该receivexml 文件夹下需要解析的xml文件名字为:", fileList[i].Name())
-
 		//判断文件的结尾名
 		if strings.HasSuffix(fileList[i].Name(), ".xml") {
-
+			log.Println("该receivexml 文件夹下需要解析的xml文件名字为:", fileList[i].Name())
 			content, err := ioutil.ReadFile("./receivexml/" + fileList[i].Name())
 			if err != nil {
 				log.Println("读文件位置错误信息：", err)
@@ -84,7 +82,6 @@ func ParseFile() error {
 				if pzyerr := ParseDisputeFile(result, fileList[i].Name()); pzyerr != nil {
 					return pzyerr
 				}
-
 			}
 
 			//清分数据包
@@ -117,11 +114,16 @@ func ParseFile() error {
 //记账包的解析
 func ParseKeepAccountFile(result types.ReceiveMessage, fname string) error {
 	//记账包的确认应答
-	gerr, filename := GenerateRespMessage("jz", result)
+	gerr, filename, resmsg := GenerateRespMessage("jz", result)
 	if gerr != nil {
 		return gerr
 	}
 	log.Printf("记账包的确认应答包的名字", filename)
+	//新增记账包的应答包记录
+	inerr := storage.InsertResMessageData(resmsg)
+	if inerr != nil {
+		return inerr
+	}
 
 	var des string
 	//记账数据包
@@ -138,8 +140,7 @@ func ParseKeepAccountFile(result types.ReceiveMessage, fname string) error {
 		log.Println("记账数据包 修改文件名字错误：", jzfrerr)
 		return jzfrerr
 	}
-
-	log.Println("keepAccount result:", result)
+	//log.Println("keepAccount result:", result)
 
 	//解析xml数据 把数据导入数据库
 	if result.Body.DisputedCount == 0 {
@@ -162,14 +163,18 @@ func ParseKeepAccountFile(result types.ReceiveMessage, fname string) error {
 //争议包的解析
 func ParseDisputeFile(result types.ReceiveMessage, fname string) error {
 	//争议包的确认应答
-	gerr, filename := GenerateRespMessage("zy", result)
+	gerr, filename, resmsg := GenerateRespMessage("zy", result)
 	if gerr != nil {
 		return gerr
 	}
 
 	log.Printf("争议处理包的确认应答包的名字", filename)
 
-	//新增原始交易应答包
+	//新增记账包的应答包记录
+	inerr := storage.DisputeProcessResInsert(resmsg)
+	if inerr != nil {
+		return inerr
+	}
 
 	//1、修改文件名字  2、移动文件
 	src := "./receivexml/" + fname
@@ -191,11 +196,17 @@ func ParseDisputeFile(result types.ReceiveMessage, fname string) error {
 //清分包的解析
 func ParseClearlingFile(result types.ReceiveMessage, fname string) error {
 	//清分包的确认应答
-	gerr, filename := GenerateRespMessage("qf", result)
+	gerr, filename, resmsg := GenerateRespMessage("qf", result)
 	if gerr != nil {
 		return gerr
 	}
 	log.Printf("清分处理包的确认应答包的名字", filename)
+
+	//新增清分包的应答包记录
+	inerr := storage.ClearingYDInsert(resmsg)
+	if inerr != nil {
+		return inerr
+	}
 
 	var des string
 	//1、修改文件名字  2、移动文件
@@ -234,14 +245,14 @@ func ParseClearlingFile(result types.ReceiveMessage, fname string) error {
 func ParseRespFile(result types.ReceiveMessage, fname string) error {
 	//1、修改文件名字  2、移动文件
 	src := "./receivexml/" + fname
-	des := "./respfile/" + "YDB_" + fmt.Sprintf("%020d", result.Header.MessageId) + ".xml"
+	des := "./respfile/" + "YSYDB_" + fmt.Sprintf("%020d", result.Header.MessageId) + ".xml"
 	ydfrerr := common.FileRename(src, des)
 	if ydfrerr != nil {
 		log.Println("原始记录应答包 修改文件名字错误：", ydfrerr)
 		return ydfrerr
 	}
 	//解析xml数据 把数据导入数据库
-	ydpxerr := Parsexml("./respfile/", "YDB_"+fmt.Sprintf("%020d", result.Header.MessageId)+".xml")
+	ydpxerr := Parsexml("./respfile/", "YSYDB_"+fmt.Sprintf("%020d", result.Header.MessageId)+".xml")
 	if ydpxerr != nil {
 		log.Println("原始数据应答包 解析xml数据 把数据导入数据库 时 错误 ：", ydpxerr)
 		return ydpxerr
@@ -260,9 +271,8 @@ func Parsexml(filePath string, fname string) error {
 	}
 	for i := range fileInfoList {
 		//判断文件的结尾名
-		//log.Println("名字是否一致",fileInfoList[i].Name(), fname)
 		if fileInfoList[i].Name() == fname {
-			log.Println("消息包要入数据库的xml文件名：", fileInfoList[i].Name()) //打印当前文件或目录下的文件或目录名
+			log.Println("消息包要入数据库的xml文件名：", fileInfoList[i].Name())
 
 			//解析xml文件 获取xml文件位置
 			content, rderr := ioutil.ReadFile(filePath + fname)
@@ -373,32 +383,32 @@ func Parsexml(filePath string, fname string) error {
 
 			//更新结算数据  更新已数据清分
 
-			//case "QFB":
-			//	//有可疑数据 存入fileid
-			//	var result types.ClearingMessage
-			//	qfumerr := xml.Unmarshal(content, &result)
-			//	if qfumerr != nil {
-			//		log.Println("解析 Clearing 文件夹中xml文件内容的错误信息：", qfumerr)
-			//	}
-			//	log.Println("清分包数据：", result)
-			//
-			//	//将数据存储数据库
-			//	//新增清分包消息
-			//	cerr := ClearingMessageInsert(result)
-			//	if cerr != nil {
-			//		return cerr
-			//	}
-			//
-			//	//新增清分包明细
-			//	cmxerr := ClearingMessageMxInsert(result)
-			//	if cmxerr != nil {
-			//		return cmxerr
-			//	}
+			case "QFB":
+				//有可疑数据 存入fileid
+				var result types.ClearingMessage
+				qfumerr := xml.Unmarshal(content, &result)
+				if qfumerr != nil {
+					log.Println("解析 Clearing 文件夹中xml文件内容的错误信息：", qfumerr)
+				}
+				log.Println("清分包数据：", result)
+
+				//将数据存储数据库
+				//新增清分包消息
+				cerr := ClearingMessageInsert(result)
+				if cerr != nil {
+					return cerr
+				}
+
+				//新增清分包明细
+				cmxerr := ClearingMessageMxInsert(result)
+				if cmxerr != nil {
+					return cmxerr
+				}
 
 			//更新结算数据  更新已数据清分
 
 			//原始交易应答包
-			case "YDB":
+			case "YSYDB":
 				var result types.RespMessage
 				qfumerr := xml.Unmarshal(content, &result)
 				if qfumerr != nil {
@@ -445,7 +455,7 @@ func KeepAccountMessageInsert(result types.KeepAccountokMessage) error {
 	jzshuju.FDtChulsj = t //F_DT_CHULSJ	处理时间	DATETIME
 
 	jzshuju.FVcXiaoxwjlj = "keepAccountFile/" + "JZB-ok_" + fmt.Sprintf("%020d", result.Header.MessageId) + ".xml" //F_VC_XIAOXWJLJ	消息文件路径	VARCHAR(512)
-	log.Println(jzshuju)
+	log.Println("新增记账包消息", jzshuju)
 	jzerr := storage.InsertMessageData(jzshuju)
 	if jzerr != nil {
 		log.Println("新增记账包消息错误 ：", jzerr)
@@ -816,7 +826,7 @@ func RespMessageInsert(result types.RespMessage) error {
 	ydshuju.FNbZhixjg = result.Body.Result            //F_NB_ZHIXJG	执行结果	INT
 	ydshuju.FVcQingfmbr = result.Body.ClearTargetDate //F_VC_QINGFMBR	清分目标日	VARCHAR(32)
 
-	ydshuju.FVcXiaoxwjlj = "respfile/" + "YDB_" + fmt.Sprintf("%020d", result.Header.MessageId) + ".xml" //F_VC_XIAOXWJLJ	消息文件路径	VARCHAR(512)
+	ydshuju.FVcXiaoxwjlj = "respfile/" + "YSYDB_" + fmt.Sprintf("%020d", result.Header.MessageId) + ".xml" //F_VC_XIAOXWJLJ	消息文件路径	VARCHAR(512)
 
 	qferr := storage.PackagingRespRecordInsert(ydshuju)
 	if qferr != nil {
@@ -828,27 +838,27 @@ func RespMessageInsert(result types.RespMessage) error {
 
 //
 //生成对应的确认消息应答包
-func GenerateRespMessage(lx string, result types.ReceiveMessage) (error, string) {
+func GenerateRespMessage(lx string, result types.ReceiveMessage) (error, string, *types.ResponseCTMessage) {
 	// 记账包应答、争议包应答、清分包应答
 	var msgclass, msgtype int
 	var lxstr string
-	Messageid := conf.GenerateMessageId()
+	Messageid := conf.GenerateYingdMessageId()
 	Filenameid = fmt.Sprintf("%020d", Messageid)
 
 	switch lx {
 	case "jz":
 		msgclass = 6
 		msgtype = 5
-		lxstr = "JZYDB"
+		lxstr = "JZ_YDB"
 
 	case "zy":
 		msgclass = 6
 		msgtype = 7
-		lxstr = "ZYYDB"
+		lxstr = "ZY_YDB"
 	case "qf":
 		msgclass = 6
 		msgtype = 5
-		lxstr = "QFYDB"
+		lxstr = "QF_YDB"
 	}
 	var ydmsgct *types.ResponseCTMessage
 	if result.Body.ContentType > 0 {
@@ -873,13 +883,13 @@ func GenerateRespMessage(lx string, result types.ReceiveMessage) (error, string)
 		outputxml, err := xml.MarshalIndent(ydmsgct, "  ", " ")
 		if err != nil {
 			log.Printf("error: %v\n", err)
-			return err, ""
+			return err, "", nil
 		}
 
 		fw, f_werr := os.Create("./generatexml/" + lxstr + "_" + Filenameid + ".xml") //go run main.go
 		if f_werr != nil {
 			log.Fatal("Read:", f_werr)
-			return f_werr, ""
+			return f_werr, "", nil
 		}
 		//加入XML头
 		headerBytes := []byte(xml.Header)
@@ -889,12 +899,12 @@ func GenerateRespMessage(lx string, result types.ReceiveMessage) (error, string)
 		_, ferr := fw.Write((xmlOutPutData))
 		if ferr != nil {
 			log.Printf("Write xml file error: %v\n", ferr)
-			return ferr, ""
+			return ferr, "", nil
 		}
 		//更新消息包信息
 		fw.Close()
 
-		return nil, lxstr + "_" + Filenameid + ".xml"
+		return nil, lxstr + "_" + Filenameid + ".xml", ydmsgct
 	}
 
 	ydmsg := &types.ResponseMessage{
@@ -916,13 +926,13 @@ func GenerateRespMessage(lx string, result types.ReceiveMessage) (error, string)
 	outputxml, err := xml.MarshalIndent(ydmsg, "  ", " ")
 	if err != nil {
 		log.Printf("error: %v\n", err)
-		return err, ""
+		return err, "", nil
 	}
 
 	fw, f_werr := os.Create("./generatexml/" + lxstr + "_" + Filenameid + ".xml") //go run main.go
 	if f_werr != nil {
 		log.Fatal("Read:", f_werr)
-		return f_werr, ""
+		return f_werr, "", nil
 	}
 	//加入XML头
 	headerBytes := []byte(xml.Header)
@@ -932,10 +942,24 @@ func GenerateRespMessage(lx string, result types.ReceiveMessage) (error, string)
 	_, ferr := fw.Write((xmlOutPutData))
 	if ferr != nil {
 		log.Printf("Write xml file error: %v\n", ferr)
-		return ferr, ""
+		return ferr, "", nil
 	}
 	//更新消息包信息
 	fw.Close()
+	newydmsg := &types.ResponseCTMessage{
+		Header: types.ResponseHeader{
+			Version:      "00010000",
+			MessageClass: msgclass,
+			MessageType:  msgtype,
+			SenderId:     "00000000000000FD",
+			ReceiverId:   "0000000000000020",
+			MessageId:    Messageid},
+		Body: types.ResponseCTBody{
+			ContentType: 0,
+			ProcessTime: common.DateTimeNowFormat(), //处理时间
+			Result:      1,                          // int8  1.消息已正常接收（用于Advice Response时含已接受建议）
+			MessageId:   result.Header.MessageId,
+		}}
 
-	return nil, lxstr + "_" + Filenameid + ".xml"
+	return nil, lxstr + "_" + Filenameid + ".xml", newydmsg
 }

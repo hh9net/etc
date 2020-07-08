@@ -20,7 +20,7 @@ import (
 func HandleSendXml() {
 
 	//从文件夹sendzipxml中扫描打包文件（判断这个文件夹下面有没有文件）
-	tiker := time.NewTicker(time.Second * 15)
+	tiker := time.NewTicker(time.Second * 10)
 	for {
 		log.Println("执行线程2 发送原始交易包")
 		pwd := "./generatexml/" //先压缩后发送    go run main.go
@@ -135,10 +135,9 @@ func ImmediateResponseProcessing(str string, name string, sendStru *types.SendSt
 
 		log.Println("收到联网中心的接收成功的即时应答")
 		//TCP 记录联网中心的即时应答
-
 		has, serr, reqcount := storage.GetTcpReqRecord(string(b[:len(str)-1]))
 		if serr != nil {
-			log.Println("查询TCP接收记录错误")
+			log.Println("查询TCP接收记录错误", serr)
 		}
 		var resRecord storage.BJsTcpydjl
 
@@ -172,17 +171,16 @@ func ImmediateResponseProcessing(str string, name string, sendStru *types.SendSt
 		if mverr != nil {
 			return mverr
 		}
-
 	}
 	if string(b[len(str)-1:]) == "0" {
-		//
+
 		log.Println("联网中心的接收失败")
 		log.Println("原始交易包发送失败,触发重发机制")
 		//	发送失败 触发重发机制
-		for i := 0; i < 3; i++ {
+		for resendi := 0; resendi < 3; resendi++ {
 			time.Sleep(time.Second * 5)
 			client.Sendxml(sendStru, conn)
-			log.Printf("原始交易包发送失败,触发重发机制,重发第%d次", 1+i)
+			log.Printf("原始交易包发送失败,触发重发机制,重发第%d次", 1+resendi)
 		}
 	}
 	return nil

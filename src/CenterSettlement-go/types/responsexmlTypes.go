@@ -6,6 +6,7 @@ import (
 )
 
 //通用确认消息结构
+//ContentType 存在
 type ResponseCTMessage struct {
 	XMLName xml.Name       `xml:"Message"`
 	Header  ResponseHeader `xml:"Header"`

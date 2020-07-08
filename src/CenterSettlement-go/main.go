@@ -37,17 +37,14 @@ func main() {
 	//goroutine2
 	go service.HandleSendXml()
 	//goroutine4
-	//go service.AnalyzeDataPakage()
+	go service.AnalyzeDataPakage()
 	//goroutine3
-	//service.Receive()
+	service.Receive()
 
 	for {
 		tiker := time.NewTicker(time.Second * 10)
 		for {
-			log.Println("执行主go程 ")
 			log.Println("执行主go程 ", common.DateTimeFormat(<-tiker.C))
 		}
 	}
 }
-
-//

@@ -1,8 +1,10 @@
 package storage
 
 import (
+	"CenterSettlement-go/common"
 	"CenterSettlement-go/database"
 	"CenterSettlement-go/types"
+	"fmt"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -77,22 +79,24 @@ func DisputeProcessMxInsert(data *types.BJsZhengyjyclmx) error {
 }
 
 //新增争议处理结果应答消息包记录
-func DisputeProcessResInsert(data types.BJsZhengyclydxx) error {
+func DisputeProcessResInsert(respmsg *types.ResponseCTMessage) error {
 	xorm := database.XormClient
 	session := TransactionBegin(xorm)
 	zhengyclydxx := new(types.BJsZhengyclydxx)
 
 	//赋值
-	zhengyclydxx.FVcBanbh = data.FVcBanbh         //F_VC_BANBH	版本号	VARCHAR(32)
-	zhengyclydxx.FNbXiaoxlb = data.FNbXiaoxlb     //F_NB_XIAOXLB	消息类别	INT
-	zhengyclydxx.FNbXiaoxlx = data.FNbXiaoxlx     //F_NB_XIAOXLX	消息类型	INT
-	zhengyclydxx.FVcFaszid = data.FVcFaszid       //F_VC_FASZID	发送者ID	VARCHAR(32)
-	zhengyclydxx.FVcJieszid = data.FVcJieszid     //F_VC_JIESZID	接收者ID	VARCHAR(32)
-	zhengyclydxx.FNbXiaoxxh = data.FNbXiaoxxh     //F_NB_XIAOXXH	消息序号	BIGINT
-	zhengyclydxx.FNbQuerdxxxh = data.FNbQuerdxxxh //F_NB_QUERDXXXH	确认的消息序号	BIGINT
-	zhengyclydxx.FVcChulsj = data.FVcChulsj       //F_DT_CHULSJ	处理时间	DATETIME
-	zhengyclydxx.FNbZhixjg = data.FNbZhixjg       //F_NB_ZHIXJG	执行结果	INT
-	zhengyclydxx.FVcXiaoxwjlj = data.FVcXiaoxwjlj //F_VC_XIAOXWJLJ	消息文件路径	VARCHAR(512)
+	zhengyclydxx.FVcBanbh = respmsg.Header.Version        //F_VC_BANBH	版本号	VARCHAR(32)
+	zhengyclydxx.FNbXiaoxlb = respmsg.Header.MessageClass //F_NB_XIAOXLB	消息类别	INT
+	zhengyclydxx.FNbXiaoxlx = respmsg.Header.MessageType  //F_NB_XIAOXLX	消息类型	INT
+	zhengyclydxx.FVcFaszid = respmsg.Header.SenderId      //F_VC_FASZID	发送者ID	VARCHAR(32)
+	zhengyclydxx.FVcJieszid = respmsg.Header.ReceiverId   //F_VC_JIESZID	接收者ID	VARCHAR(32)
+	zhengyclydxx.FNbXiaoxxh = respmsg.Header.MessageId    //F_NB_XIAOXXH	消息序号	BIGINT
+	zhengyclydxx.FNbQuerdxxxh = respmsg.Body.MessageId    //F_NB_QUERDXXXH	确认的消息序号	BIGINT
+
+	zhengyclydxx.FVcChulsj = common.StrTimeTotime(common.DataTimeFormatHandle(respmsg.Body.ProcessTime)) //F_DT_CHULSJ	处理时间	DATETIME
+
+	zhengyclydxx.FNbZhixjg = respmsg.Body.Result                                                                     //F_NB_ZHIXJG	执行结果	INT
+	zhengyclydxx.FVcXiaoxwjlj = "generatexml/" + "ZY_YDB_" + fmt.Sprintf("%020d", respmsg.Header.MessageId) + ".xml" //F_VC_XIAOXWJLJ	消息文件路径	VARCHAR(512)
 
 	//插入
 	_, err := session.Insert(zhengyclydxx)

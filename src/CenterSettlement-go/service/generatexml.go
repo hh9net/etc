@@ -25,9 +25,10 @@ var (
 func HandleGeneratexml() {
 	log.Println("执行线程1，处理原始数据的打包")
 	//tiker := time.NewTicker(time.Minute * 10)//每10分钟执行一下
-	tiker := time.NewTicker(time.Second * 30) //每10秒执行一下
+	tiker := time.NewTicker(time.Second * 20) //每10秒执行一下
 
 	for {
+		log.Println(common.DateTimeFormat(<-tiker.C), "执行线程1，处理原始数据的打包")
 
 		//其他省市地区    xml文件生成
 		for _, Diqu := range types.Gl_network {
@@ -53,8 +54,7 @@ func HandleGeneratexml() {
 				log.Println("没有此地区记账卡原始数据", Diqu)
 			}
 		}
-		<-tiker.C
-		log.Println(common.DateTimeFormat(<-tiker.C), "执行线程1，处理原始数据的打包")
+
 	}
 }
 

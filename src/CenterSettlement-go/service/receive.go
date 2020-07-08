@@ -91,7 +91,7 @@ func Save(conn *net.Conn) (string, error) {
 	cerr := CheckFile(msgmd5, fileNameid)
 	if cerr != nil {
 		// 1、应答确认
-		log.Println("触发应答确认消息发送")
+		log.Println("触发应答确认消息的  发送")
 
 		//2、移动文件
 		//移动xml
@@ -172,6 +172,7 @@ func RevFile(fileNameid string, conn *net.Conn, msglength string) (error, string
 			m := []byte(replyStru.Massageid)
 			r := []byte(replyStru.Result)
 			d := append(m, r...)
+			//即时应答
 			InstantResponse(d, conn)
 			return nil, fileNameid + ".xml.lz77"
 		}
@@ -212,7 +213,7 @@ func InstantResponse(d []byte, conn *net.Conn) {
 		log.Println("联网中心 conn.Write 错误", err)
 	}
 	//关闭连接
-	//(*conn).Close()
+	(*conn).Close()
 }
 
 //校验文件md5

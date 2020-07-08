@@ -1,8 +1,10 @@
 package storage
 
 import (
+	"CenterSettlement-go/common"
 	"CenterSettlement-go/database"
 	"CenterSettlement-go/types"
+	"fmt"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -79,14 +81,26 @@ func ClearingMXInsert(data *types.BJsQingftjmx) error {
 }
 
 //新增清分应答消息包记录
-func ClearingYDInsert(data *types.BJsQingftjxxyd) error {
+func ClearingYDInsert(respmsg *types.ResponseCTMessage) error {
 
 	xorm := database.XormClient
 	session := TransactionBegin(xorm)
 	qingftongjixxyd := new(types.BJsQingftjxxyd)
 
 	//赋值
-	qingftongjixxyd.FNbQuerdxxxh = data.FNbQuerdxxxh
+	qingftongjixxyd.FVcBanbh = respmsg.Header.Version        //F_VC_BANBH	版本号	VARCHAR(32)
+	qingftongjixxyd.FNbXiaoxlb = respmsg.Header.MessageClass //F_NB_XIAOXLB	消息类别	INT
+	qingftongjixxyd.FNbXiaoxlx = respmsg.Header.MessageType  //F_NB_XIAOXLX	消息类型	INT
+	qingftongjixxyd.FVcFaszid = respmsg.Header.SenderId      //F_VC_FASZID	发送者ID	VARCHAR(32)
+	qingftongjixxyd.FVcJieszid = respmsg.Header.ReceiverId   //F_VC_JIESZID	接收者ID	VARCHAR(32)
+	qingftongjixxyd.FNbXiaoxxh = respmsg.Header.MessageId    //F_NB_XIAOXXH	消息序号	BIGINT
+	qingftongjixxyd.FNbQuerdxxxh = respmsg.Body.MessageId    //F_NB_QUERDXXXH	确认的消息序号	BIGINT
+
+	qingftongjixxyd.FDtChulsj = common.StrTimeTotime(common.DataTimeFormatHandle(respmsg.Body.ProcessTime)) //F_DT_CHULSJ	处理时间	DATETIME
+
+	qingftongjixxyd.FNbZhixjg = respmsg.Body.Result //F_NB_ZHIXJG	执行结果	INT
+
+	qingftongjixxyd.FVcXiaoxwjlj = "generatexml/" + "QF_YDB_" + fmt.Sprintf("%020d", respmsg.Header.MessageId) + ".xml" //F_VC_XIAOXWJLJ	消息文件路径	VARCHAR(512)
 
 	//插入
 	_, err := session.Insert(qingftongjixxyd)
